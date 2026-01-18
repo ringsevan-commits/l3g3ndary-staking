@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L3G3NDARY | Official Website</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+    
+    <!-- Ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-dark: #7C3AED;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --dark: #0F172A;
+            --light: #F8FAFC;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 6rem 0 4rem;
+            background: linear-gradient(rgba(139, 92, 246, 0.1), transparent);
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Wallet Section */
+        .wallet-section {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            margin: 2rem auto;
+            max-width: 600px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Main Content Sections */
+        .section {
+            padding: 4rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--light);
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Links */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 2rem 0;
+        }
+        
+        .link-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .link-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+        
+        /* Contract Address */
+        .contract-address {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            word-break: break-all;
+            margin: 0.5rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94A3B8;
+        }
+        
+        .contract-address:hover {
+            background: rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+        
+        /* Staking Section */
+        .staking-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #94A3B8;
+            font-size: 0.9rem;
+        }
+        
+        /* Tokenomics Section */
+        .tokenomics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .tokenomics-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .tokenomics-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tokenomics-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tokenomics-percentage {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10B981;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+        
+        .security-badge.danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+        
+        .security-badge.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 20px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Contract List */
+        .contract-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .contract-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .contract-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        
+        .notification-error {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+        }
+        
+        .notification-warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .notification-info {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .section-title { font-size: 2rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .links { flex-direction: column; align-items: center; }
+            .staking-section { padding: 2rem; }
+            .contract-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
+        
+        /* Utility */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94A3B8;
+            background: rgba(0, 0, 0, 0.3);
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo">
+                <span>🛡️</span>
+                <span>L3G3NDARY</span>
+            </div>
+            <div id="networkInfo"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>L3G3NDARY</h1>
+            <div class="links">
+                <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank" class="link-btn">
+                    <span>🖼️</span>
+                    <span>L3G3NDS NFTs</span>
+                </a>
+                <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank" class="link-btn">
+                    <span>🎫</span>
+                    <span>L3G3NDARY Pass</span>
+                </a>
+                <button id="connectWalletBtn" class="btn btn-primary">
+                    🔗 Connect Wallet
+                </button>
+            </div>
+        </section>
+
+        <!-- Security & Transparency Section -->
+        <section class="section">
+            <h2 class="section-title">🔒 Security & Transparency</h2>
+            <div class="tokenomics-grid">
+                <div class="tokenomics-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <span>✅</span>
+                        <span>Renounced Contracts</span>
+                    </h3>
+                    <div style="margin-top: 1rem;">
+                        <div class="tokenomics-item">
+                            <span>LGND Token Contract</span>
+                            <span class="security-badge">Renounced Forever</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>L3G3NDARY Pass Staking</span>
+                            <span class="security-badge">Renounced</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>L3G3NDS Staking</span>
+                            <span class="security-badge">Renounced</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>Liquidity Pool</span>
+                            <span class="security-badge">LOCKED</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tokenomics-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <span>💰</span>
+                        <span>Royalty Distribution</span>
+                    </h3>
+                    <div style="margin-top: 1rem;">
+                        <div class="tokenomics-item">
+                            <span>NFT Contracts</span>
+                            <span class="security-badge warning">Adjustable</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>50% Royalties</span>
+                            <span style="color: #F59E0B; font-weight: bold;">To Liquidity</span>
+                        </div>
+                        <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 1rem;">
+                            Liquidity will be added manually from project wallet
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tokenomics Section -->
+        <section class="section">
+            <h2 class="section-title">📊 LGND Tokenomics</h2>
+            <p style="text-align: center; color: #CBD5E1; margin-bottom: 2rem; font-size: 1.1rem;">
+                Total Supply: 1,000,000,000 LGND (1 Billion)
+            </p>
+            
+            <div class="tokenomics-grid">
+                <div class="tokenomics-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Token Allocation</h3>
+                    <div style="margin-top: 1rem;">
+                        <div class="tokenomics-item">
+                            <span>L3G3NDARY Pass Staking</span>
+                            <span class="tokenomics-percentage">50% (500M)</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>L3G3NDS Staking</span>
+                            <span class="tokenomics-percentage">15% (150M)</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>Liquidity Pool</span>
+                            <span class="tokenomics-percentage">2% (20M)</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>Reserved for Liquidity</span>
+                            <span class="tokenomics-percentage">12% (120M)</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>Locked Tokens</span>
+                            <span class="tokenomics-percentage">15.2% (152M)</span>
+                        </div>
+                        <div class="tokenomics-item">
+                            <span>Community & Development</span>
+                            <span class="tokenomics-percentage">5.8% (58M)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tokenomics-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Distribution Visualization</h3>
+                    <div style="margin-top: 1.5rem;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="progress-container" style="flex: 1;">
+                                <div class="progress-bar" style="width: 50%; background: linear-gradient(90deg, #8B5CF6, #7C3AED);"></div>
+                            </div>
+                            <span style="margin-left: 1rem; font-weight: bold;">50%</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="progress-container" style="flex: 1;">
+                                <div class="progress-bar" style="width: 15%; background: linear-gradient(90deg, #10B981, #059669);"></div>
+                            </div>
+                            <span style="margin-left: 1rem; font-weight: bold;">15%</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="progress-container" style="flex: 1;">
+                                <div class="progress-bar" style="width: 17%; background: linear-gradient(90deg, #F59E0B, #D97706);"></div>
+                            </div>
+                            <span style="margin-left: 1rem; font-weight: bold;">17%</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="progress-container" style="flex: 1;">
+                                <div class="progress-bar" style="width: 15.2%; background: linear-gradient(90deg, #EF4444, #DC2626);"></div>
+                            </div>
+                            <span style="margin-left: 1rem; font-weight: bold;">15.2%</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="progress-container" style="flex: 1;">
+                                <div class="progress-bar" style="width: 5.8%; background: linear-gradient(90deg, #3B82F6, #1D4ED8);"></div>
+                            </div>
+                            <span style="margin-left: 1rem; font-weight: bold;">5.8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contract Addresses Section -->
+        <section class="section">
+            <h2 class="section-title">📋 Smart Contract Addresses</h2>
+            <div class="contract-list">
+                <div class="contract-item">
+                    <div class="contract-label">
+                        <span>🛡️</span>
+                        <div>
+                            <div><strong>LGND Token Contract</strong></div>
+                            <div class="contract-address" onclick="copyToClipboard('0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30')">
+                                0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30
+                            </div>
+                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
+                                Renounced Forever • Total Supply: 1,000,000,000
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://etherscan.io/token/0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30" target="_blank" class="link-btn" style="padding: 0.5rem 1rem;">
+                        🔍 View
+                    </a>
+                </div>
+                
+                <div class="contract-item">
+                    <div class="contract-label">
+                        <span>🎫</span>
+                        <div>
+                            <div><strong>L3G3NDARY Pass Staking Contract</strong></div>
+                            <div class="contract-address" onclick="copyToClipboard('0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378')">
+                                0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378
+                            </div>
+                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
+                                Renounced • 500M LGND allocated
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://etherscan.io/address/0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378" target="_blank" class="link-btn" style="padding: 0.5rem 1rem;">
+                        🔍 View
+                    </a>
+                </div>
+                
+                <div class="contract-item">
+                    <div class="contract-label">
+                        <span>🖼️</span>
+                        <div>
+                            <div><strong>L3G3NDS Staking Contract</strong></div>
+                            <div class="contract-address" onclick="copyToClipboard('0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52')">
+                                0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52
+                            </div>
+                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
+                                Renounced • 150M LGND allocated
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://etherscan.io/address/0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52" target="_blank" class="link-btn" style="padding: 0.5rem 1rem;">
+                        🔍 View
+                    </a>
+                </div>
+                
+                <div class="contract-item">
+                    <div class="contract-label">
+                        <span>💧</span>
+                        <div>
+                            <div><strong>Liquidity Pool (LOCKED)</strong></div>
+                            <div class="contract-address" onclick="copyToClipboard('0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6')">
+                                0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6
+                            </div>
+                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
+                                LOCKED • 20M LGND + ETH
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://etherscan.io/address/0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6" target="_blank" class="link-btn" style="padding: 0.5rem 1rem;">
+                        🔍 View
+                    </a>
+                </div>
+                
+                <div class="contract-item">
+                    <div class="contract-label">
+                        <span>🏦</span>
+                        <div>
+                            <div><strong>Project Wallet (Liquidity Reserve)</strong></div>
+                            <div class="contract-address" onclick="copyToClipboard('0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc')">
+                                0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc
+                            </div>
+                            <div style="font-size: 0.9rem; color: #F59E0B; margin-top: 0.25rem;">
+                                Adjustable • 120M LGND reserved
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://etherscan.io/address/0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc" target="_blank" class="link-btn" style="padding: 0.5rem 1rem;">
+                        🔍 View
+                    </a>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <div style="display: inline-flex; align-items: center; gap: 10px; padding: 1rem 2rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <span>✅</span>
+                    <span><strong>152M LGND (15.2%)</strong> are permanently locked in vesting contracts</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ecosystem Section -->
+        <section class="section">
+            <h2 class="section-title">✨ L3G3NDARY Ecosystem</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3 style="margin-bottom: 1rem;">L3G3NDS NFTs</h3>
+                    <div class="contract-address" onclick="copyToClipboard('0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501')">
+                        0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎫</div>
+                    <h3 style="margin-bottom: 1rem;">L3G3NDARY Pass</h3>
+                    <div class="contract-address" onclick="copyToClipboard('0x1bc5f738b2dad5adbab624f82223b2d5c789efd8')">
+                        0x1bc5f738b2dad5adbab624f82223b2d5c789efd8
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3 style="margin-bottom: 1rem;">LGND Token</h3>
+                    <div class="contract-address" onclick="copyToClipboard('0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30')">
+                        0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Staking Section -->
+        <section class="staking-section">
+            <h2 class="section-title" style="color: white;">🎯 NFT Staking Platform</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalStaked">0</div>
+                    <div class="stat-label">Total NFTs Staked</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="dailyRewards">0 LGND</div>
+                    <div class="stat-label">L3G3NDS Daily Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="passRewards">0 LGND</div>
+                    <div class="stat-label">Pass Daily Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalRewards">0 LGND</div>
+                    <div class="stat-label">Total Rewards Distributed</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button id="goToStakingBtn" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                    🚀 Go to Staking Platform
+                </button>
+                <p style="margin-top: 1rem; color: #94A3B8; font-size: 0.9rem;">
+                    Staking contracts are renounced for maximum security
+                </p>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section class="section">
+            <h2 class="section-title">🌍 Join Our Community</h2>
+            <div class="links">
+                <a href="https://x.com/l3g3ndary_dep" target="_blank" class="link-btn">
+                    <span>🐦</span>
+                    <span>Twitter</span>
+                </a>
+                <a href="https://discord.gg/FXHpdqeqDr" target="_blank" class="link-btn">
+                    <span>💬</span>
+                    <span>Discord</span>
+                </a>
+                <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank" class="link-btn">
+                    <span>🖼️</span>
+                    <span>L3G3NDS on OpenSea</span>
+                </a>
+                <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank" class="link-btn">
+                    <span>🎫</span>
+                    <span>Pass on OpenSea</span>
+                </a>
+                <a href="https://dextools.io/" target="_blank" class="link-btn">
+                    <span>📈</span>
+                    <span>Trade LGND</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p style="margin-bottom: 0.5rem; font-size: 1.1rem;">🛡️ L3G3NDARY | Official Website</p>
+            <div style="display: flex; justify-content: center; gap: 1rem; margin: 1rem 0; flex-wrap: wrap;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
+                    ✅ Token Contract Renounced
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
+                    ✅ Staking Contracts Renounced
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(245, 158, 11, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
+                    🔒 Liquidity LOCKED
+                </span>
+            </div>
+            <p style="font-size: 0.9rem; color: #64748B;">
+                © 2024 L3G3NDARY | 
+                <a href="https://l3g3ndary.com" style="color: #8B5CF6; text-decoration: none;">l3g3ndary.com</a> | 
+                Always verify contract addresses
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================
+        // КОНФИГУРАЦИЯ
+        // ============================
+        const CONFIG = {
+            token: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
+            collections: {
+                "L3G3NDS": "0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501",
+                "L3G3NDARY Pass": "0x1bc5f738b2dad5adbab624f82223b2d5c789efd8"
+            },
+            staking: {
+                "L3G3NDARY Pass": "0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378",
+                "L3G3NDS": "0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52"
+            },
+            liquidity: {
+                pool: "0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6",
+                reserve: "0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc"
+            }
+        };
+
+        // ============================
+        // СОСТОЯНИЕ
+        // ============================
+        let state = {
+            isConnected: false,
+            walletAddress: null,
+            walletType: null,
+            chainId: null,
+            provider: null,
+            signer: null
+        };
+
+        // ============================
+        // УТИЛИТНЫЕ ФУНКЦИИ
+        // ============================
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        function formatAddress(address) {
+            if (!address) return '';
+            return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✅ Contract address copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showNotification('❌ Failed to copy address', 'error');
+            });
+        }
+
+        // ============================
+        // ОБНОВЛЕНИЕ СТАТИСТИКИ СТЕЙКИНГА
+        // ============================
+        async function updateStakingStats() {
+            if (!state.isConnected || !state.provider) {
+                // Показываем базовые данные или данные из localStorage
+                const cachedStats = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
+                
+                if (Object.keys(cachedStats).length > 0) {
+                    document.getElementById('totalStaked').textContent = cachedStats.totalStaked || '0';
+                    document.getElementById('dailyRewards').textContent = (cachedStats.l3g3ndsDaily || 0).toLocaleString() + ' LGND';
+                    document.getElementById('passRewards').textContent = (cachedStats.passDaily || 0).toLocaleString() + ' LGND';
+                    document.getElementById('totalRewards').textContent = (cachedStats.totalDistributed || 0).toLocaleString() + ' LGND';
+                }
+                return;
+            }
+
+            try {
+                // В реальном приложении здесь были бы вызовы контрактов
+                // Для демо используем симуляцию
+                
+                // Симуляция данных стейкинга
+                const mockStats = {
+                    totalStaked: Math.floor(Math.random() * 10000) + 5000,
+                    l3g3ndsDaily: Math.floor(Math.random() * 5000) + 1000,
+                    passDaily: Math.floor(Math.random() * 10000) + 2000,
+                    totalDistributed: Math.floor(Math.random() * 10000000) + 5000000,
+                    lastUpdated: Date.now()
+                };
+
+                // Обновляем UI
+                document.getElementById('totalStaked').textContent = mockStats.totalStaked.toLocaleString();
+                document.getElementById('dailyRewards').textContent = mockStats.l3g3ndsDaily.toLocaleString() + ' LGND';
+                document.getElementById('passRewards').textContent = mockStats.passDaily.toLocaleString() + ' LGND';
+                document.getElementById('totalRewards').textContent = mockStats.totalDistributed.toLocaleString() + ' LGND';
+
+                // Кэшируем данные
+                localStorage.setItem('l3g3ndary_staking_stats', JSON.stringify(mockStats));
+                
+            } catch (error) {
+                console.error('Error updating staking stats:', error);
+            }
+        }
+
+        // ============================
+        // ОБНАРУЖЕНИЕ КОШЕЛЬКА
+        // ============================
+        function detectWallet() {
+            console.log('🔄 Detecting wallet...');
+            
+            let ethereumProvider = null;
+            
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('✅ Found window.ethereum');
+                ethereumProvider = window.ethereum;
+                
+                if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
+                    for (const provider of window.ethereum.providers) {
+                        if (provider.isMetaMask) {
+                            ethereumProvider = provider;
+                            console.log('✅ Selected MetaMask from providers array');
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (!ethereumProvider && window.top && window.top.ethereum) {
+                console.log('✅ Found window.top.ethereum');
+                ethereumProvider = window.top.ethereum;
+            }
+            
+            if (!ethereumProvider && typeof window.web3 !== 'undefined' && window.web3.currentProvider) {
+                console.log('✅ Found window.web3.currentProvider (legacy)');
+                ethereumProvider = window.web3.currentProvider;
+            }
+            
+            if (!ethereumProvider && window.coinbaseWalletExtension) {
+                console.log('✅ Found Coinbase Wallet');
+                ethereumProvider = window.coinbaseWalletExtension;
+            }
+            
+            if (ethereumProvider) {
+                console.log('✅ Wallet detected:', ethereumProvider);
+                return ethereumProvider;
+            }
+            
+            console.log('❌ No wallet detected');
+            return null;
+        }
+
+        // ============================
+        // ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
+        // ============================
+        async function connectWallet() {
+            console.log('🚀 Connecting wallet...');
+            
+            const ethereumProvider = detectWallet();
+            
+            if (!ethereumProvider) {
+                document.getElementById('walletInstallOptions').classList.remove('hidden');
+                showNotification('No Web3 wallet found. Please install MetaMask or another wallet.', 'error');
+                return;
+            }
+            
+            try {
+                let accounts;
+                
+                try {
+                    accounts = await ethereumProvider.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    console.log('✅ Accounts via eth_requestAccounts:', accounts);
+                } catch (err) {
+                    console.log('⚠️ eth_requestAccounts failed:', err);
+                    
+                    if (ethereumProvider.enable) {
+                        accounts = await ethereumProvider.enable();
+                        console.log('✅ Accounts via enable():', accounts);
+                    } else {
+                        throw new Error('Wallet connection failed');
+                    }
+                }
+                
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No accounts returned');
+                }
+                
+                const provider = new ethers.BrowserProvider(ethereumProvider);
+                const signer = await provider.getSigner();
+                const address = accounts[0];
+                
+                let network;
+                try {
+                    network = await provider.getNetwork();
+                } catch (err) {
+                    console.log('⚠️ Error getting network:', err);
+                    network = { chainId: 1n };
+                }
+                
+                let walletType = 'Web3 Wallet';
+                if (ethereumProvider.isMetaMask) walletType = 'MetaMask';
+                else if (ethereumProvider.isCoinbaseWallet) walletType = 'Coinbase Wallet';
+                else if (ethereumProvider.isTrust) walletType = 'Trust Wallet';
+                else if (ethereumProvider.isRabby) walletType = 'Rabby Wallet';
+                else if (ethereumProvider.isBraveWallet) walletType = 'Brave Wallet';
+                
+                state.isConnected = true;
+                state.walletAddress = address;
+                state.walletType = walletType;
+                state.provider = provider;
+                state.signer = signer;
+                state.chainId = '0x' + network.chainId.toString(16);
+                
+                updateUI();
+                updateNetworkInfo();
+                updateStakingStats();
+                
+                showNotification(`✅ ${walletType} connected successfully!`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Wallet connection error:', error);
+                
+                if (error.code === 4001 || error.message.includes('rejected') || error.message.includes('denied')) {
+                    showNotification('❌ Connection rejected by user', 'warning');
+                } else if (error.code === -32002) {
+                    showNotification('⚠️ Connection already pending. Please check your wallet.', 'warning');
+                } else if (error.message.includes('not found') || error.message.includes('unavailable')) {
+                    showNotification('❌ Wallet not found. Please check your wallet extension.', 'error');
+                    document.getElementById('walletInstallOptions').classList.remove('hidden');
+                } else {
+                    showNotification('❌ Connection failed: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function checkWalletAgain() {
+            document.getElementById('walletInstallOptions').classList.add('hidden');
+            connectWallet();
+        }
+
+        function disconnectWallet() {
+            state.isConnected = false;
+            state.walletAddress = null;
+            state.walletType = null;
+            state.provider = null;
+            state.signer = null;
+            state.chainId = null;
+            
+            updateUI();
+            showNotification('ℹ️ Wallet disconnected', 'info');
+        }
+
+        function updateUI() {
+            const walletStatus = document.getElementById('walletStatus');
+            const connectedInfo = document.getElementById('connectedInfo');
+            const walletInstallOptions = document.getElementById('walletInstallOptions');
+            const walletAddress = document.getElementById('walletAddress');
+            const walletType = document.getElementById('walletType');
+            const connectWalletBtn = document.getElementById('connectWalletBtn');
+            const goToStakingBtn = document.getElementById('goToStakingBtn');
+            
+            if (state.isConnected) {
+                walletStatus.style.display = 'none';
+                connectedInfo.classList.remove('hidden');
+                walletInstallOptions.classList.add('hidden');
+                
+                walletAddress.textContent = formatAddress(state.walletAddress);
+                walletType.textContent = state.walletType;
+                
+                connectWalletBtn.textContent = '✅ Connected';
+                connectWalletBtn.disabled = true;
+                
+                goToStakingBtn.disabled = false;
+                goToStakingBtn.textContent = '🚀 Go to Staking Platform';
+            } else {
+                walletStatus.style.display = 'block';
+                connectedInfo.classList.add('hidden');
+                
+                connectWalletBtn.textContent = '🔗 Connect Wallet';
+                connectWalletBtn.disabled = false;
+                
+                goToStakingBtn.disabled = true;
+                goToStakingBtn.textContent = '🔒 Connect Wallet First';
+            }
+        }
+
+        function updateNetworkInfo() {
+            const networkInfo = document.getElementById('networkInfo');
+            const networkBadge = document.getElementById('networkBadge');
+            
+            if (!state.chainId) {
+                networkInfo.innerHTML = '';
+                if (networkBadge) networkBadge.textContent = '';
+                return;
+            }
+            
+            const isEthereum = state.chainId === '0x1';
+            const networkName = isEthereum ? 'Ethereum Mainnet' : `Chain: ${state.chainId}`;
+            
+            networkInfo.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; background: ${isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid ${isEthereum ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}">
+                    <span>🌐</span>
+                    <span>${networkName}</span>
+                    ${!isEthereum ? '<span style="color: #F59E0B;">⚠️</span>' : ''}
+                </div>
+            `;
+            
+            if (networkBadge) {
+                networkBadge.textContent = networkName;
+                networkBadge.style.background = isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2);
+                networkBadge.style.color = isEthereum ? '#10B981' : '#F59E0B';
+            }
+        }
+
+        // ============================
+        // КНОПКА ПЕРЕХОДА НА СТЕЙКИНГ
+        // ============================
+        document.getElementById('goToStakingBtn').onclick = function() {
+            if (!state.isConnected) {
+                showNotification('Please connect your wallet first', 'warning');
+                connectWallet();
+                return;
+            }
+            
+            showNotification('🚀 Redirecting to staking platform...', 'info');
+            
+            // В реальном приложении здесь был бы переход на отдельную страницу
+            setTimeout(() => {
+                alert('Staking platform would open in a new tab. Staking contracts are renounced for maximum security.');
+            }, 1000);
+        };
+
+        // ============================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================
+        window.addEventListener('load', async () => {
+            console.log('🎮 L3G3NDARY website initialized');
+            
+            // Назначаем обработчики для копирования адресов
+            document.querySelectorAll('.contract-address').forEach(el => {
+                el.style.cursor = 'pointer';
+                el.title = 'Click to copy address';
+            });
+            
+            // Загружаем кэшированные данные стейкинга
+            updateStakingStats();
+            
+            // Автоподключение кошелька
+            const ethereumProvider = detectWallet();
+            if (ethereumProvider) {
+                try {
+                    let accounts = [];
+                    
+                    try {
+                        if (ethereumProvider.request) {
+                            accounts = await ethereumProvider.request({ method: 'eth_accounts' });
+                        } else if (ethereumProvider.selectedAddress) {
+                            accounts = [ethereumProvider.selectedAddress];
+                        }
+                    } catch (err) {
+                        console.log('⚠️ Error getting initial accounts:', err);
+                    }
+                    
+                    if (accounts && accounts.length > 0) {
+                        console.log('✅ Found existing connection:', accounts[0]);
+                        
+                        const provider = new ethers.BrowserProvider(ethereumProvider);
+                        const signer = await provider.getSigner();
+                        const address = accounts[0];
+                        
+                        let network;
+                        try {
+                            network = await provider.getNetwork();
+                        } catch (err) {
+                            network = { chainId: 1n };
+                        }
+                        
+                        let walletType = 'Web3 Wallet';
+                        if (ethereumProvider.isMetaMask) walletType = 'MetaMask';
+                        else if (ethereumProvider.isCoinbaseWallet) walletType = 'Coinbase Wallet';
+                        
+                        state.isConnected = true;
+                        state.walletAddress = address;
+                        state.walletType = walletType;
+                        state.provider = provider;
+                        state.signer = signer;
+                        state.chainId = '0x' + network.chainId.toString(16);
+                        
+                        updateUI();
+                        updateNetworkInfo();
+                        updateStakingStats();
+                        
+                        console.log('✅ Auto-connected to:', address);
+                    }
+                } catch (error) {
+                    console.error('❌ Auto-connect error:', error);
+                }
+            }
+            
+            // Назначаем обработчики
+            document.getElementById('connectWalletBtn').onclick = connectWallet;
+            
+            // Обновляем статистику каждые 30 секунд
+            setInterval(updateStakingStats, 30000);
+        });
+    </script>
+</body>
+</html>
