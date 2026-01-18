@@ -8,7 +8,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
     
     <!-- Ethers.js -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
     
     <style>
         :root {
@@ -376,9 +376,10 @@
             border-radius: 8px;
             color: white;
             font-weight: 500;
-            z-index: 9999;
+            z-index: 999999;
             animation: slideIn 0.3s ease;
             max-width: 400px;
+            backdrop-filter: blur(10px);
         }
         
         @keyframes slideIn {
@@ -387,19 +388,75 @@
         }
         
         .notification-success {
-            background: linear-gradient(135deg, #10B981, #059669);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
         }
         
         .notification-error {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
         }
         
         .notification-warning {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9));
         }
         
         .notification-info {
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(29, 78, 216, 0.9));
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--dark);
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid var(--primary);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
         }
         
         /* Responsive */
@@ -458,6 +515,36 @@
             gap: 0.5rem;
             margin-top: 1rem;
             flex-wrap: wrap;
+        }
+        
+        /* Wallet Info */
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(139, 92, 246, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .wallet-address {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .disconnect-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .disconnect-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
         }
     </style>
 </head>
@@ -796,11 +883,14 @@
                                 <div>
                                     <strong>Pending Rewards:</strong> <span id="legendPending" style="color: #F59E0B; font-weight: bold;">0 LGND</span>
                                 </div>
+                                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #94A3B8;">
+                                    <strong>APR:</strong> ~25% • <strong>Daily:</strong> ~0.068%
+                                </div>
                             </div>
                             <div class="staking-controls">
                                 <input type="number" id="legendAmount" placeholder="Amount" min="1" style="flex: 1;">
                                 <button onclick="stakeLegend()" class="btn btn-small" style="background: var(--secondary);">Stake</button>
-                                <button onclick="unstakeLegend()" class="btn btn-small" style="background: var(--danger);">Unstake</button>
+                                <button onclick="openUnstakeModal('legend')" class="btn btn-small" style="background: var(--danger);">Unstake</button>
                                 <button onclick="claimLegend()" class="btn btn-small" style="background: var(--accent);">Claim</button>
                             </div>
                         </div>
@@ -818,11 +908,14 @@
                                 <div>
                                     <strong>Pending Rewards:</strong> <span id="passPending" style="color: #F59E0B; font-weight: bold;">0 LGND</span>
                                 </div>
+                                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #94A3B8;">
+                                    <strong>APR:</strong> ~50% • <strong>Daily:</strong> ~0.137%
+                                </div>
                             </div>
                             <div class="staking-controls">
                                 <input type="number" id="passAmount" placeholder="Amount" min="1" style="flex: 1;">
                                 <button onclick="stakePass()" class="btn btn-small" style="background: var(--secondary);">Stake</button>
-                                <button onclick="unstakePass()" class="btn btn-small" style="background: var(--danger);">Unstake</button>
+                                <button onclick="openUnstakeModal('pass')" class="btn btn-small" style="background: var(--danger);">Unstake</button>
                                 <button onclick="claimPass()" class="btn btn-small" style="background: var(--accent);">Claim</button>
                             </div>
                         </div>
@@ -915,6 +1008,20 @@
         </div>
     </footer>
 
+    <!-- Unstake Modal -->
+    <div id="unstakeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="color: white;">Select Stake to Unstake</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div id="stakesList"></div>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <button onclick="closeModal()" class="btn btn-small" style="background: var(--dark); border: 1px solid var(--primary);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================
         // КОНФИГУРАЦИЯ
@@ -936,7 +1043,7 @@
         };
 
         // ============================
-        // ABI КОНТРАКТОВ
+        // ABI КОНТРАКТОВ (ИСПРАВЛЕННЫЕ)
         // ============================
         const ERC1155_ABI = [
             "function balanceOf(address account, uint256 id) view returns (uint256)",
@@ -948,7 +1055,7 @@
             "function stake(uint256 tokenId, uint256 amount) external",
             "function unstake(uint256 stakeIndex) external",
             "function claimRewards() external",
-            "function getUserStakes(address user) view returns ((uint256 tokenId, uint256 amount, uint256 stakedAt)[])",
+            "function getUserStakes(address user) view returns ((uint256 tokenId, uint256 amount, uint256 stakedAt)[] memory)",
             "function pendingRewards(address user) view returns (uint256)",
             "function totalStaked() view returns (uint256)",
             "function totalRewardsDistributed() view returns (uint256)"
@@ -963,13 +1070,17 @@
             walletType: null,
             chainId: null,
             provider: null,
-            signer: null
+            signer: null,
+            currentUnstakeType: null
         };
 
         // ============================
         // УТИЛИТНЫЕ ФУНКЦИИ
         // ============================
         function showNotification(message, type = 'info') {
+            // Удаляем старые уведомления
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+            
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.textContent = message;
@@ -996,91 +1107,129 @@
             });
         }
 
+        function showLoading(button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner"></span> Processing...';
+            button.disabled = true;
+            return originalText;
+        }
+
+        function hideLoading(button, originalText) {
+            if (button && originalText) {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('unstakeModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function safeContractCall(contract, method, args = []) {
+            const timeout = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout after 30 seconds')), 30000)
+            );
+            const promise = contract[method](...args);
+            return await Promise.race([promise, timeout]);
+        }
+
         // ============================
-        // ОБНОВЛЕНИЕ СТАТИСТИКИ СТЕЙКИНГА (РЕАЛЬНАЯ)
+        // ОБНОВЛЕНИЕ СТАТИСТИКИ СТЕЙКИНГА (ИСПРАВЛЕННОЕ)
         // ============================
         async function updateStakingStats() {
             try {
-                if (!state.provider) {
-                    // Показываем кэшированные данные
-                    const cached = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
-                    if (cached.totalStaked) {
-                        document.getElementById('totalStaked').textContent = cached.totalStaked.toLocaleString();
-                        document.getElementById('dailyRewards').textContent = (cached.l3g3ndsDaily || 0).toLocaleString() + ' LGND';
-                        document.getElementById('passRewards').textContent = (cached.passDaily || 0).toLocaleString() + ' LGND';
-                        document.getElementById('totalRewards').textContent = (cached.totalDistributed || 0).toLocaleString() + ' LGND';
-                    }
-                    return;
-                }
-                
-                // Подключаемся к контрактам стейкинга
-                const stakingPassContract = new ethers.Contract(
-                    CONFIG.staking["L3G3NDARY Pass"],
-                    STAKING_ABI,
-                    state.provider
-                );
-                
-                const stakingLegendContract = new ethers.Contract(
-                    CONFIG.staking["L3G3NDS"],
-                    STAKING_ABI,
-                    state.provider
-                );
-                
-                // Получаем реальные данные
-                const [totalStakedPass, totalStakedLegend] = await Promise.all([
-                    stakingPassContract.totalStaked().catch(() => 0n),
-                    stakingLegendContract.totalStaked().catch(() => 0n)
-                ]);
-                
-                const totalStaked = Number(totalStakedPass) + Number(totalStakedLegend);
-                
-                // Рассчитываем daily pools
-                const l3g3ndsDaily = Math.floor(Number(totalStakedLegend) * 100);
-                const passDaily = Math.floor(Number(totalStakedPass) * 250);
-                
-                // Обновляем информацию о пулах награждения
-                document.getElementById('legendPoolInfo').textContent = `~${l3g3ndsDaily.toLocaleString()} LGND`;
-                document.getElementById('passPoolInfo').textContent = `~${passDaily.toLocaleString()} LGND`;
-                
-                // Total rewards distributed
-                const [totalRewardsPass, totalRewardsLegend] = await Promise.all([
-                    stakingPassContract.totalRewardsDistributed().catch(() => 0n),
-                    stakingLegendContract.totalRewardsDistributed().catch(() => 0n)
-                ]);
-                
-                const totalDistributed = Number(totalRewardsPass) + Number(totalRewardsLegend);
-                
-                // Обновляем UI
-                document.getElementById('totalStaked').textContent = totalStaked.toLocaleString();
-                document.getElementById('dailyRewards').textContent = l3g3ndsDaily.toLocaleString() + ' LGND';
-                document.getElementById('passRewards').textContent = passDaily.toLocaleString() + ' LGND';
-                document.getElementById('totalRewards').textContent = totalDistributed.toLocaleString() + ' LGND';
-                
-                // Кэшируем
-                const stats = {
-                    totalStaked,
-                    l3g3ndsDaily,
-                    passDaily,
-                    totalDistributed,
-                    lastUpdated: Date.now()
-                };
-                localStorage.setItem('l3g3ndary_staking_stats', JSON.stringify(stats));
-                
-            } catch (error) {
-                console.error('Error updating staking stats:', error);
-                // Показываем кэшированные данные
+                // Сначала показываем кэшированные данные
                 const cached = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
-                if (cached.totalStaked) {
+                const now = Date.now();
+                const cacheAge = now - (cached.lastUpdated || 0);
+                
+                if (cached.totalStaked && cacheAge < 300000) { // 5 минут кэш
                     document.getElementById('totalStaked').textContent = cached.totalStaked.toLocaleString();
                     document.getElementById('dailyRewards').textContent = (cached.l3g3ndsDaily || 0).toLocaleString() + ' LGND';
                     document.getElementById('passRewards').textContent = (cached.passDaily || 0).toLocaleString() + ' LGND';
                     document.getElementById('totalRewards').textContent = (cached.totalDistributed || 0).toLocaleString() + ' LGND';
                 }
+                
+                if (!state.provider) {
+                    return; // Не обновляем онлайн данные без провайдера
+                }
+                
+                try {
+                    // Подключаемся к контрактам стейкинга
+                    const stakingPassContract = new ethers.Contract(
+                        CONFIG.staking["L3G3NDARY Pass"],
+                        STAKING_ABI,
+                        state.provider
+                    );
+                    
+                    const stakingLegendContract = new ethers.Contract(
+                        CONFIG.staking["L3G3NDS"],
+                        STAKING_ABI,
+                        state.provider
+                    );
+                    
+                    // Получаем реальные данные с таймаутами
+                    const [totalStakedPass, totalStakedLegend] = await Promise.all([
+                        safeContractCall(stakingPassContract, 'totalStaked').catch(() => 0n),
+                        safeContractCall(stakingLegendContract, 'totalStaked').catch(() => 0n)
+                    ]);
+                    
+                    const totalStaked = Number(totalStakedPass + totalStakedLegend);
+                    
+                    // Рассчитываем daily pools (предполагаемые значения)
+                    const l3g3ndsDaily = totalStakedLegend ? Math.floor(Number(totalStakedLegend) * 100) : 1000;
+                    const passDaily = totalStakedPass ? Math.floor(Number(totalStakedPass) * 250) : 2500;
+                    
+                    // Обновляем информацию о пулах награждения
+                    document.getElementById('legendPoolInfo').textContent = `~${l3g3ndsDaily.toLocaleString()} LGND`;
+                    document.getElementById('passPoolInfo').textContent = `~${passDaily.toLocaleString()} LGND`;
+                    
+                    // Total rewards distributed
+                    const [totalRewardsPass, totalRewardsLegend] = await Promise.all([
+                        safeContractCall(stakingPassContract, 'totalRewardsDistributed').catch(() => 0n),
+                        safeContractCall(stakingLegendContract, 'totalRewardsDistributed').catch(() => 0n)
+                    ]);
+                    
+                    const totalDistributed = Number(totalRewardsPass + totalRewardsLegend);
+                    
+                    // Обновляем UI
+                    document.getElementById('totalStaked').textContent = totalStaked.toLocaleString();
+                    document.getElementById('dailyRewards').textContent = l3g3ndsDaily.toLocaleString() + ' LGND';
+                    document.getElementById('passRewards').textContent = passDaily.toLocaleString() + ' LGND';
+                    document.getElementById('totalRewards').textContent = totalDistributed.toLocaleString() + ' LGND';
+                    
+                    // Кэшируем
+                    const stats = {
+                        totalStaked,
+                        l3g3ndsDaily,
+                        passDaily,
+                        totalDistributed,
+                        lastUpdated: Date.now()
+                    };
+                    localStorage.setItem('l3g3ndary_staking_stats', JSON.stringify(stats));
+                    
+                } catch (error) {
+                    console.error('Error fetching staking stats:', error);
+                    // Используем кэшированные данные если онлайн недоступны
+                }
+                
+            } catch (error) {
+                console.error('Error updating staking stats:', error);
             }
         }
 
         // ============================
-        // ЗАГРУЗКА ДАННЫХ СТЕЙКИНГА
+        // ЗАГРУЗКА ДАННЫХ СТЕЙКИНГА (ИСПРАВЛЕННАЯ)
         // ============================
         async function loadStakingData() {
             if (!state.isConnected || !state.signer) {
@@ -1104,14 +1253,14 @@
                 
                 // Получаем балансы (tokenId 1 для обоих коллекций)
                 const [legendBalance, passBalance] = await Promise.all([
-                    legendNFT.balanceOf(state.walletAddress, 1).catch(() => 0n),
-                    passNFT.balanceOf(state.walletAddress, 1).catch(() => 0n)
+                    safeContractCall(legendNFT, 'balanceOf', [state.walletAddress, 1]).catch(() => 0n),
+                    safeContractCall(passNFT, 'balanceOf', [state.walletAddress, 1]).catch(() => 0n)
                 ]);
                 
                 // Получаем pending rewards
                 const [legendPending, passPending] = await Promise.all([
-                    legendStaking.pendingRewards(state.walletAddress).catch(() => 0n),
-                    passStaking.pendingRewards(state.walletAddress).catch(() => 0n)
+                    safeContractCall(legendStaking, 'pendingRewards', [state.walletAddress]).catch(() => 0n),
+                    safeContractCall(passStaking, 'pendingRewards', [state.walletAddress]).catch(() => 0n)
                 ]);
                 
                 // Обновляем UI
@@ -1122,11 +1271,12 @@
                 
             } catch (error) {
                 console.error('Error loading staking data:', error);
+                showNotification('Failed to load staking data', 'error');
             }
         }
 
         // ============================
-        // ФУНКЦИИ СТЕЙКИНГА
+        // ФУНКЦИИ СТЕЙКИНГА (ИСПРАВЛЕННЫЕ)
         // ============================
         async function stakeLegend() {
             if (!state.isConnected) {
@@ -1140,12 +1290,15 @@
                 return;
             }
             
+            const button = event.target;
+            const originalText = showLoading(button);
+            
             try {
                 const nftContract = new ethers.Contract(CONFIG.collections["L3G3NDS"], ERC1155_ABI, state.signer);
                 const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
                 
                 // Проверяем approve
-                const isApproved = await nftContract.isApprovedForAll(state.walletAddress, CONFIG.staking["L3G3NDS"]);
+                const isApproved = await safeContractCall(nftContract, 'isApprovedForAll', [state.walletAddress, CONFIG.staking["L3G3NDS"]]);
                 if (!isApproved) {
                     showNotification('Approving NFTs...', 'info');
                     const approveTx = await nftContract.setApprovalForAll(CONFIG.staking["L3G3NDS"], true);
@@ -1163,7 +1316,9 @@
                 
             } catch (error) {
                 console.error('Stake error:', error);
-                showNotification('Stake failed: ' + error.message, 'error');
+                showNotification('Stake failed: ' + (error.message || 'Unknown error'), 'error');
+            } finally {
+                hideLoading(button, originalText);
             }
         }
 
@@ -1179,12 +1334,15 @@
                 return;
             }
             
+            const button = event.target;
+            const originalText = showLoading(button);
+            
             try {
                 const nftContract = new ethers.Contract(CONFIG.collections["L3G3NDARY Pass"], ERC1155_ABI, state.signer);
                 const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
                 
                 // Проверяем approve
-                const isApproved = await nftContract.isApprovedForAll(state.walletAddress, CONFIG.staking["L3G3NDARY Pass"]);
+                const isApproved = await safeContractCall(nftContract, 'isApprovedForAll', [state.walletAddress, CONFIG.staking["L3G3NDARY Pass"]]);
                 if (!isApproved) {
                     showNotification('Approving Pass NFTs...', 'info');
                     const approveTx = await nftContract.setApprovalForAll(CONFIG.staking["L3G3NDARY Pass"], true);
@@ -1202,53 +1360,91 @@
                 
             } catch (error) {
                 console.error('Stake error:', error);
-                showNotification('Stake failed: ' + error.message, 'error');
+                showNotification('Stake failed: ' + (error.message || 'Unknown error'), 'error');
+            } finally {
+                hideLoading(button, originalText);
             }
         }
 
-        async function unstakeLegend() {
+        async function openUnstakeModal(type) {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            state.currentUnstakeType = type;
+            
+            try {
+                const contractAddress = CONFIG.staking[type === 'legend' ? "L3G3NDS" : "L3G3NDARY Pass"];
+                const stakingContract = new ethers.Contract(contractAddress, STAKING_ABI, state.signer);
+                
+                const stakes = await safeContractCall(stakingContract, 'getUserStakes', [state.walletAddress]);
+                
+                if (!stakes || stakes.length === 0) {
+                    showNotification('No stakes found', 'warning');
+                    return;
+                }
+                
+                // Показываем модальное окно с выбором стейка
+                const stakesList = document.getElementById('stakesList');
+                stakesList.innerHTML = '';
+                
+                stakes.forEach((stake, index) => {
+                    const stakeElement = document.createElement('div');
+                    stakeElement.className = 'staking-info';
+                    stakeElement.style.marginBottom = '0.5rem';
+                    stakeElement.style.cursor = 'pointer';
+                    stakeElement.onclick = () => performUnstake(index);
+                    
+                    const date = new Date(Number(stake.stakedAt) * 1000);
+                    const daysStaked = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+                    
+                    stakeElement.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>Amount:</strong> ${stake.amount.toString()}
+                                <br>
+                                <small style="color: #94A3B8;">Staked: ${date.toLocaleDateString()} (${daysStaked} days ago)</small>
+                            </div>
+                            <div style="color: var(--danger);">Unstake →</div>
+                        </div>
+                    `;
+                    
+                    stakesList.appendChild(stakeElement);
+                });
+                
+                openModal('unstakeModal');
+                
+            } catch (error) {
+                console.error('Error loading stakes:', error);
+                showNotification('Failed to load stakes', 'error');
+            }
+        }
+
+        async function performUnstake(stakeIndex) {
+            closeModal();
+            
             if (!state.isConnected) {
                 showNotification('Please connect wallet first', 'warning');
                 return;
             }
             
             try {
-                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
+                const type = state.currentUnstakeType;
+                const contractAddress = CONFIG.staking[type === 'legend' ? "L3G3NDS" : "L3G3NDARY Pass"];
+                const stakingContract = new ethers.Contract(contractAddress, STAKING_ABI, state.signer);
                 
-                showNotification('Unstaking L3G3NDS...', 'info');
-                const tx = await stakingContract.unstake(0); // unstake first stake
+                showNotification(`Unstaking ${type === 'legend' ? 'L3G3NDS' : 'Pass'}...`, 'info');
+                const tx = await stakingContract.unstake(stakeIndex);
                 await tx.wait();
                 
-                showNotification('✅ L3G3NDS unstaked successfully!', 'success');
+                showNotification(`✅ ${type === 'legend' ? 'L3G3NDS' : 'Pass'} unstaked successfully!`, 'success');
                 await loadStakingData();
                 await updateStakingStats();
                 
             } catch (error) {
                 console.error('Unstake error:', error);
-                showNotification('Unstake failed: ' + error.message, 'error');
-            }
-        }
-
-        async function unstakePass() {
-            if (!state.isConnected) {
-                showNotification('Please connect wallet first', 'warning');
-                return;
-            }
-            
-            try {
-                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
-                
-                showNotification('Unstaking Pass...', 'info');
-                const tx = await stakingContract.unstake(0); // unstake first stake
-                await tx.wait();
-                
-                showNotification('✅ Pass unstaked successfully!', 'success');
-                await loadStakingData();
-                await updateStakingStats();
-                
-            } catch (error) {
-                console.error('Unstake error:', error);
-                showNotification('Unstake failed: ' + error.message, 'error');
+                showNotification('Unstake failed: ' + (error.message || 'Unknown error'), 'error');
             }
         }
 
@@ -1257,6 +1453,9 @@
                 showNotification('Please connect wallet first', 'warning');
                 return;
             }
+            
+            const button = event.target;
+            const originalText = showLoading(button);
             
             try {
                 const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
@@ -1271,7 +1470,9 @@
                 
             } catch (error) {
                 console.error('Claim error:', error);
-                showNotification('Claim failed: ' + error.message, 'error');
+                showNotification('Claim failed: ' + (error.message || 'Unknown error'), 'error');
+            } finally {
+                hideLoading(button, originalText);
             }
         }
 
@@ -1280,6 +1481,9 @@
                 showNotification('Please connect wallet first', 'warning');
                 return;
             }
+            
+            const button = event.target;
+            const originalText = showLoading(button);
             
             try {
                 const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
@@ -1294,21 +1498,25 @@
                 
             } catch (error) {
                 console.error('Claim error:', error);
-                showNotification('Claim failed: ' + error.message, 'error');
+                showNotification('Claim failed: ' + (error.message || 'Unknown error'), 'error');
+            } finally {
+                hideLoading(button, originalText);
             }
         }
 
         // ============================
-        // ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
+        // ПОДКЛЮЧЕНИЕ КОШЕЛЬКА (ИСПРАВЛЕННОЕ)
         // ============================
         async function connectWallet() {
             console.log('🚀 Connecting wallet...');
             
-            // ПРОСТАЯ ПРОВЕРКА ДЛЯ ТЕСТА
             if (typeof window.ethereum === 'undefined') {
-                alert('❌ MetaMask не найден! Установите расширение из https://metamask.io');
+                showNotification('❌ MetaMask not found! Install from https://metamask.io', 'error');
                 return;
             }
+            
+            const button = document.getElementById('connectWalletBtn');
+            const originalText = showLoading(button);
             
             try {
                 const accounts = await window.ethereum.request({ 
@@ -1330,6 +1538,20 @@
                     network = { chainId: 1n };
                 }
                 
+                // Проверяем сеть (только Ethereum Mainnet)
+                const chainId = '0x' + network.chainId.toString(16);
+                if (chainId !== '0x1') {
+                    showNotification('Please switch to Ethereum Mainnet', 'warning');
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x1' }],
+                        });
+                    } catch (switchError) {
+                        console.error('Failed to switch network:', switchError);
+                    }
+                }
+                
                 let walletType = 'MetaMask';
                 if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
                 else if (window.ethereum.isTrust) walletType = 'Trust Wallet';
@@ -1340,7 +1562,7 @@
                 state.walletType = walletType;
                 state.provider = provider;
                 state.signer = signer;
-                state.chainId = '0x' + network.chainId.toString(16);
+                state.chainId = chainId;
                 
                 updateUI();
                 updateNetworkInfo();
@@ -1358,7 +1580,23 @@
                 } else {
                     showNotification('❌ Connection failed: ' + error.message, 'error');
                 }
+            } finally {
+                hideLoading(button, originalText);
             }
+        }
+
+        async function disconnectWallet() {
+            state.isConnected = false;
+            state.walletAddress = null;
+            state.walletType = null;
+            state.provider = null;
+            state.signer = null;
+            state.chainId = null;
+            
+            updateUI();
+            updateNetworkInfo();
+            
+            showNotification('Wallet disconnected', 'info');
         }
 
         // ============================
@@ -1367,20 +1605,37 @@
         function updateUI() {
             const connectWalletBtn = document.getElementById('connectWalletBtn');
             const goToStakingBtn = document.getElementById('goToStakingBtn');
+            const networkInfo = document.getElementById('networkInfo');
             
             if (!connectWalletBtn || !goToStakingBtn) return;
             
             if (state.isConnected) {
+                // Обновляем кнопку подключения
                 connectWalletBtn.textContent = '✅ Connected';
                 connectWalletBtn.disabled = true;
+                
+                // Обновляем кнопку стейкинга
                 goToStakingBtn.textContent = '🚀 Stake NFTs';
                 
-                // Показываем уведомление о успешном подключении
-                showNotification(`✅ ${state.walletType} connected: ${formatAddress(state.walletAddress)}`, 'success');
+                // Показываем информацию о кошельке в хедере
+                if (networkInfo) {
+                    networkInfo.innerHTML = `
+                        <div class="wallet-info">
+                            <span>👛</span>
+                            <span class="wallet-address">${formatAddress(state.walletAddress)}</span>
+                            <button class="disconnect-btn" onclick="disconnectWallet()">Disconnect</button>
+                        </div>
+                    `;
+                }
+                
             } else {
                 connectWalletBtn.textContent = '🔗 Connect Wallet';
                 connectWalletBtn.disabled = false;
                 goToStakingBtn.textContent = '🔒 Connect Wallet First';
+                
+                if (networkInfo) {
+                    networkInfo.innerHTML = '';
+                }
                 
                 // Скрываем интерфейс стейкинга
                 document.getElementById('stakingInterface').style.display = 'none';
@@ -1389,33 +1644,16 @@
         }
 
         function updateNetworkInfo() {
-            const networkInfo = document.getElementById('networkInfo');
             const networkBadge = document.getElementById('networkBadge');
             
-            if (!state.chainId) {
-                if (networkInfo) networkInfo.innerHTML = '';
-                if (networkBadge) networkBadge.textContent = '';
-                return;
-            }
+            if (!state.chainId || !networkBadge) return;
             
             const isEthereum = state.chainId === '0x1';
             const networkName = isEthereum ? 'Ethereum Mainnet' : `Chain: ${state.chainId}`;
             
-            if (networkInfo) {
-                networkInfo.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; background: ${isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid ${isEthereum ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}">
-                        <span>🌐</span>
-                        <span>${networkName}</span>
-                        ${!isEthereum ? '<span style="color: #F59E0B;">⚠️</span>' : ''}
-                    </div>
-                `;
-            }
-            
-            if (networkBadge) {
-                networkBadge.textContent = networkName;
-                networkBadge.style.background = isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
-                networkBadge.style.color = isEthereum ? '#10B981' : '#F59E0B';
-            }
+            networkBadge.textContent = networkName;
+            networkBadge.style.background = isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+            networkBadge.style.color = isEthereum ? '#10B981' : '#F59E0B';
         }
 
         // ============================
@@ -1429,8 +1667,44 @@
             }
             
             // Прокручиваем к стейкинг интерфейсу
-            document.querySelector('.staking-section').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.staking-section').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
         };
+
+        // ============================
+        // ОБРАБОТЧИКИ СОБЫТИЙ МЕТАМАСК
+        // ============================
+        function setupEventListeners() {
+            if (window.ethereum) {
+                // Аккаунты изменились
+                window.ethereum.on('accountsChanged', async (accounts) => {
+                    if (accounts.length === 0) {
+                        // Пользователь отключил кошелек
+                        disconnectWallet();
+                    } else {
+                        // Обновляем адрес
+                        state.walletAddress = accounts[0];
+                        if (state.isConnected) {
+                            updateUI();
+                            await loadStakingData();
+                            showNotification('Account changed', 'info');
+                        }
+                    }
+                });
+                
+                // Сеть изменилась
+                window.ethereum.on('chainChanged', () => {
+                    window.location.reload();
+                });
+                
+                // Кошелек заблокирован
+                window.ethereum.on('disconnect', () => {
+                    disconnectWallet();
+                });
+            }
+        }
 
         // ============================
         // ИНИЦИАЛИЗАЦИЯ
@@ -1438,14 +1712,22 @@
         window.addEventListener('load', async () => {
             console.log('🎮 L3G3NDARY website initialized');
             
+            // Делаем адреса копируемыми
             document.querySelectorAll('.contract-address').forEach(el => {
                 el.style.cursor = 'pointer';
                 el.title = 'Click to copy address';
             });
             
+            // Назначаем обработчики кнопок
+            document.getElementById('connectWalletBtn').onclick = connectWallet;
+            
+            // Настраиваем обработчики событий
+            setupEventListeners();
+            
+            // Загружаем статистику
             updateStakingStats();
             
-            // Автоподключение кошелька
+            // Проверяем автоподключение
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -1486,10 +1768,24 @@
                 }
             }
             
-            document.getElementById('connectWalletBtn').onclick = connectWallet;
-            
+            // Обновляем статистику каждые 30 секунд
             setInterval(updateStakingStats, 30000);
+            
+            // Обновляем данные стейкинга каждую минуту
+            setInterval(async () => {
+                if (state.isConnected) {
+                    await loadStakingData();
+                }
+            }, 60000);
         });
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('unstakeModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
     </script>
 </body>
 </html>
