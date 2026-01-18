@@ -765,11 +765,11 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="dailyRewards">0 LGND</div>
-                    <div class="stat-label">L3G3NDS Daily Rate</div>
+                    <div class="stat-label">L3G3NDS Daily Pool</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="passRewards">0 LGND</div>
-                    <div class="stat-label">Pass Daily Rate</div>
+                    <div class="stat-label">Pass Daily Pool</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="totalRewards">0 LGND</div>
@@ -828,9 +828,27 @@
                         </div>
                     </div>
                     
-                    <div style="text-align: center; margin-top: 1.5rem; color: #94A3B8; font-size: 0.9rem;">
-                        <p>Staking contracts are renounced for maximum security</p>
-                        <p>APR: ~365% (1 LGND per NFT daily)</p>
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <div style="display: inline-block; background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                            <p style="color: #94A3B8; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                                <strong>📊 Reward Information:</strong>
+                            </p>
+                            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                                <div style="text-align: center;">
+                                    <div style="color: #8B5CF6; font-weight: bold;">L3G3NDS</div>
+                                    <div style="color: #94A3B8; font-size: 0.85rem;">Daily Rewards Pool</div>
+                                    <div style="color: #F59E0B; font-weight: bold;" id="legendPoolInfo">~1,000 LGND</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #10B981; font-weight: bold;">PASS</div>
+                                    <div style="color: #94A3B8; font-size: 0.85rem;">Daily Rewards Pool</div>
+                                    <div style="color: #F59E0B; font-weight: bold;" id="passPoolInfo">~2,500 LGND</div>
+                                </div>
+                            </div>
+                            <p style="color: #94A3B8; margin-top: 0.5rem; font-size: 0.8rem;">
+                                Staking contracts are renounced for maximum security
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1016,9 +1034,13 @@
                 
                 const totalStaked = Number(totalStakedPass) + Number(totalStakedLegend);
                 
-                // Примерные daily rewards
+                // Рассчитываем daily pools
                 const l3g3ndsDaily = Math.floor(Number(totalStakedLegend) * 100);
                 const passDaily = Math.floor(Number(totalStakedPass) * 250);
+                
+                // Обновляем информацию о пулах награждения
+                document.getElementById('legendPoolInfo').textContent = `~${l3g3ndsDaily.toLocaleString()} LGND`;
+                document.getElementById('passPoolInfo').textContent = `~${passDaily.toLocaleString()} LGND`;
                 
                 // Total rewards distributed
                 const [totalRewardsPass, totalRewardsLegend] = await Promise.all([
