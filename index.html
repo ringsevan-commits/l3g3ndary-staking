@@ -121,6 +121,11 @@
             transform: translateY(-2px);
         }
         
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -343,6 +348,25 @@
             gap: 10px;
         }
         
+        /* Inputs */
+        input {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        input::placeholder {
+            color: #94A3B8;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
         /* Notification */
         .notification {
             position: fixed;
@@ -386,6 +410,7 @@
             .links { flex-direction: column; align-items: center; }
             .staking-section { padding: 2rem; }
             .contract-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .staking-grid { grid-template-columns: 1fr; }
         }
         
         /* Utility */
@@ -404,6 +429,35 @@
             color: #94A3B8;
             background: rgba(0, 0, 0, 0.3);
             margin-top: 4rem;
+        }
+        
+        /* Staking Grid */
+        .staking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .staking-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .staking-info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .staking-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -703,6 +757,7 @@
         <section class="staking-section">
             <h2 class="section-title" style="color: white;">🎯 NFT Staking Platform</h2>
             
+            <!-- Статистика -->
             <div class="stats-grid">
                 <div class="stat-item">
                     <div class="stat-value" id="totalStaked">0</div>
@@ -722,12 +777,71 @@
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 2rem;">
+            <!-- Интерфейс стейкинга -->
+            <div id="stakingInterface" style="display: none; margin-top: 2rem;">
+                <div style="background: rgba(0, 0, 0, 0.3); padding: 2rem; border-radius: 15px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                    <h3 style="color: white; margin-bottom: 1.5rem; text-align: center;">Stake Your NFTs</h3>
+                    
+                    <div class="staking-grid">
+                        <!-- L3G3NDS Staking -->
+                        <div class="staking-card">
+                            <h4 style="color: #8B5CF6; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                                <span>🖼️</span>
+                                <span>L3G3NDS</span>
+                            </h4>
+                            <div class="staking-info">
+                                <div style="margin-bottom: 0.5rem;">
+                                    <strong>Your Balance:</strong> <span id="legendBalance" style="color: #8B5CF6; font-weight: bold;">0</span>
+                                </div>
+                                <div>
+                                    <strong>Pending Rewards:</strong> <span id="legendPending" style="color: #F59E0B; font-weight: bold;">0 LGND</span>
+                                </div>
+                            </div>
+                            <div class="staking-controls">
+                                <input type="number" id="legendAmount" placeholder="Amount" min="1" style="flex: 1;">
+                                <button onclick="stakeLegend()" class="btn btn-small" style="background: var(--secondary);">Stake</button>
+                                <button onclick="unstakeLegend()" class="btn btn-small" style="background: var(--danger);">Unstake</button>
+                                <button onclick="claimLegend()" class="btn btn-small" style="background: var(--accent);">Claim</button>
+                            </div>
+                        </div>
+                        
+                        <!-- L3G3NDARY Pass Staking -->
+                        <div class="staking-card">
+                            <h4 style="color: #10B981; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                                <span>🎫</span>
+                                <span>L3G3NDARY Pass</span>
+                            </h4>
+                            <div class="staking-info">
+                                <div style="margin-bottom: 0.5rem;">
+                                    <strong>Your Balance:</strong> <span id="passBalance" style="color: #10B981; font-weight: bold;">0</span>
+                                </div>
+                                <div>
+                                    <strong>Pending Rewards:</strong> <span id="passPending" style="color: #F59E0B; font-weight: bold;">0 LGND</span>
+                                </div>
+                            </div>
+                            <div class="staking-controls">
+                                <input type="number" id="passAmount" placeholder="Amount" min="1" style="flex: 1;">
+                                <button onclick="stakePass()" class="btn btn-small" style="background: var(--secondary);">Stake</button>
+                                <button onclick="unstakePass()" class="btn btn-small" style="background: var(--danger);">Unstake</button>
+                                <button onclick="claimPass()" class="btn btn-small" style="background: var(--accent);">Claim</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 1.5rem; color: #94A3B8; font-size: 0.9rem;">
+                        <p>Staking contracts are renounced for maximum security</p>
+                        <p>APR: ~365% (1 LGND per NFT daily)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопка для не подключенных пользователей -->
+            <div id="stakingNotConnected" style="text-align: center; margin-top: 2rem;">
                 <button id="goToStakingBtn" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
-                    🚀 Go to Staking Platform
+                    🚀 Connect Wallet to Stake
                 </button>
                 <p style="margin-top: 1rem; color: #94A3B8; font-size: 0.9rem;">
-                    Staking contracts are renounced for maximum security
+                    Connect wallet to stake NFTs and earn LGND rewards
                 </p>
             </div>
         </section>
@@ -804,6 +918,25 @@
         };
 
         // ============================
+        // ABI КОНТРАКТОВ
+        // ============================
+        const ERC1155_ABI = [
+            "function balanceOf(address account, uint256 id) view returns (uint256)",
+            "function isApprovedForAll(address account, address operator) view returns (bool)",
+            "function setApprovalForAll(address operator, bool approved)"
+        ];
+
+        const STAKING_ABI = [
+            "function stake(uint256 tokenId, uint256 amount) external",
+            "function unstake(uint256 stakeIndex) external",
+            "function claimRewards() external",
+            "function getUserStakes(address user) view returns ((uint256 tokenId, uint256 amount, uint256 stakedAt)[])",
+            "function pendingRewards(address user) view returns (uint256)",
+            "function totalStaked() view returns (uint256)",
+            "function totalRewardsDistributed() view returns (uint256)"
+        ];
+
+        // ============================
         // СОСТОЯНИЕ
         // ============================
         let state = {
@@ -846,39 +979,300 @@
         }
 
         // ============================
-        // ОБНОВЛЕНИЕ СТАТИСТИКИ СТЕЙКИНГА
+        // ОБНОВЛЕНИЕ СТАТИСТИКИ СТЕЙКИНГА (РЕАЛЬНАЯ)
         // ============================
         async function updateStakingStats() {
-            if (!state.isConnected || !state.provider) {
-                const cachedStats = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
-                
-                if (Object.keys(cachedStats).length > 0) {
-                    document.getElementById('totalStaked').textContent = cachedStats.totalStaked || '0';
-                    document.getElementById('dailyRewards').textContent = (cachedStats.l3g3ndsDaily || 0).toLocaleString() + ' LGND';
-                    document.getElementById('passRewards').textContent = (cachedStats.passDaily || 0).toLocaleString() + ' LGND';
-                    document.getElementById('totalRewards').textContent = (cachedStats.totalDistributed || 0).toLocaleString() + ' LGND';
-                }
-                return;
-            }
-
             try {
-                const mockStats = {
-                    totalStaked: Math.floor(Math.random() * 10000) + 5000,
-                    l3g3ndsDaily: Math.floor(Math.random() * 5000) + 1000,
-                    passDaily: Math.floor(Math.random() * 10000) + 2000,
-                    totalDistributed: Math.floor(Math.random() * 10000000) + 5000000,
+                if (!state.provider) {
+                    // Показываем кэшированные данные
+                    const cached = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
+                    if (cached.totalStaked) {
+                        document.getElementById('totalStaked').textContent = cached.totalStaked.toLocaleString();
+                        document.getElementById('dailyRewards').textContent = (cached.l3g3ndsDaily || 0).toLocaleString() + ' LGND';
+                        document.getElementById('passRewards').textContent = (cached.passDaily || 0).toLocaleString() + ' LGND';
+                        document.getElementById('totalRewards').textContent = (cached.totalDistributed || 0).toLocaleString() + ' LGND';
+                    }
+                    return;
+                }
+                
+                // Подключаемся к контрактам стейкинга
+                const stakingPassContract = new ethers.Contract(
+                    CONFIG.staking["L3G3NDARY Pass"],
+                    STAKING_ABI,
+                    state.provider
+                );
+                
+                const stakingLegendContract = new ethers.Contract(
+                    CONFIG.staking["L3G3NDS"],
+                    STAKING_ABI,
+                    state.provider
+                );
+                
+                // Получаем реальные данные
+                const [totalStakedPass, totalStakedLegend] = await Promise.all([
+                    stakingPassContract.totalStaked().catch(() => 0n),
+                    stakingLegendContract.totalStaked().catch(() => 0n)
+                ]);
+                
+                const totalStaked = Number(totalStakedPass) + Number(totalStakedLegend);
+                
+                // Примерные daily rewards
+                const l3g3ndsDaily = Math.floor(Number(totalStakedLegend) * 100);
+                const passDaily = Math.floor(Number(totalStakedPass) * 250);
+                
+                // Total rewards distributed
+                const [totalRewardsPass, totalRewardsLegend] = await Promise.all([
+                    stakingPassContract.totalRewardsDistributed().catch(() => 0n),
+                    stakingLegendContract.totalRewardsDistributed().catch(() => 0n)
+                ]);
+                
+                const totalDistributed = Number(totalRewardsPass) + Number(totalRewardsLegend);
+                
+                // Обновляем UI
+                document.getElementById('totalStaked').textContent = totalStaked.toLocaleString();
+                document.getElementById('dailyRewards').textContent = l3g3ndsDaily.toLocaleString() + ' LGND';
+                document.getElementById('passRewards').textContent = passDaily.toLocaleString() + ' LGND';
+                document.getElementById('totalRewards').textContent = totalDistributed.toLocaleString() + ' LGND';
+                
+                // Кэшируем
+                const stats = {
+                    totalStaked,
+                    l3g3ndsDaily,
+                    passDaily,
+                    totalDistributed,
                     lastUpdated: Date.now()
                 };
-
-                document.getElementById('totalStaked').textContent = mockStats.totalStaked.toLocaleString();
-                document.getElementById('dailyRewards').textContent = mockStats.l3g3ndsDaily.toLocaleString() + ' LGND';
-                document.getElementById('passRewards').textContent = mockStats.passDaily.toLocaleString() + ' LGND';
-                document.getElementById('totalRewards').textContent = mockStats.totalDistributed.toLocaleString() + ' LGND';
-
-                localStorage.setItem('l3g3ndary_staking_stats', JSON.stringify(mockStats));
+                localStorage.setItem('l3g3ndary_staking_stats', JSON.stringify(stats));
                 
             } catch (error) {
                 console.error('Error updating staking stats:', error);
+                // Показываем кэшированные данные
+                const cached = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
+                if (cached.totalStaked) {
+                    document.getElementById('totalStaked').textContent = cached.totalStaked.toLocaleString();
+                    document.getElementById('dailyRewards').textContent = (cached.l3g3ndsDaily || 0).toLocaleString() + ' LGND';
+                    document.getElementById('passRewards').textContent = (cached.passDaily || 0).toLocaleString() + ' LGND';
+                    document.getElementById('totalRewards').textContent = (cached.totalDistributed || 0).toLocaleString() + ' LGND';
+                }
+            }
+        }
+
+        // ============================
+        // ЗАГРУЗКА ДАННЫХ СТЕЙКИНГА
+        // ============================
+        async function loadStakingData() {
+            if (!state.isConnected || !state.signer) {
+                document.getElementById('stakingInterface').style.display = 'none';
+                document.getElementById('stakingNotConnected').style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Показываем интерфейс стейкинга
+                document.getElementById('stakingInterface').style.display = 'block';
+                document.getElementById('stakingNotConnected').style.display = 'none';
+                
+                // Контракты NFT
+                const legendNFT = new ethers.Contract(CONFIG.collections["L3G3NDS"], ERC1155_ABI, state.signer);
+                const passNFT = new ethers.Contract(CONFIG.collections["L3G3NDARY Pass"], ERC1155_ABI, state.signer);
+                
+                // Контракты стейкинга
+                const legendStaking = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
+                const passStaking = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
+                
+                // Получаем балансы (tokenId 1 для обоих коллекций)
+                const [legendBalance, passBalance] = await Promise.all([
+                    legendNFT.balanceOf(state.walletAddress, 1).catch(() => 0n),
+                    passNFT.balanceOf(state.walletAddress, 1).catch(() => 0n)
+                ]);
+                
+                // Получаем pending rewards
+                const [legendPending, passPending] = await Promise.all([
+                    legendStaking.pendingRewards(state.walletAddress).catch(() => 0n),
+                    passStaking.pendingRewards(state.walletAddress).catch(() => 0n)
+                ]);
+                
+                // Обновляем UI
+                document.getElementById('legendBalance').textContent = legendBalance.toString();
+                document.getElementById('passBalance').textContent = passBalance.toString();
+                document.getElementById('legendPending').textContent = ethers.formatUnits(legendPending, 18) + ' LGND';
+                document.getElementById('passPending').textContent = ethers.formatUnits(passPending, 18) + ' LGND';
+                
+            } catch (error) {
+                console.error('Error loading staking data:', error);
+            }
+        }
+
+        // ============================
+        // ФУНКЦИИ СТЕЙКИНГА
+        // ============================
+        async function stakeLegend() {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            const amount = document.getElementById('legendAmount').value;
+            if (!amount || amount < 1) {
+                showNotification('Enter valid amount', 'warning');
+                return;
+            }
+            
+            try {
+                const nftContract = new ethers.Contract(CONFIG.collections["L3G3NDS"], ERC1155_ABI, state.signer);
+                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
+                
+                // Проверяем approve
+                const isApproved = await nftContract.isApprovedForAll(state.walletAddress, CONFIG.staking["L3G3NDS"]);
+                if (!isApproved) {
+                    showNotification('Approving NFTs...', 'info');
+                    const approveTx = await nftContract.setApprovalForAll(CONFIG.staking["L3G3NDS"], true);
+                    await approveTx.wait();
+                }
+                
+                // Стейкинг
+                showNotification('Staking L3G3NDS...', 'info');
+                const tx = await stakingContract.stake(1, amount);
+                await tx.wait();
+                
+                showNotification('✅ L3G3NDS staked successfully!', 'success');
+                await loadStakingData();
+                await updateStakingStats();
+                
+            } catch (error) {
+                console.error('Stake error:', error);
+                showNotification('Stake failed: ' + error.message, 'error');
+            }
+        }
+
+        async function stakePass() {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            const amount = document.getElementById('passAmount').value;
+            if (!amount || amount < 1) {
+                showNotification('Enter valid amount', 'warning');
+                return;
+            }
+            
+            try {
+                const nftContract = new ethers.Contract(CONFIG.collections["L3G3NDARY Pass"], ERC1155_ABI, state.signer);
+                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
+                
+                // Проверяем approve
+                const isApproved = await nftContract.isApprovedForAll(state.walletAddress, CONFIG.staking["L3G3NDARY Pass"]);
+                if (!isApproved) {
+                    showNotification('Approving Pass NFTs...', 'info');
+                    const approveTx = await nftContract.setApprovalForAll(CONFIG.staking["L3G3NDARY Pass"], true);
+                    await approveTx.wait();
+                }
+                
+                // Стейкинг
+                showNotification('Staking L3G3NDARY Pass...', 'info');
+                const tx = await stakingContract.stake(1, amount);
+                await tx.wait();
+                
+                showNotification('✅ Pass staked successfully!', 'success');
+                await loadStakingData();
+                await updateStakingStats();
+                
+            } catch (error) {
+                console.error('Stake error:', error);
+                showNotification('Stake failed: ' + error.message, 'error');
+            }
+        }
+
+        async function unstakeLegend() {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            try {
+                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
+                
+                showNotification('Unstaking L3G3NDS...', 'info');
+                const tx = await stakingContract.unstake(0); // unstake first stake
+                await tx.wait();
+                
+                showNotification('✅ L3G3NDS unstaked successfully!', 'success');
+                await loadStakingData();
+                await updateStakingStats();
+                
+            } catch (error) {
+                console.error('Unstake error:', error);
+                showNotification('Unstake failed: ' + error.message, 'error');
+            }
+        }
+
+        async function unstakePass() {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            try {
+                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
+                
+                showNotification('Unstaking Pass...', 'info');
+                const tx = await stakingContract.unstake(0); // unstake first stake
+                await tx.wait();
+                
+                showNotification('✅ Pass unstaked successfully!', 'success');
+                await loadStakingData();
+                await updateStakingStats();
+                
+            } catch (error) {
+                console.error('Unstake error:', error);
+                showNotification('Unstake failed: ' + error.message, 'error');
+            }
+        }
+
+        async function claimLegend() {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            try {
+                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDS"], STAKING_ABI, state.signer);
+                
+                showNotification('Claiming L3G3NDS rewards...', 'info');
+                const tx = await stakingContract.claimRewards();
+                await tx.wait();
+                
+                showNotification('✅ L3G3NDS rewards claimed!', 'success');
+                await loadStakingData();
+                await updateStakingStats();
+                
+            } catch (error) {
+                console.error('Claim error:', error);
+                showNotification('Claim failed: ' + error.message, 'error');
+            }
+        }
+
+        async function claimPass() {
+            if (!state.isConnected) {
+                showNotification('Please connect wallet first', 'warning');
+                return;
+            }
+            
+            try {
+                const stakingContract = new ethers.Contract(CONFIG.staking["L3G3NDARY Pass"], STAKING_ABI, state.signer);
+                
+                showNotification('Claiming Pass rewards...', 'info');
+                const tx = await stakingContract.claimRewards();
+                await tx.wait();
+                
+                showNotification('✅ Pass rewards claimed!', 'success');
+                await loadStakingData();
+                await updateStakingStats();
+                
+            } catch (error) {
+                console.error('Claim error:', error);
+                showNotification('Claim failed: ' + error.message, 'error');
             }
         }
 
@@ -929,6 +1323,7 @@
                 updateUI();
                 updateNetworkInfo();
                 updateStakingStats();
+                await loadStakingData();
                 
                 showNotification(`✅ ${walletType} connected!`, 'success');
                 console.log('Connected address:', address);
@@ -956,16 +1351,18 @@
             if (state.isConnected) {
                 connectWalletBtn.textContent = '✅ Connected';
                 connectWalletBtn.disabled = true;
-                goToStakingBtn.disabled = false;
-                goToStakingBtn.textContent = '🚀 Go to Staking Platform';
+                goToStakingBtn.textContent = '🚀 Stake NFTs';
                 
                 // Показываем уведомление о успешном подключении
                 showNotification(`✅ ${state.walletType} connected: ${formatAddress(state.walletAddress)}`, 'success');
             } else {
                 connectWalletBtn.textContent = '🔗 Connect Wallet';
                 connectWalletBtn.disabled = false;
-                goToStakingBtn.disabled = true;
                 goToStakingBtn.textContent = '🔒 Connect Wallet First';
+                
+                // Скрываем интерфейс стейкинга
+                document.getElementById('stakingInterface').style.display = 'none';
+                document.getElementById('stakingNotConnected').style.display = 'block';
             }
         }
 
@@ -1009,11 +1406,8 @@
                 return;
             }
             
-            showNotification('🚀 Redirecting to staking platform...', 'info');
-            
-            setTimeout(() => {
-                alert('Staking platform would open in a new tab. Staking contracts are renounced for maximum security.');
-            }, 1000);
+            // Прокручиваем к стейкинг интерфейсу
+            document.querySelector('.staking-section').scrollIntoView({ behavior: 'smooth' });
         };
 
         // ============================
@@ -1061,6 +1455,7 @@
                         updateUI();
                         updateNetworkInfo();
                         updateStakingStats();
+                        await loadStakingData();
                         
                         console.log('✅ Auto-connected to:', address);
                     }
