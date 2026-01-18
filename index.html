@@ -883,53 +883,6 @@
         }
 
         // ============================
-        // ОБНАРУЖЕНИЕ КОШЕЛЬКА
-        // ============================
-        function detectWallet() {
-            console.log('🔄 Detecting wallet...');
-            
-            let ethereumProvider = null;
-            
-            if (typeof window.ethereum !== 'undefined') {
-                console.log('✅ Found window.ethereum');
-                ethereumProvider = window.ethereum;
-                
-                if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
-                    for (const provider of window.ethereum.providers) {
-                        if (provider.isMetaMask) {
-                            ethereumProvider = provider;
-                            console.log('✅ Selected MetaMask from providers array');
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            if (!ethereumProvider && window.top && window.top.ethereum) {
-                console.log('✅ Found window.top.ethereum');
-                ethereumProvider = window.top.ethereum;
-            }
-            
-            if (!ethereumProvider && typeof window.web3 !== 'undefined' && window.web3.currentProvider) {
-                console.log('✅ Found window.web3.currentProvider (legacy)');
-                ethereumProvider = window.web3.currentProvider;
-            }
-            
-            if (!ethereumProvider && window.coinbaseWalletExtension) {
-                console.log('✅ Found Coinbase Wallet');
-                ethereumProvider = window.coinbaseWalletExtension;
-            }
-            
-            if (ethereumProvider) {
-                console.log('✅ Wallet detected:', ethereumProvider);
-                return ethereumProvider;
-            }
-            
-            console.log('❌ No wallet detected');
-            return null;
-        }
-
-        // ============================
         // ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
         // ============================
         async function connectWallet() {
@@ -991,52 +944,26 @@
             }
         }
 
-        function checkWalletAgain() {
-            document.getElementById('walletInstallOptions').classList.add('hidden');
-            connectWallet();
-        }
-
-        function disconnectWallet() {
-            state.isConnected = false;
-            state.walletAddress = null;
-            state.walletType = null;
-            state.provider = null;
-            state.signer = null;
-            state.chainId = null;
-            
-            updateUI();
-            showNotification('ℹ️ Wallet disconnected', 'info');
-        }
-
+        // ============================
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+        // ============================
         function updateUI() {
-            const walletStatus = document.getElementById('walletStatus');
-            const connectedInfo = document.getElementById('connectedInfo');
-            const walletInstallOptions = document.getElementById('walletInstallOptions');
-            const walletAddress = document.getElementById('walletAddress');
-            const walletType = document.getElementById('walletType');
             const connectWalletBtn = document.getElementById('connectWalletBtn');
             const goToStakingBtn = document.getElementById('goToStakingBtn');
             
+            if (!connectWalletBtn || !goToStakingBtn) return;
+            
             if (state.isConnected) {
-                walletStatus.style.display = 'none';
-                connectedInfo.classList.remove('hidden');
-                walletInstallOptions.classList.add('hidden');
-                
-                walletAddress.textContent = formatAddress(state.walletAddress);
-                walletType.textContent = state.walletType;
-                
                 connectWalletBtn.textContent = '✅ Connected';
                 connectWalletBtn.disabled = true;
-                
                 goToStakingBtn.disabled = false;
                 goToStakingBtn.textContent = '🚀 Go to Staking Platform';
-            } else {
-                walletStatus.style.display = 'block';
-                connectedInfo.classList.add('hidden');
                 
+                // Показываем уведомление о успешном подключении
+                showNotification(`✅ ${state.walletType} connected: ${formatAddress(state.walletAddress)}`, 'success');
+            } else {
                 connectWalletBtn.textContent = '🔗 Connect Wallet';
                 connectWalletBtn.disabled = false;
-                
                 goToStakingBtn.disabled = true;
                 goToStakingBtn.textContent = '🔒 Connect Wallet First';
             }
@@ -1047,7 +974,7 @@
             const networkBadge = document.getElementById('networkBadge');
             
             if (!state.chainId) {
-                networkInfo.innerHTML = '';
+                if (networkInfo) networkInfo.innerHTML = '';
                 if (networkBadge) networkBadge.textContent = '';
                 return;
             }
@@ -1055,13 +982,15 @@
             const isEthereum = state.chainId === '0x1';
             const networkName = isEthereum ? 'Ethereum Mainnet' : `Chain: ${state.chainId}`;
             
-            networkInfo.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px; background: ${isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid ${isEthereum ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}">
-                    <span>🌐</span>
-                    <span>${networkName}</span>
-                    ${!isEthereum ? '<span style="color: #F59E0B;">⚠️</span>' : ''}
-                </div>
-            `;
+            if (networkInfo) {
+                networkInfo.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; background: ${isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid ${isEthereum ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}">
+                        <span>🌐</span>
+                        <span>${networkName}</span>
+                        ${!isEthereum ? '<span style="color: #F59E0B;">⚠️</span>' : ''}
+                    </div>
+                `;
+            }
             
             if (networkBadge) {
                 networkBadge.textContent = networkName;
@@ -1100,25 +1029,15 @@
             
             updateStakingStats();
             
-            const ethereumProvider = detectWallet();
-            if (ethereumProvider) {
+            // Автоподключение кошелька
+            if (typeof window.ethereum !== 'undefined') {
                 try {
-                    let accounts = [];
-                    
-                    try {
-                        if (ethereumProvider.request) {
-                            accounts = await ethereumProvider.request({ method: 'eth_accounts' });
-                        } else if (ethereumProvider.selectedAddress) {
-                            accounts = [ethereumProvider.selectedAddress];
-                        }
-                    } catch (err) {
-                        console.log('⚠️ Error getting initial accounts:', err);
-                    }
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     
                     if (accounts && accounts.length > 0) {
                         console.log('✅ Found existing connection:', accounts[0]);
                         
-                        const provider = new ethers.BrowserProvider(ethereumProvider);
+                        const provider = new ethers.BrowserProvider(window.ethereum);
                         const signer = await provider.getSigner();
                         const address = accounts[0];
                         
@@ -1129,9 +1048,8 @@
                             network = { chainId: 1n };
                         }
                         
-                        let walletType = 'Web3 Wallet';
-                        if (ethereumProvider.isMetaMask) walletType = 'MetaMask';
-                        else if (ethereumProvider.isCoinbaseWallet) walletType = 'Coinbase Wallet';
+                        let walletType = 'MetaMask';
+                        if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
                         
                         state.isConnected = true;
                         state.walletAddress = address;
