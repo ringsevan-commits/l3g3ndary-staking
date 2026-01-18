@@ -850,7 +850,6 @@
         // ============================
         async function updateStakingStats() {
             if (!state.isConnected || !state.provider) {
-                // Показываем базовые данные или данные из localStorage
                 const cachedStats = JSON.parse(localStorage.getItem('l3g3ndary_staking_stats') || '{}');
                 
                 if (Object.keys(cachedStats).length > 0) {
@@ -863,10 +862,6 @@
             }
 
             try {
-                // В реальном приложении здесь были бы вызовы контрактов
-                // Для демо используем симуляцию
-                
-                // Симуляция данных стейкинга
                 const mockStats = {
                     totalStaked: Math.floor(Math.random() * 10000) + 5000,
                     l3g3ndsDaily: Math.floor(Math.random() * 5000) + 1000,
@@ -875,13 +870,11 @@
                     lastUpdated: Date.now()
                 };
 
-                // Обновляем UI
                 document.getElementById('totalStaked').textContent = mockStats.totalStaked.toLocaleString();
                 document.getElementById('dailyRewards').textContent = mockStats.l3g3ndsDaily.toLocaleString() + ' LGND';
                 document.getElementById('passRewards').textContent = mockStats.passDaily.toLocaleString() + ' LGND';
                 document.getElementById('totalRewards').textContent = mockStats.totalDistributed.toLocaleString() + ' LGND';
 
-                // Кэшируем данные
                 localStorage.setItem('l3g3ndary_staking_stats', JSON.stringify(mockStats));
                 
             } catch (error) {
@@ -942,38 +935,22 @@
         async function connectWallet() {
             console.log('🚀 Connecting wallet...');
             
-            const ethereumProvider = detectWallet();
-            
-            if (!ethereumProvider) {
-                document.getElementById('walletInstallOptions').classList.remove('hidden');
-                showNotification('No Web3 wallet found. Please install MetaMask or another wallet.', 'error');
+            // ПРОСТАЯ ПРОВЕРКА ДЛЯ ТЕСТА
+            if (typeof window.ethereum === 'undefined') {
+                alert('❌ MetaMask не найден! Установите расширение из https://metamask.io');
                 return;
             }
             
             try {
-                let accounts;
-                
-                try {
-                    accounts = await ethereumProvider.request({ 
-                        method: 'eth_requestAccounts' 
-                    });
-                    console.log('✅ Accounts via eth_requestAccounts:', accounts);
-                } catch (err) {
-                    console.log('⚠️ eth_requestAccounts failed:', err);
-                    
-                    if (ethereumProvider.enable) {
-                        accounts = await ethereumProvider.enable();
-                        console.log('✅ Accounts via enable():', accounts);
-                    } else {
-                        throw new Error('Wallet connection failed');
-                    }
-                }
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
                 
                 if (!accounts || accounts.length === 0) {
                     throw new Error('No accounts returned');
                 }
                 
-                const provider = new ethers.BrowserProvider(ethereumProvider);
+                const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const address = accounts[0];
                 
@@ -981,16 +958,13 @@
                 try {
                     network = await provider.getNetwork();
                 } catch (err) {
-                    console.log('⚠️ Error getting network:', err);
                     network = { chainId: 1n };
                 }
                 
-                let walletType = 'Web3 Wallet';
-                if (ethereumProvider.isMetaMask) walletType = 'MetaMask';
-                else if (ethereumProvider.isCoinbaseWallet) walletType = 'Coinbase Wallet';
-                else if (ethereumProvider.isTrust) walletType = 'Trust Wallet';
-                else if (ethereumProvider.isRabby) walletType = 'Rabby Wallet';
-                else if (ethereumProvider.isBraveWallet) walletType = 'Brave Wallet';
+                let walletType = 'MetaMask';
+                if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
+                else if (window.ethereum.isTrust) walletType = 'Trust Wallet';
+                else if (window.ethereum.isRabby) walletType = 'Rabby Wallet';
                 
                 state.isConnected = true;
                 state.walletAddress = address;
@@ -1003,18 +977,14 @@
                 updateNetworkInfo();
                 updateStakingStats();
                 
-                showNotification(`✅ ${walletType} connected successfully!`, 'success');
+                showNotification(`✅ ${walletType} connected!`, 'success');
+                console.log('Connected address:', address);
                 
             } catch (error) {
                 console.error('❌ Wallet connection error:', error);
                 
-                if (error.code === 4001 || error.message.includes('rejected') || error.message.includes('denied')) {
+                if (error.code === 4001) {
                     showNotification('❌ Connection rejected by user', 'warning');
-                } else if (error.code === -32002) {
-                    showNotification('⚠️ Connection already pending. Please check your wallet.', 'warning');
-                } else if (error.message.includes('not found') || error.message.includes('unavailable')) {
-                    showNotification('❌ Wallet not found. Please check your wallet extension.', 'error');
-                    document.getElementById('walletInstallOptions').classList.remove('hidden');
                 } else {
                     showNotification('❌ Connection failed: ' + error.message, 'error');
                 }
@@ -1095,7 +1065,7 @@
             
             if (networkBadge) {
                 networkBadge.textContent = networkName;
-                networkBadge.style.background = isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2);
+                networkBadge.style.background = isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
                 networkBadge.style.color = isEthereum ? '#10B981' : '#F59E0B';
             }
         }
@@ -1112,7 +1082,6 @@
             
             showNotification('🚀 Redirecting to staking platform...', 'info');
             
-            // В реальном приложении здесь был бы переход на отдельную страницу
             setTimeout(() => {
                 alert('Staking platform would open in a new tab. Staking contracts are renounced for maximum security.');
             }, 1000);
@@ -1124,16 +1093,13 @@
         window.addEventListener('load', async () => {
             console.log('🎮 L3G3NDARY website initialized');
             
-            // Назначаем обработчики для копирования адресов
             document.querySelectorAll('.contract-address').forEach(el => {
                 el.style.cursor = 'pointer';
                 el.title = 'Click to copy address';
             });
             
-            // Загружаем кэшированные данные стейкинга
             updateStakingStats();
             
-            // Автоподключение кошелька
             const ethereumProvider = detectWallet();
             if (ethereumProvider) {
                 try {
@@ -1185,10 +1151,8 @@
                 }
             }
             
-            // Назначаем обработчики
             document.getElementById('connectWalletBtn').onclick = connectWallet;
             
-            // Обновляем статистику каждые 30 секунд
             setInterval(updateStakingStats, 30000);
         });
     </script>
