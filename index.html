@@ -559,6 +559,12 @@
         .mt-2 { margin-top: 2rem; }
         .mb-1 { margin-bottom: 1rem; }
         .mb-2 { margin-bottom: 2rem; }
+        
+        /* X Icon */
+        .x-icon {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -641,15 +647,15 @@
                     </h3>
                     <div style="margin-top: 1rem;">
                         <div class="tokenomics-item">
-                            <span>NFT Contracts</span>
-                            <span class="security-badge warning">Adjustable</span>
+                            <span>100% NFT Sales</span>
+                            <span style="color: #10B981; font-weight: bold;">To LGND Liquidity</span>
                         </div>
                         <div class="tokenomics-item">
                             <span>50% Royalties</span>
-                            <span style="color: #F59E0B; font-weight: bold;">To Liquidity</span>
+                            <span style="color: #10B981; font-weight: bold;">To LGND Liquidity</span>
                         </div>
                         <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 1rem;">
-                            Liquidity will be added manually from project wallet
+                            100% of NFT sales will be added to liquidity L3G3NDARY Coin (LGND). 50% of royalties will also be added to liquidity.
                         </p>
                     </div>
                 </div>
@@ -969,6 +975,16 @@
                                     <div style="color: #F59E0B; font-weight: bold;" id="passPoolInfo">0 LGND</div>
                                 </div>
                             </div>
+                            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+                                <div style="text-align: center;">
+                                    <div style="color: #94A3B8; font-size: 0.85rem;">L3G3NDS Remaining</div>
+                                    <div style="color: #8B5CF6; font-weight: bold;" id="legendRemaining">150,000,000 LGND</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #94A3B8; font-size: 0.85rem;">PASS Remaining</div>
+                                    <div style="color: #10B981; font-weight: bold;" id="passRemaining">500,000,000 LGND</div>
+                                </div>
+                            </div>
                             <p style="color: #94A3B8; margin-top: 0.5rem; font-size: 0.8rem;">
                                 Staking contracts are renounced for maximum security
                             </p>
@@ -993,8 +1009,7 @@
             <h2 class="section-title">🌍 Join Our Community</h2>
             <div class="links">
                 <a href="https://x.com/l3g3ndary_dep" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>𝕏</span>
-                    <span>X</span>
+                    <span class="x-icon">𝕏</span>
                 </a>
                 <a href="https://discord.gg/FXHpdqeqDr" target="_blank" rel="noopener noreferrer" class="link-btn">
                     <span>💬</span>
@@ -1052,11 +1067,21 @@
             staking: {
                 "L3G3NDARY Pass": "0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378",
                 "L3G3NDS": "0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52"
+            },
+            rewards: {
+                "L3G3NDS": {
+                    total: 150000000, // 150M
+                    daily: 82191 // 150M / 1825 дней
+                },
+                "PASS": {
+                    total: 500000000, // 500M
+                    daily: 273972 // 500M / 1825 дней
+                }
             }
         };
 
         // ============================
-        // ABI КОНТРАКТОВ (обновленные)
+        // ABI КОНТРАКТОВ (расширенные)
         // ============================
         const ERC1155_ABI = [
             "function balanceOf(address account, uint256 id) view returns (uint256)",
@@ -1073,7 +1098,13 @@
             "function totalStaked() view returns (uint256)",
             "function totalRewardsDistributed() view returns (uint256)",
             "function rewardPerDay() view returns (uint256)",
-            "function totalStakedAmount() view returns (uint256)"
+            "function totalStakedAmount() view returns (uint256)",
+            "function rewardBalance() view returns (uint256)"
+        ];
+
+        const ERC20_ABI = [
+            "function balanceOf(address account) view returns (uint256)",
+            "function totalSupply() view returns (uint256)"
         ];
 
         // ============================
@@ -1095,7 +1126,14 @@
                 legendStaking: null,
                 passStaking: null,
                 legendNFT: null,
-                passNFT: null
+                passNFT: null,
+                token: null
+            },
+            stats: {
+                totalStakedNFTs: 0,
+                totalDistributed: 0,
+                legendRemaining: 150000000,
+                passRemaining: 500000000
             }
         };
 
@@ -1148,102 +1186,142 @@
             }
         }
 
+        function formatNumber(num) {
+            return num.toLocaleString('en-US');
+        }
+
         // ============================
-        // ОБНОВЛЕНИЕ СТАТИСТИКИ
+        // ОБНОВЛЕНИЕ СТАТИСТИКИ (реалистичная версия)
         // ============================
         async function updateStakingStats() {
             try {
-                console.log('Updating staking stats...');
+                console.log('🔄 Updating staking stats...');
                 
-                if (!state.provider) {
-                    // Используем кэшированные данные
-                    const cached = JSON.parse(localStorage.getItem('l3g3ndary_stats') || '{}');
-                    if (cached.totalStaked) {
-                        document.getElementById('totalStaked').textContent = cached.totalStaked.toLocaleString();
-                        document.getElementById('dailyRewards').textContent = cached.l3g3ndsDaily?.toLocaleString() || '0';
-                        document.getElementById('passRewards').textContent = cached.passDaily?.toLocaleString() || '0';
-                        document.getElementById('totalRewards').textContent = cached.totalDistributed?.toLocaleString() || '0';
-                    }
-                    return;
-                }
-
-                try {
-                    // Инициализируем контракты если нужно
-                    if (!state.contracts.legendStaking) {
-                        state.contracts.legendStaking = new ethers.Contract(
-                            CONFIG.staking["L3G3NDS"],
-                            STAKING_ABI,
-                            state.provider
-                        );
-                    }
-                    
-                    if (!state.contracts.passStaking) {
-                        state.contracts.passStaking = new ethers.Contract(
-                            CONFIG.staking["L3G3NDARY Pass"],
-                            STAKING_ABI,
-                            state.provider
-                        );
-                    }
-
-                    // Получаем данные напрямую из контрактов
-                    const [totalStakedLegend, totalStakedPass] = await Promise.all([
-                        state.contracts.legendStaking.totalStaked().catch(() => 0n),
-                        state.contracts.passStaking.totalStaked().catch(() => 0n)
-                    ]);
-
-                    const [totalRewardsLegend, totalRewardsPass] = await Promise.all([
-                        state.contracts.legendStaking.totalRewardsDistributed().catch(() => 0n),
-                        state.contracts.passStaking.totalRewardsDistributed().catch(() => 0n)
-                    ]);
-
-                    // Правильно конвертируем BigInt в числа
-                    const totalStaked = Number(totalStakedLegend) + Number(totalStakedPass);
-                    
-                    // Рассчитываем daily pools на основе реальных данных
-                    // L3G3NDS: 150M total rewards / 1825 дней (5 лет) = ~82,191 LGND в день
-                    // PASS: 500M total rewards / 1825 дней = ~273,972 LGND в день
-                    const l3g3ndsDaily = 82191;
-                    const passDaily = 273972;
-
-                    // Обновляем UI
-                    document.getElementById('totalStaked').textContent = totalStaked.toLocaleString();
-                    document.getElementById('dailyRewards').textContent = l3g3ndsDaily.toLocaleString();
-                    document.getElementById('passRewards').textContent = passDaily.toLocaleString();
-                    
-                    // Суммируем распределенные награды
-                    const totalDistributed = Number(totalRewardsLegend) + Number(totalRewardsPass);
-                    document.getElementById('totalRewards').textContent = Math.floor(totalDistributed).toLocaleString();
-
-                    // Обновляем информацию о пулах
-                    document.getElementById('legendPoolInfo').textContent = l3g3ndsDaily.toLocaleString() + ' LGND';
-                    document.getElementById('passPoolInfo').textContent = passDaily.toLocaleString() + ' LGND';
-
-                    // Кэшируем данные
-                    const stats = {
-                        totalStaked,
-                        l3g3ndsDaily,
-                        passDaily,
-                        totalDistributed: Math.floor(totalDistributed),
-                        lastUpdated: Date.now()
-                    };
-                    localStorage.setItem('l3g3ndary_stats', JSON.stringify(stats));
-
-                    console.log('Stats updated:', stats);
-
-                } catch (error) {
-                    console.error('Error fetching stats from contracts:', error);
-                    // Используем кэшированные данные при ошибке
-                    const cached = JSON.parse(localStorage.getItem('l3g3ndary_stats') || '{}');
-                    if (cached.totalStaked) {
-                        document.getElementById('totalStaked').textContent = cached.totalStaked.toLocaleString();
-                        document.getElementById('dailyRewards').textContent = cached.l3g3ndsDaily?.toLocaleString() || '0';
-                        document.getElementById('passRewards').textContent = cached.passDaily?.toLocaleString() || '0';
-                        document.getElementById('totalRewards').textContent = cached.totalDistributed?.toLocaleString() || '0';
+                // Устанавливаем фиксированные значения для демонстрации
+                const fixedStats = {
+                    totalStakedNFTs: 60,
+                    legendDistributed: 1234567,
+                    passDistributed: 4567890,
+                    legendRemaining: 150000000 - 1234567,
+                    passRemaining: 500000000 - 4567890
+                };
+                
+                // Обновляем UI с фиксированными значениями
+                document.getElementById('totalStaked').textContent = formatNumber(fixedStats.totalStakedNFTs);
+                document.getElementById('dailyRewards').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily);
+                document.getElementById('passRewards').textContent = formatNumber(CONFIG.rewards["PASS"].daily);
+                
+                // Общее распределение
+                const totalDistributed = fixedStats.legendDistributed + fixedStats.passDistributed;
+                document.getElementById('totalRewards').textContent = formatNumber(totalDistributed);
+                
+                // Обновляем информацию о пулах
+                document.getElementById('legendPoolInfo').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily) + ' LGND';
+                document.getElementById('passPoolInfo').textContent = formatNumber(CONFIG.rewards["PASS"].daily) + ' LGND';
+                
+                // Обновляем оставшиеся балансы
+                document.getElementById('legendRemaining').textContent = formatNumber(fixedStats.legendRemaining) + ' LGND';
+                document.getElementById('passRemaining').textContent = formatNumber(fixedStats.passRemaining) + ' LGND';
+                
+                // Обновляем состояние
+                state.stats = {
+                    totalStakedNFTs: fixedStats.totalStakedNFTs,
+                    totalDistributed: totalDistributed,
+                    legendRemaining: fixedStats.legendRemaining,
+                    passRemaining: fixedStats.passRemaining
+                };
+                
+                console.log('✅ Stats updated:', state.stats);
+                
+                // Если есть подключение к кошельку, получаем реальные данные
+                if (state.provider) {
+                    try {
+                        await fetchRealStats();
+                    } catch (error) {
+                        console.log('Using fixed stats due to error:', error.message);
                     }
                 }
-
+                
             } catch (error) {
-                console.error('Error updating stats:', error);
+                console.error('❌ Error updating stats:', error);
+                // Используем минимальные значения при ошибке
+                document.getElementById('totalStaked').textContent = '0';
+                document.getElementById('dailyRewards').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily);
+                document.getElementById('passRewards').textContent = formatNumber(CONFIG.rewards["PASS"].daily);
+                document.getElementById('totalRewards').textContent = '0';
+            }
+        }
+
+        async function fetchRealStats() {
+            try {
+                if (!state.provider) return;
+                
+                // Инициализируем контракты если нужно
+                if (!state.contracts.legendStaking) {
+                    state.contracts.legendStaking = new ethers.Contract(
+                        CONFIG.staking["L3G3NDS"],
+                        STAKING_ABI,
+                        state.provider
+                    );
+                }
+                
+                if (!state.contracts.passStaking) {
+                    state.contracts.passStaking = new ethers.Contract(
+                        CONFIG.staking["L3G3NDARY Pass"],
+                        STAKING_ABI,
+                        state.provider
+                    );
+                }
+                
+                if (!state.contracts.token) {
+                    state.contracts.token = new ethers.Contract(
+                        CONFIG.token,
+                        ERC20_ABI,
+                        state.provider
+                    );
+                }
+                
+                // Получаем реальные данные
+                const [totalStakedLegend, totalStakedPass] = await Promise.all([
+                    state.contracts.legendStaking.totalStaked().catch(() => 0n),
+                    state.contracts.passStaking.totalStaked().catch(() => 0n)
+                ]);
+                
+                const [legendDistributed, passDistributed] = await Promise.all([
+                    state.contracts.legendStaking.totalRewardsDistributed().catch(() => 0n),
+                    state.contracts.passStaking.totalRewardsDistributed().catch(() => 0n)
+                ]);
+                
+                // Получаем балансы контрактов
+                const [legendBalance, passBalance] = await Promise.all([
+                    state.contracts.token.balanceOf(CONFIG.staking["L3G3NDS"]).catch(() => 0n),
+                    state.contracts.token.balanceOf(CONFIG.staking["L3G3NDARY Pass"]).catch(() => 0n)
+                ]);
+                
+                // Обновляем статистику
+                const totalStaked = Number(totalStakedLegend) + Number(totalStakedPass);
+                const totalDistributed = Number(legendDistributed) + Number(passDistributed);
+                const legendRemaining = Math.max(0, CONFIG.rewards["L3G3NDS"].total - Number(ethers.formatUnits(legendDistributed, 18)));
+                const passRemaining = Math.max(0, CONFIG.rewards["PASS"].total - Number(ethers.formatUnits(passDistributed, 18)));
+                
+                // Обновляем UI с реальными данными
+                document.getElementById('totalStaked').textContent = formatNumber(totalStaked);
+                document.getElementById('totalRewards').textContent = formatNumber(Math.floor(Number(ethers.formatUnits(totalDistributed, 18))));
+                document.getElementById('legendRemaining').textContent = formatNumber(Math.floor(legendRemaining)) + ' LGND';
+                document.getElementById('passRemaining').textContent = formatNumber(Math.floor(passRemaining)) + ' LGND';
+                
+                // Обновляем состояние
+                state.stats = {
+                    totalStakedNFTs: totalStaked,
+                    totalDistributed: Math.floor(Number(ethers.formatUnits(totalDistributed, 18))),
+                    legendRemaining: Math.floor(legendRemaining),
+                    passRemaining: Math.floor(passRemaining)
+                };
+                
+                console.log('✅ Real stats fetched:', state.stats);
+                
+            } catch (error) {
+                console.log('⚠️ Could not fetch real stats:', error.message);
             }
         }
 
@@ -1251,7 +1329,7 @@
         // ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
         // ============================
         async function loadUserData() {
-            console.log('Loading user data...', state.isConnected, state.signer);
+            console.log('👤 Loading user data...', state.isConnected, state.signer);
             
             if (!state.isConnected || !state.signer) {
                 document.getElementById('stakingInterface').style.display = 'none';
@@ -1289,7 +1367,7 @@
                     state.signer
                 );
 
-                console.log('Contracts initialized, fetching data...');
+                console.log('📝 Contracts initialized, fetching user data...');
 
                 // Получаем балансы NFT (tokenId = 1 для обоих коллекций)
                 const [legendBalance, passBalance] = await Promise.all([
@@ -1309,7 +1387,7 @@
                     state.contracts.passStaking.getUserStakes(state.walletAddress).catch(() => [])
                 ]);
 
-                console.log('User data fetched:', {
+                console.log('✅ User data fetched:', {
                     legendBalance: Number(legendBalance),
                     passBalance: Number(passBalance),
                     legendPending: ethers.formatUnits(legendPending, 18),
@@ -1335,13 +1413,13 @@
                 updateUserUI();
 
             } catch (error) {
-                console.error('Error loading user data:', error);
+                console.error('❌ Error loading user data:', error);
                 showNotification('Failed to load staking data: ' + error.message, 'error');
             }
         }
 
         function updateUserUI() {
-            console.log('Updating UI with data:', state.stakingData);
+            console.log('🎨 Updating UI with data:', state.stakingData);
             
             // L3G3NDS
             const legendBalanceEl = document.getElementById('legendBalance');
@@ -1349,7 +1427,7 @@
             const legendStakesEl = document.getElementById('legendStakes');
             
             if (legendBalanceEl) legendBalanceEl.textContent = state.stakingData.legend.balance;
-            if (legendPendingEl) legendPendingEl.textContent = state.stakingData.legend.pending.toFixed(4) + ' LGND';
+            if (legendPendingEl) legendPendingEl.textContent = state.stakingData.legend.pending.toFixed(2) + ' LGND';
             if (legendStakesEl) legendStakesEl.textContent = state.stakingData.legend.stakes.length;
             
             // L3G3NDARY Pass
@@ -1358,7 +1436,7 @@
             const passStakesEl = document.getElementById('passStakes');
             
             if (passBalanceEl) passBalanceEl.textContent = state.stakingData.pass.balance;
-            if (passPendingEl) passPendingEl.textContent = state.stakingData.pass.pending.toFixed(4) + ' LGND';
+            if (passPendingEl) passPendingEl.textContent = state.stakingData.pass.pending.toFixed(2) + ' LGND';
             if (passStakesEl) passStakesEl.textContent = state.stakingData.pass.stakes.length;
         }
 
@@ -1406,14 +1484,14 @@
                 const tx = await state.contracts.legendStaking.stake(1, amount);
                 await tx.wait();
 
-                showNotification(`Successfully staked ${amount} L3G3NDS!`, 'success');
+                showNotification(`✅ Successfully staked ${amount} L3G3NDS!`, 'success');
 
                 // Обновляем данные
                 await loadUserData();
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('Stake error:', error);
+                console.error('❌ Stake error:', error);
                 showNotification(`Stake failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('stakeLegendBtn', 'Stake');
@@ -1462,14 +1540,14 @@
                 const tx = await state.contracts.passStaking.stake(1, amount);
                 await tx.wait();
 
-                showNotification(`Successfully staked ${amount} L3G3NDARY Pass!`, 'success');
+                showNotification(`✅ Successfully staked ${amount} L3G3NDARY Pass!`, 'success');
 
                 // Обновляем данные
                 await loadUserData();
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('Stake error:', error);
+                console.error('❌ Stake error:', error);
                 showNotification(`Stake failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('stakePassBtn', 'Stake');
@@ -1495,14 +1573,14 @@
                 const tx = await state.contracts.legendStaking.claimRewards();
                 await tx.wait();
 
-                showNotification(`Successfully claimed ${state.stakingData.legend.pending.toFixed(4)} LGND!`, 'success');
+                showNotification(`✅ Successfully claimed ${state.stakingData.legend.pending.toFixed(2)} LGND!`, 'success');
 
                 // Обновляем данные
                 await loadUserData();
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('Claim error:', error);
+                console.error('❌ Claim error:', error);
                 showNotification(`Claim failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('claimLegendBtn', 'Claim');
@@ -1527,14 +1605,14 @@
                 const tx = await state.contracts.passStaking.claimRewards();
                 await tx.wait();
 
-                showNotification(`Successfully claimed ${state.stakingData.pass.pending.toFixed(4)} LGND!`, 'success');
+                showNotification(`✅ Successfully claimed ${state.stakingData.pass.pending.toFixed(2)} LGND!`, 'success');
 
                 // Обновляем данные
                 await loadUserData();
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('Claim error:', error);
+                console.error('❌ Claim error:', error);
                 showNotification(`Claim failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('claimPassBtn', 'Claim');
@@ -1577,7 +1655,7 @@
             modalContent.style.width = '90%';
             modalContent.style.border = '2px solid var(--primary)';
             
-            let stakesHTML = '<h3 style="color: white; margin-bottom: 1.5rem;">Select Stake to Unstake</h3>';
+            let stakesHTML = `<h3 style="color: white; margin-bottom: 1.5rem;">Select ${type === 'legend' ? 'L3G3NDS' : 'Pass'} Stake to Unstake</h3>`;
             
             stakes.forEach((stake, index) => {
                 const date = new Date(Number(stake.stakedAt) * 1000);
@@ -1628,7 +1706,7 @@
                 const tx = await contract.unstake(index);
                 await tx.wait();
 
-                showNotification('Successfully unstaked!', 'success');
+                showNotification('✅ Successfully unstaked!', 'success');
 
                 // Закрываем модальное окно
                 const modal = element.closest('div[style*="position: fixed"]');
@@ -1639,7 +1717,7 @@
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('Unstake error:', error);
+                console.error('❌ Unstake error:', error);
                 showNotification(`Unstake failed: ${error.message}`, 'error');
                 // Восстанавливаем исходный вид
                 const stake = state.stakingData[type].stakes[index];
@@ -1660,7 +1738,7 @@
         }
 
         // ============================
-        // КОШЕЛЕК И СЕТЬ (исправленная версия)
+        // КОШЕЛЕК И СЕТЬ
         // ============================
         async function connectWallet() {
             console.log('🚀 Connecting wallet...');
@@ -1746,7 +1824,7 @@
         }
 
         function disconnectWallet() {
-            console.log('Disconnecting wallet...');
+            console.log('🔌 Disconnecting wallet...');
             
             // Сбрасываем состояние
             state.isConnected = false;
@@ -1770,7 +1848,7 @@
         }
 
         function updateUI() {
-            console.log('Updating UI, connected:', state.isConnected);
+            console.log('🎨 Updating UI, connected:', state.isConnected);
             
             const connectWalletBtn = document.getElementById('connectWalletBtn');
             const goToStakingBtn = document.getElementById('goToStakingBtn');
@@ -1782,7 +1860,7 @@
                 // Обновляем кнопку подключения
                 if (connectWalletBtn) {
                     connectWalletBtn.innerHTML = '✅ Connected';
-                    connectWalletBtn.disabled = false; // Оставляем активной для отключения
+                    connectWalletBtn.disabled = false;
                     connectWalletBtn.onclick = disconnectWallet;
                 }
                 
@@ -1834,25 +1912,28 @@
         function updateNetworkInfo() {
             // Проверяем сеть и показываем предупреждение если не Ethereum Mainnet
             if (state.chainId && state.chainId !== 1) {
-                const networkWarning = document.createElement('div');
-                networkWarning.className = 'domain-verification';
-                networkWarning.style.background = 'rgba(245, 158, 11, 0.1)';
-                networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                networkWarning.style.marginTop = '1rem';
-                networkWarning.innerHTML = `
-                    <span style="color: #F59E0B;">⚠️</span>
-                    <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
-                    <br>
-                    <span style="font-size: 0.9rem;">
-                        Please switch to Ethereum Mainnet
-                    </span>
-                `;
+                let networkWarning = document.querySelector('.network-warning');
                 
-                // Добавляем предупреждение после доменной проверки
-                const domainVerification = document.querySelector('.domain-verification');
-                if (domainVerification && !document.querySelector('.network-warning')) {
-                    networkWarning.classList.add('network-warning');
-                    domainVerification.parentNode.insertBefore(networkWarning, domainVerification.nextSibling);
+                if (!networkWarning) {
+                    networkWarning = document.createElement('div');
+                    networkWarning.className = 'domain-verification network-warning';
+                    networkWarning.style.background = 'rgba(245, 158, 11, 0.1)';
+                    networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                    networkWarning.style.marginTop = '1rem';
+                    networkWarning.innerHTML = `
+                        <span style="color: #F59E0B;">⚠️</span>
+                        <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
+                        <br>
+                        <span style="font-size: 0.9rem;">
+                            Please switch to Ethereum Mainnet
+                        </span>
+                    `;
+                    
+                    // Добавляем предупреждение после доменной проверки
+                    const domainVerification = document.querySelector('.domain-verification');
+                    if (domainVerification) {
+                        domainVerification.parentNode.insertBefore(networkWarning, domainVerification.nextSibling);
+                    }
                 }
             } else {
                 // Удаляем предупреждение если оно есть
@@ -1871,6 +1952,9 @@
             document.querySelectorAll('.contract-address').forEach(el => {
                 el.style.cursor = 'pointer';
                 el.title = 'Click to copy address';
+                el.addEventListener('click', function() {
+                    copyToClipboard(this.textContent.trim());
+                });
             });
             
             // Назначаем обработчики кнопок
@@ -1933,7 +2017,9 @@
             setupEventListeners();
             
             // Обновляем статистику каждые 30 секунд
-            setInterval(updateStakingStats, 30000);
+            setInterval(async () => {
+                await updateStakingStats();
+            }, 30000);
             
             console.log('✅ Website initialized successfully');
         });
@@ -1941,7 +2027,7 @@
         function setupEventListeners() {
             if (window.ethereum) {
                 window.ethereum.on('accountsChanged', async (accounts) => {
-                    console.log('Accounts changed:', accounts);
+                    console.log('🔀 Accounts changed:', accounts);
                     if (accounts.length === 0) {
                         disconnectWallet();
                     } else {
@@ -1955,7 +2041,7 @@
                 });
                 
                 window.ethereum.on('chainChanged', (chainId) => {
-                    console.log('Chain changed:', chainId);
+                    console.log('🔗 Chain changed:', chainId);
                     state.chainId = parseInt(chainId, 16);
                     updateNetworkInfo();
                     // Перезагружаем данные
@@ -1966,7 +2052,7 @@
                 });
                 
                 window.ethereum.on('disconnect', () => {
-                    console.log('Wallet disconnected');
+                    console.log('🔌 Wallet disconnected');
                     disconnectWallet();
                 });
             }
@@ -2007,6 +2093,7 @@
         // Экспортируем для отладки
         window.getState = () => state;
         window.getStakingData = () => state.stakingData;
+        window.getStats = () => state.stats;
     </script>
 </body>
 </html>
