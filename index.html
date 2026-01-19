@@ -266,7 +266,6 @@
             border-radius: 20px;
             padding: 3rem;
             margin: 3rem 0;
-            border: 1px solid rgba(139, 92, 246, 0.2);
         }
         
         /* Stats */
@@ -995,7 +994,7 @@
             <div class="links">
                 <a href="https://x.com/l3g3ndary_dep" target="_blank" rel="noopener noreferrer" class="link-btn">
                     <span>𝕏</span>
-                    <span>X (Twitter)</span>
+                    <span>X</span>
                 </a>
                 <a href="https://discord.gg/FXHpdqeqDr" target="_blank" rel="noopener noreferrer" class="link-btn">
                     <span>💬</span>
@@ -1057,7 +1056,7 @@
         };
 
         // ============================
-        // ABI КОНТРАКТОВ
+        // ABI КОНТРАКТОВ (обновленные)
         // ============================
         const ERC1155_ABI = [
             "function balanceOf(address account, uint256 id) view returns (uint256)",
@@ -1072,7 +1071,9 @@
             "function getUserStakes(address user) view returns ((uint256 tokenId, uint256 amount, uint256 stakedAt)[] memory)",
             "function pendingRewards(address user) view returns (uint256)",
             "function totalStaked() view returns (uint256)",
-            "function totalRewardsDistributed() view returns (uint256)"
+            "function totalRewardsDistributed() view returns (uint256)",
+            "function rewardPerDay() view returns (uint256)",
+            "function totalStakedAmount() view returns (uint256)"
         ];
 
         // ============================
@@ -1152,6 +1153,8 @@
         // ============================
         async function updateStakingStats() {
             try {
+                console.log('Updating staking stats...');
+                
                 if (!state.provider) {
                     // Используем кэшированные данные
                     const cached = JSON.parse(localStorage.getItem('l3g3ndary_stats') || '{}');
@@ -1182,7 +1185,7 @@
                         );
                     }
 
-                    // Получаем данные
+                    // Получаем данные напрямую из контрактов
                     const [totalStakedLegend, totalStakedPass] = await Promise.all([
                         state.contracts.legendStaking.totalStaked().catch(() => 0n),
                         state.contracts.passStaking.totalStaked().catch(() => 0n)
@@ -1193,18 +1196,23 @@
                         state.contracts.passStaking.totalRewardsDistributed().catch(() => 0n)
                     ]);
 
+                    // Правильно конвертируем BigInt в числа
                     const totalStaked = Number(totalStakedLegend) + Number(totalStakedPass);
-                    const totalDistributed = Number(totalRewardsLegend) + Number(totalRewardsPass);
-
-                    // Рассчитываем daily pools (примерная формула)
-                    const l3g3ndsDaily = Math.floor(Number(totalStakedLegend) * 0.1); // 0.1 LGND на NFT в день
-                    const passDaily = Math.floor(Number(totalStakedPass) * 0.25); // 0.25 LGND на Pass в день
+                    
+                    // Рассчитываем daily pools на основе реальных данных
+                    // L3G3NDS: 150M total rewards / 1825 дней (5 лет) = ~82,191 LGND в день
+                    // PASS: 500M total rewards / 1825 дней = ~273,972 LGND в день
+                    const l3g3ndsDaily = 82191;
+                    const passDaily = 273972;
 
                     // Обновляем UI
                     document.getElementById('totalStaked').textContent = totalStaked.toLocaleString();
                     document.getElementById('dailyRewards').textContent = l3g3ndsDaily.toLocaleString();
                     document.getElementById('passRewards').textContent = passDaily.toLocaleString();
-                    document.getElementById('totalRewards').textContent = Math.floor(Number(ethers.formatUnits(totalDistributed, 18))).toLocaleString();
+                    
+                    // Суммируем распределенные награды
+                    const totalDistributed = Number(totalRewardsLegend) + Number(totalRewardsPass);
+                    document.getElementById('totalRewards').textContent = Math.floor(totalDistributed).toLocaleString();
 
                     // Обновляем информацию о пулах
                     document.getElementById('legendPoolInfo').textContent = l3g3ndsDaily.toLocaleString() + ' LGND';
@@ -1215,13 +1223,15 @@
                         totalStaked,
                         l3g3ndsDaily,
                         passDaily,
-                        totalDistributed: Math.floor(Number(ethers.formatUnits(totalDistributed, 18))),
+                        totalDistributed: Math.floor(totalDistributed),
                         lastUpdated: Date.now()
                     };
                     localStorage.setItem('l3g3ndary_stats', JSON.stringify(stats));
 
+                    console.log('Stats updated:', stats);
+
                 } catch (error) {
-                    console.error('Error fetching stats:', error);
+                    console.error('Error fetching stats from contracts:', error);
                     // Используем кэшированные данные при ошибке
                     const cached = JSON.parse(localStorage.getItem('l3g3ndary_stats') || '{}');
                     if (cached.totalStaked) {
@@ -1241,6 +1251,8 @@
         // ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
         // ============================
         async function loadUserData() {
+            console.log('Loading user data...', state.isConnected, state.signer);
+            
             if (!state.isConnected || !state.signer) {
                 document.getElementById('stakingInterface').style.display = 'none';
                 document.getElementById('stakingNotConnected').style.display = 'block';
@@ -1277,7 +1289,9 @@
                     state.signer
                 );
 
-                // Получаем балансы NFT
+                console.log('Contracts initialized, fetching data...');
+
+                // Получаем балансы NFT (tokenId = 1 для обоих коллекций)
                 const [legendBalance, passBalance] = await Promise.all([
                     state.contracts.legendNFT.balanceOf(state.walletAddress, 1).catch(() => 0n),
                     state.contracts.passNFT.balanceOf(state.walletAddress, 1).catch(() => 0n)
@@ -1295,16 +1309,25 @@
                     state.contracts.passStaking.getUserStakes(state.walletAddress).catch(() => [])
                 ]);
 
+                console.log('User data fetched:', {
+                    legendBalance: Number(legendBalance),
+                    passBalance: Number(passBalance),
+                    legendPending: ethers.formatUnits(legendPending, 18),
+                    passPending: ethers.formatUnits(passPending, 18),
+                    legendStakes: legendStakes.length,
+                    passStakes: passStakes.length
+                });
+
                 // Обновляем состояние
                 state.stakingData.legend = {
                     balance: Number(legendBalance),
-                    pending: Number(ethers.formatUnits(legendPending, 18)),
+                    pending: parseFloat(ethers.formatUnits(legendPending, 18)),
                     stakes: legendStakes
                 };
 
                 state.stakingData.pass = {
                     balance: Number(passBalance),
-                    pending: Number(ethers.formatUnits(passPending, 18)),
+                    pending: parseFloat(ethers.formatUnits(passPending, 18)),
                     stakes: passStakes
                 };
 
@@ -1313,20 +1336,30 @@
 
             } catch (error) {
                 console.error('Error loading user data:', error);
-                showNotification('Failed to load staking data', 'error');
+                showNotification('Failed to load staking data: ' + error.message, 'error');
             }
         }
 
         function updateUserUI() {
+            console.log('Updating UI with data:', state.stakingData);
+            
             // L3G3NDS
-            document.getElementById('legendBalance').textContent = state.stakingData.legend.balance;
-            document.getElementById('legendPending').textContent = state.stakingData.legend.pending.toFixed(4) + ' LGND';
-            document.getElementById('legendStakes').textContent = state.stakingData.legend.stakes.length;
+            const legendBalanceEl = document.getElementById('legendBalance');
+            const legendPendingEl = document.getElementById('legendPending');
+            const legendStakesEl = document.getElementById('legendStakes');
+            
+            if (legendBalanceEl) legendBalanceEl.textContent = state.stakingData.legend.balance;
+            if (legendPendingEl) legendPendingEl.textContent = state.stakingData.legend.pending.toFixed(4) + ' LGND';
+            if (legendStakesEl) legendStakesEl.textContent = state.stakingData.legend.stakes.length;
             
             // L3G3NDARY Pass
-            document.getElementById('passBalance').textContent = state.stakingData.pass.balance;
-            document.getElementById('passPending').textContent = state.stakingData.pass.pending.toFixed(4) + ' LGND';
-            document.getElementById('passStakes').textContent = state.stakingData.pass.stakes.length;
+            const passBalanceEl = document.getElementById('passBalance');
+            const passPendingEl = document.getElementById('passPending');
+            const passStakesEl = document.getElementById('passStakes');
+            
+            if (passBalanceEl) passBalanceEl.textContent = state.stakingData.pass.balance;
+            if (passPendingEl) passPendingEl.textContent = state.stakingData.pass.pending.toFixed(4) + ' LGND';
+            if (passStakesEl) passStakesEl.textContent = state.stakingData.pass.stakes.length;
         }
 
         // ============================
@@ -1384,6 +1417,7 @@
                 showNotification(`Stake failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('stakeLegendBtn', 'Stake');
+                document.getElementById('legendAmount').value = '';
             }
         }
 
@@ -1439,6 +1473,7 @@
                 showNotification(`Stake failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('stakePassBtn', 'Stake');
+                document.getElementById('passAmount').value = '';
             }
         }
 
@@ -1553,7 +1588,7 @@
                          onclick="performUnstake('${type}', ${index}, this)">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <strong>Amount:</strong> ${stake.amount.toString()}
+                                <strong>Amount:</strong> ${Number(stake.amount)}
                                 <br>
                                 <small style="color: #94A3B8;">Staked: ${date.toLocaleDateString()} (${days} days ago)</small>
                             </div>
@@ -1565,7 +1600,7 @@
             
             stakesHTML += `
                 <div style="text-align: center; margin-top: 1.5rem;">
-                    <button onclick="document.body.removeChild(this.parentNode.parentNode.parentNode)" 
+                    <button onclick="this.parentNode.parentNode.parentNode.remove()" 
                             class="btn btn-small" style="background: var(--dark); border: 1px solid var(--primary);">
                         Cancel
                     </button>
@@ -1597,7 +1632,7 @@
 
                 // Закрываем модальное окно
                 const modal = element.closest('div[style*="position: fixed"]');
-                if (modal) document.body.removeChild(modal);
+                if (modal) modal.remove();
 
                 // Обновляем данные
                 await loadUserData();
@@ -1614,7 +1649,7 @@
                 element.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <strong>Amount:</strong> ${stake.amount.toString()}
+                            <strong>Amount:</strong> ${Number(stake.amount)}
                             <br>
                             <small style="color: #94A3B8;">Staked: ${date.toLocaleDateString()} (${days} days ago)</small>
                         </div>
@@ -1625,7 +1660,7 @@
         }
 
         // ============================
-        // КОШЕЛЕК И СЕТЬ
+        // КОШЕЛЕК И СЕТЬ (исправленная версия)
         // ============================
         async function connectWallet() {
             console.log('🚀 Connecting wallet...');
@@ -1641,6 +1676,7 @@
             button.disabled = true;
             
             try {
+                // Запрашиваем аккаунты
                 const accounts = await window.ethereum.request({ 
                     method: 'eth_requestAccounts' 
                 });
@@ -1649,36 +1685,46 @@
                     throw new Error('No accounts returned');
                 }
                 
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const signer = await provider.getSigner();
                 const address = accounts[0];
                 
-                let network;
-                try {
-                    network = await provider.getNetwork();
-                } catch (err) {
-                    network = { chainId: 1n };
-                }
+                // Создаем провайдер и подписывающего
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
                 
+                // Получаем сеть
+                const network = await provider.getNetwork();
+                
+                // Определяем тип кошелька
                 let walletType = 'MetaMask';
                 if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
                 else if (window.ethereum.isTrust) walletType = 'Trust Wallet';
                 else if (window.ethereum.isRabby) walletType = 'Rabby Wallet';
                 
+                // Обновляем состояние
                 state.isConnected = true;
                 state.walletAddress = address;
                 state.walletType = walletType;
                 state.provider = provider;
                 state.signer = signer;
-                state.chainId = '0x' + network.chainId.toString(16);
+                state.chainId = Number(network.chainId);
                 
+                console.log('✅ Connected:', {
+                    address,
+                    walletType,
+                    chainId: state.chainId
+                });
+                
+                // Обновляем UI
                 updateUI();
                 updateNetworkInfo();
-                await loadUserData();
-                await updateStakingStats();
+                
+                // Загружаем данные
+                await Promise.all([
+                    loadUserData(),
+                    updateStakingStats()
+                ]);
                 
                 showNotification(`✅ ${walletType} connected!`, 'success');
-                console.log('Connected address:', address);
                 
             } catch (error) {
                 console.error('❌ Wallet connection error:', error);
@@ -1688,6 +1734,11 @@
                 } else {
                     showNotification('❌ Connection failed: ' + error.message, 'error');
                 }
+                
+                // Сбрасываем состояние при ошибке
+                state.isConnected = false;
+                state.walletAddress = null;
+                updateUI();
             } finally {
                 button.innerHTML = originalText;
                 button.disabled = false;
@@ -1695,6 +1746,9 @@
         }
 
         function disconnectWallet() {
+            console.log('Disconnecting wallet...');
+            
+            // Сбрасываем состояние
             state.isConnected = false;
             state.walletAddress = null;
             state.walletType = null;
@@ -1702,6 +1756,13 @@
             state.signer = null;
             state.chainId = null;
             
+            // Сбрасываем данные стейкинга
+            state.stakingData = {
+                legend: { balance: 0, pending: 0, stakes: [] },
+                pass: { balance: 0, pending: 0, stakes: [] }
+            };
+            
+            // Обновляем UI
             updateUI();
             updateNetworkInfo();
             
@@ -1709,23 +1770,36 @@
         }
 
         function updateUI() {
+            console.log('Updating UI, connected:', state.isConnected);
+            
             const connectWalletBtn = document.getElementById('connectWalletBtn');
             const goToStakingBtn = document.getElementById('goToStakingBtn');
-            const networkInfo = document.getElementById('networkInfo');
+            const networkInfoDiv = document.getElementById('networkInfo');
             const stakingInterface = document.getElementById('stakingInterface');
             const stakingNotConnected = document.getElementById('stakingNotConnected');
             
-            if (state.isConnected) {
-                // Обновляем кнопку подключения - теперь она будет Disconnect
-                connectWalletBtn.textContent = '✅ Connected';
-                connectWalletBtn.disabled = true; // Делаем неактивной
+            if (state.isConnected && state.walletAddress) {
+                // Обновляем кнопку подключения
+                if (connectWalletBtn) {
+                    connectWalletBtn.innerHTML = '✅ Connected';
+                    connectWalletBtn.disabled = false; // Оставляем активной для отключения
+                    connectWalletBtn.onclick = disconnectWallet;
+                }
                 
                 // Обновляем кнопку стейкинга
-                goToStakingBtn.textContent = '🚀 Stake NFTs';
+                if (goToStakingBtn) {
+                    goToStakingBtn.textContent = '🚀 Stake NFTs';
+                    goToStakingBtn.onclick = function() {
+                        document.querySelector('.staking-section').scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    };
+                }
                 
                 // Показываем информацию о кошельке в хедере
-                if (networkInfo) {
-                    networkInfo.innerHTML = `
+                if (networkInfoDiv) {
+                    networkInfoDiv.innerHTML = `
                         <div class="wallet-info">
                             <span>👛</span>
                             <span class="wallet-address">${formatAddress(state.walletAddress)}</span>
@@ -1734,36 +1808,56 @@
                     `;
                 }
                 
+                // Показываем интерфейс стейкинга
                 if (stakingInterface) stakingInterface.style.display = 'block';
                 if (stakingNotConnected) stakingNotConnected.style.display = 'none';
                 
             } else {
-                // Когда не подключен - показываем Connect Wallet
-                connectWalletBtn.textContent = '🔗 Connect Wallet';
-                connectWalletBtn.disabled = false; // Активируем
-                goToStakingBtn.textContent = '🔒 Connect Wallet First';
+                // Когда не подключен
+                if (connectWalletBtn) {
+                    connectWalletBtn.innerHTML = '🔗 Connect Wallet';
+                    connectWalletBtn.disabled = false;
+                    connectWalletBtn.onclick = connectWallet;
+                }
                 
-                if (networkInfo) networkInfo.innerHTML = '';
+                if (goToStakingBtn) {
+                    goToStakingBtn.textContent = '🔒 Connect Wallet First';
+                    goToStakingBtn.onclick = connectWallet;
+                }
+                
+                if (networkInfoDiv) networkInfoDiv.innerHTML = '';
                 if (stakingInterface) stakingInterface.style.display = 'none';
                 if (stakingNotConnected) stakingNotConnected.style.display = 'block';
             }
         }
 
         function updateNetworkInfo() {
-            const networkBadge = document.getElementById('networkBadge');
-            if (!networkBadge) return;
-            
-            if (state.chainId) {
-                const isEthereum = state.chainId === '0x1';
-                const networkName = isEthereum ? 'Ethereum Mainnet' : `Chain: ${state.chainId}`;
+            // Проверяем сеть и показываем предупреждение если не Ethereum Mainnet
+            if (state.chainId && state.chainId !== 1) {
+                const networkWarning = document.createElement('div');
+                networkWarning.className = 'domain-verification';
+                networkWarning.style.background = 'rgba(245, 158, 11, 0.1)';
+                networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                networkWarning.style.marginTop = '1rem';
+                networkWarning.innerHTML = `
+                    <span style="color: #F59E0B;">⚠️</span>
+                    <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
+                    <br>
+                    <span style="font-size: 0.9rem;">
+                        Please switch to Ethereum Mainnet
+                    </span>
+                `;
                 
-                networkBadge.textContent = networkName;
-                networkBadge.style.background = isEthereum ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
-                networkBadge.style.color = isEthereum ? '#10B981' : '#F59E0B';
+                // Добавляем предупреждение после доменной проверки
+                const domainVerification = document.querySelector('.domain-verification');
+                if (domainVerification && !document.querySelector('.network-warning')) {
+                    networkWarning.classList.add('network-warning');
+                    domainVerification.parentNode.insertBefore(networkWarning, domainVerification.nextSibling);
+                }
             } else {
-                networkBadge.textContent = 'Not Connected';
-                networkBadge.style.background = 'rgba(148, 163, 184, 0.2)';
-                networkBadge.style.color = '#94A3B8';
+                // Удаляем предупреждение если оно есть
+                const warning = document.querySelector('.network-warning');
+                if (warning) warning.remove();
             }
         }
 
@@ -1785,13 +1879,12 @@
                 if (!state.isConnected) {
                     showNotification('Please connect your wallet first', 'warning');
                     connectWallet();
-                    return;
+                } else {
+                    document.querySelector('.staking-section').scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
-                
-                document.querySelector('.staking-section').scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
             };
             
             // Проверяем безопасность домена
@@ -1811,28 +1904,23 @@
                         const provider = new ethers.BrowserProvider(window.ethereum);
                         const signer = await provider.getSigner();
                         const address = accounts[0];
-                        
-                        let network;
-                        try {
-                            network = await provider.getNetwork();
-                        } catch (err) {
-                            network = { chainId: 1n };
-                        }
-                        
-                        let walletType = 'MetaMask';
-                        if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
+                        const network = await provider.getNetwork();
                         
                         state.isConnected = true;
                         state.walletAddress = address;
-                        state.walletType = walletType;
+                        state.walletType = 'MetaMask';
                         state.provider = provider;
                         state.signer = signer;
-                        state.chainId = '0x' + network.chainId.toString(16);
+                        state.chainId = Number(network.chainId);
                         
                         updateUI();
                         updateNetworkInfo();
-                        await loadUserData();
-                        await updateStakingStats();
+                        
+                        // Загружаем данные пользователя
+                        await Promise.all([
+                            loadUserData(),
+                            updateStakingStats()
+                        ]);
                         
                         console.log('✅ Auto-connected to:', address);
                     }
@@ -1853,6 +1941,7 @@
         function setupEventListeners() {
             if (window.ethereum) {
                 window.ethereum.on('accountsChanged', async (accounts) => {
+                    console.log('Accounts changed:', accounts);
                     if (accounts.length === 0) {
                         disconnectWallet();
                     } else {
@@ -1865,11 +1954,19 @@
                     }
                 });
                 
-                window.ethereum.on('chainChanged', () => {
-                    window.location.reload();
+                window.ethereum.on('chainChanged', (chainId) => {
+                    console.log('Chain changed:', chainId);
+                    state.chainId = parseInt(chainId, 16);
+                    updateNetworkInfo();
+                    // Перезагружаем данные
+                    if (state.isConnected) {
+                        loadUserData();
+                        updateStakingStats();
+                    }
                 });
                 
                 window.ethereum.on('disconnect', () => {
+                    console.log('Wallet disconnected');
                     disconnectWallet();
                 });
             }
@@ -1879,13 +1976,6 @@
             const currentDomain = window.location.hostname;
             const verifiedDomain = 'l3g3ndary.com';
             const isSecure = window.location.protocol === 'https:';
-            
-            // Обновляем статус SSL
-            const sslStatus = document.getElementById('sslStatus');
-            if (sslStatus) {
-                sslStatus.textContent = isSecure ? 'Secure' : 'Not Secure';
-                sslStatus.style.color = isSecure ? '#10B981' : '#EF4444';
-            }
             
             // Проверяем домен
             const domainValid = currentDomain === verifiedDomain || 
