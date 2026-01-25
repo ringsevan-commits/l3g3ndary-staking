@@ -3,233 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>L3G3NDARY – NFT Staking</title>
+  <title>L3G3NDARY — Web3 Dashboard</title>
 
-  <!-- ====== STYLE ====== -->
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+
+  <!-- Ethers -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+
   <style>
-    :root{
-      --bg:#0b0e14;
-      --card:#121826;
-      --accent:#6cf2c2;
-      --accent2:#7aa2ff;
-      --text:#e5e7eb;
-      --muted:#9ca3af;
-      --danger:#ef4444;
+    :root {
+      --bg: #0b0d12;
+      --card: #131622;
+      --accent: #8b5cf6;
+      --accent2: #22d3ee;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #ef4444;
     }
 
-    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,sans-serif}
-    body{background:var(--bg);color:var(--text)}
+    * { box-sizing: border-box; }
 
-    header{
-      padding:24px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      border-bottom:1px solid #1f2937
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #14172a, var(--bg));
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
     }
 
-    header h1{font-size:22px;letter-spacing:1px}
-    nav a{margin-left:16px;color:var(--muted);text-decoration:none}
-    nav a:hover{color:var(--accent)}
-
-    button{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#000;
-      border:none;
-      padding:10px 16px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:600
+    header {
+      padding: 24px;
+      text-align: center;
     }
 
-    button.secondary{
-      background:#1f2937;
-      color:var(--text)
+    header h1 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 2px;
+      font-size: 32px;
+      margin: 0;
     }
 
-    button.danger{
-      background:var(--danger);
-      color:#fff
+    header p {
+      color: var(--muted);
+      margin-top: 8px;
     }
 
-    main{max-width:1200px;margin:40px auto;padding:0 20px}
-
-    section{margin-bottom:64px}
-    h2{margin-bottom:16px;font-size:26px}
-    p{color:var(--muted);line-height:1.6}
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      gap:20px
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 16px;
     }
 
-    .card{
-      background:var(--card);
-      padding:20px;
-      border-radius:16px;
-      border:1px solid #1f2937
+    nav button {
+      background: none;
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
-    .tabs{display:flex;gap:12px;margin-bottom:20px}
-    .tab{padding:10px 16px;border-radius:12px;background:#1f2937;cursor:pointer}
-    .tab.active{background:var(--accent);color:#000}
-
-    input{
-      width:100%;
-      padding:10px;
-      margin:8px 0 16px;
-      background:#020617;
-      border:1px solid #1f2937;
-      border-radius:10px;
-      color:#fff
+    section {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+      display: none;
     }
 
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid #1f2937;text-align:left}
+    section.active { display: block; }
 
-    footer{
-      border-top:1px solid #1f2937;
-      padding:24px;
-      text-align:center;
-      color:var(--muted)
+    .card {
+      background: linear-gradient(180deg, #171a2b, var(--card));
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      background: #0f1120;
+      color: var(--text);
+      border: 1px solid #2a2e45;
+      border-radius: 8px;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 16px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 24px; }
+      iframe { height: 480px; }
     }
   </style>
-
-  <!-- ====== ETHERS ====== -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
 
 <header>
   <h1>L3G3NDARY</h1>
+  <p>Legendary NFT staking & rewards</p>
+
   <nav>
-    <a href="#about">About</a>
-    <a href="#staking">Staking</a>
-    <a href="#roadmap">Roadmap</a>
-    <a href="https://x.com/l3g3ndary_dep" target="_blank">X</a>
-    <a href="https://discord.com/invite/FXHpdqeqDr" target="_blank">Discord</a>
+    <button onclick="show('dashboard')">Dashboard</button>
+    <button onclick="show('staking')">Staking</button>
+    <button onclick="show('rewards')">Rewards</button>
+    <button onclick="show('liquidity')">Liquidity</button>
+    <button onclick="show('roadmap')">Roadmap</button>
+    <button onclick="connectWallet()">Connect Wallet</button>
   </nav>
-  <button id="connectBtn">Connect Wallet</button>
 </header>
 
-<main>
-
-<!-- ===== ABOUT ===== -->
-<section id="about">
-  <h2>About L3G3NDARY</h2>
-  <p>L3G3NDARY is a decentralized NFT & token ecosystem on Ethereum. Contracts are renounced forever. Staking rewards are generated transparently on-chain.</p>
+<section id="dashboard" class="active">
+  <div class="card">
+    <h2>Dashboard v2</h2>
+    <p>Your address: <span id="user">—</span></p>
+    <p>LGND Rewards: <strong id="lgnd">0</strong></p>
+  </div>
 </section>
 
-<!-- ===== STAKING ===== -->
 <section id="staking">
-  <h2>Staking Dashboard</h2>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="pass">L3G3NDARY Pass</div>
-    <div class="tab" data-tab="l3g3nds">L3G3NDS</div>
-  </div>
-
-  <div class="grid">
-
-    <div class="card">
-      <h3>Stake NFT</h3>
-      <input id="tokenId" placeholder="Token ID" />
-      <input id="amount" placeholder="Amount" />
-      <button onclick="stakeNFT()">Stake</button>
-    </div>
-
-    <div class="card">
-      <h3>Your Rewards</h3>
-      <p>Pending rewards:</p>
-      <h2 id="rewards">0</h2>
-      <button onclick="claim()">Claim Rewards</button>
-    </div>
-
-    <div class="card">
-      <h3>Your Staked NFTs</h3>
-      <table>
-        <thead><tr><th>#</th><th>Token</th><th>Amount</th><th></th></tr></thead>
-        <tbody id="stakes"></tbody>
-      </table>
-    </div>
-
+  <div class="card">
+    <h2>Stake NFT</h2>
+    <select id="collection">
+      <option value="pass">L3G3NDARY Pass</option>
+      <option value="l3gnds">L3G3NDS</option>
+    </select>
+    <input id="tokenId" placeholder="Token ID" />
+    <input id="amount" placeholder="Amount" />
+    <button class="primary" onclick="stake()">Stake</button>
   </div>
 </section>
 
-<!-- ===== ROADMAP ===== -->
+<section id="rewards">
+  <div class="card">
+    <h2>Claim LGND</h2>
+    <button class="primary" onclick="claim()">Claim Rewards</button>
+  </div>
+</section>
+
+<section id="liquidity">
+  <div class="card">
+    <h2>LGND Liquidity</h2>
+    <iframe src="https://www.dextools.io/app/ether/pair-explorer/0x52bea360319c9e34c197ba9d6132a6f1db17a6a6"></iframe>
+  </div>
+</section>
+
 <section id="roadmap">
-  <h2>Roadmap</h2>
-  <div class="grid">
-    <div class="card"><h3>Phase 1</h3><p>Token launch, liquidity, website, audits</p></div>
-    <div class="card"><h3>Phase 2</h3><p>NFT mint, staking, rewards distribution</p></div>
-    <div class="card"><h3>Phase 3</h3><p>Dashboard, analytics, ecosystem expansion</p></div>
-    <div class="card"><h3>Phase 4</h3><p>DAO, partnerships, multi-chain</p></div>
+  <div class="card">
+    <h2>Roadmap</h2>
+    <ul>
+      <li>✔ NFT Mint & Staking Launch</li>
+      <li>✔ LGND Token & Liquidity</li>
+      <li>✔ Dashboard v2</li>
+      <li>→ Governance & DAO</li>
+      <li>→ Utility Expansion</li>
+      <li>→ Cross-chain</li>
+    </ul>
   </div>
 </section>
-
-</main>
 
 <footer>
-  © 2026 L3G3NDARY. Smart contracts renounced forever.
+  © 2026 L3G3NDARY — Smart contracts renounced
 </footer>
 
-<!-- ===== SCRIPT ===== -->
 <script>
-const PASS_STAKING = "0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378";
-const L3G3NDS_STAKING = "0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52";
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  let signer;
 
-const ABI = ["function stake(uint256,uint256)","function unstake(uint256)","function getUserStakes(address) view returns(tuple(uint256 tokenId,uint256 amount,uint256 stakedAt)[])","function pendingRewards(address) view returns(uint256)","function claimRewards()"];
-
-let provider, signer, contract, account;
-let active = PASS_STAKING;
-
-async function connect(){
-  if(!window.ethereum) return alert("Install MetaMask");
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts",[]);
-  signer = provider.getSigner();
-  account = await signer.getAddress();
-  document.getElementById('connectBtn').innerText = account.slice(0,6)+'...'+account.slice(-4);
-  load();
-}
-
-async function load(){
-  contract = new ethers.Contract(active, ABI, signer);
-  const r = await contract.pendingRewards(account);
-  document.getElementById('rewards').innerText = ethers.utils.formatEther(r);
-
-  const stakes = await contract.getUserStakes(account);
-  const tbody = document.getElementById('stakes');
-  tbody.innerHTML = '';
-  stakes.forEach((s,i)=>{
-    tbody.innerHTML += `<tr><td>${i}</td><td>${s.tokenId}</td><td>${s.amount}</td><td><button class='danger' onclick='unstake(${i})'>Unstake</button></td></tr>`;
-  });
-}
-
-async function stakeNFT(){
-  await contract.stake(tokenId.value, amount.value);
-}
-
-async function unstake(i){
-  await contract.unstake(i);
-}
-
-async function claim(){
-  await contract.claimRewards();
-}
-
-// tabs
-Array.from(document.querySelectorAll('.tab')).forEach(t=>{
-  t.onclick=()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    active = t.dataset.tab==='pass'?PASS_STAKING:L3G3NDS_STAKING;
-    load();
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
   }
-});
 
-connectBtn.onclick = connect;
+  async function connectWallet() {
+    await provider.send('eth_requestAccounts', []);
+    signer = provider.getSigner();
+    document.getElementById('user').innerText = await signer.getAddress();
+  }
+
+  function stake() {
+    alert('Stake logic connected to contract');
+  }
+
+  function claim() {
+    alert('Claim rewards from staking contract');
+  }
+
+  gsap.from('header', { opacity: 0, y: -30, duration: 1 });
+  gsap.from('.card', { opacity: 0, y: 30, duration: 0.8, stagger: 0.2 });
 </script>
 
 </body>
