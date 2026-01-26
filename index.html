@@ -3,2097 +3,2252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L3G3NDARY | Official Website</title>
-    
-    <!-- Security Headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
-    
-    <!-- Ethers.js -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
-    
+    <title>L3G3NDARY - Official NFT Staking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
     <style>
+        /* ОСНОВНЫЕ СТИЛИ */
         :root {
-            --primary: #8B5CF6;
-            --primary-dark: #7C3AED;
-            --secondary: #10B981;
-            --accent: #F59E0B;
-            --danger: #EF4444;
-            --dark: #0F172A;
-            --light: #F8FAFC;
+            --gold-primary: #f0ac12;
+            --gold-secondary: #f5c63d;
+            --gold-dark: #ba6d0a;
+            --gold-light: #f9e06f;
+            --bg-dark: #050507;
+            --bg-darker: #030304;
+            --bg-light: #1A1A24;
+            --text-white: #ffffff;
+            --text-gray: #a0a0b0;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-            color: var(--light);
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-darker);
+            color: var(--text-white);
             line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(240, 172, 18, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(240, 172, 18, 0.03) 0%, transparent 20%);
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
-        
-        /* Header */
-        header {
-            background: rgba(15, 23, 42, 0.95);
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        /* НАВИГАЦИЯ */
+        .navbar {
+            background: rgba(5, 5, 7, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(240, 172, 18, 0.2);
             position: sticky;
             top: 0;
             z-index: 1000;
-            backdrop-filter: blur(10px);
+            padding: 15px 0;
         }
-        
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .logo {
-            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--bg-darker);
             font-weight: bold;
-            color: var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 70%
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0%, 100% { transform: rotate(45deg) translateX(-100%); }
+            50% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        .logo-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .logo-text .subtitle {
+            font-size: 12px;
+            color: var(--text-gray);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-link {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            padding: 8px 0;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--gold-primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold-primary), var(--gold-secondary));
+            border-radius: 2px;
+        }
+
+        .discord-btn {
+            background: #5865F2;
+            color: white !important;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.4);
+        }
+
+        .connect-wallet-btn {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: var(--bg-darker);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(240, 172, 18, 0.3);
         }
-        
-        /* Hero */
+
+        .connect-wallet-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(240, 172, 18, 0.4);
+        }
+
+        .connect-wallet-btn.connected {
+            background: linear-gradient(135deg, var(--success), #34d399);
+            color: white;
+        }
+
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(240, 172, 18, 0.2);
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--gold-light);
+        }
+
+        .wallet-balance {
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+
+        /* HERO СЕКЦИЯ */
         .hero {
+            padding: 100px 0;
             text-align: center;
-            padding: 6rem 0 4rem;
-            background: linear-gradient(rgba(139, 92, 246, 0.1), transparent);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .hero h1 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(240, 172, 18, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary), var(--gold-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 1.1;
         }
-        
-        /* Security Status */
-        .security-status {
+
+        .hero-subtitle {
+            font-size: 22px;
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto 50px;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(240, 172, 18, 0.1);
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(240, 172, 18, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 42px;
+            color: var(--gold-primary);
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .stat-card p {
+            color: var(--text-gray);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ДАШБОРД */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-align: center;
+            color: var(--text-white);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+            border-radius: 3px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(26, 26, 36, 0.8), rgba(10, 10, 15, 0.9));
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(240, 172, 18, 0.15);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(240, 172, 18, 0.1);
+            border-color: rgba(240, 172, 18, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-header i {
+            font-size: 24px;
+            color: var(--gold-primary);
+            background: rgba(240, 172, 18, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        /* РАСПРЕДЕЛЕНИЕ ТОКЕНОВ */
+        .distribution {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s;
+        }
+
+        .dist-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dist-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .dist-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+        }
+
+        .dist-name {
+            color: var(--text-white);
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .dist-value {
+            color: var(--gold-primary);
+            font-weight: 700;
+            font-size: 18px;
+            text-align: right;
+            min-width: 120px;
+        }
+
+        .dist-percentage {
+            color: var(--text-gray);
+            font-size: 14px;
+            text-align: right;
+            min-width: 60px;
+        }
+
+        /* АДРЕСА КОНТРАКТОВ */
+        .address-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .address-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .address-label {
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .address-value {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            color: var(--gold-light);
+            word-break: break-all;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(240, 172, 18, 0.1);
+        }
+
+        .copy-btn {
+            background: rgba(240, 172, 18, 0.1);
+            border: 1px solid rgba(240, 172, 18, 0.2);
+            color: var(--gold-primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(240, 172, 18, 0.2);
+        }
+
+        /* СТЕЙКИНГ */
+        .staking-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .staking-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(240, 172, 18, 0.2);
+            color: var(--text-gray);
+            padding: 18px 36px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .staking-tab:hover {
+            background: rgba(240, 172, 18, 0.1);
+            color: var(--gold-light);
+        }
+
+        .staking-tab.active {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: var(--bg-darker);
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(240, 172, 18, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .staking-card {
+            background: linear-gradient(135deg, rgba(26, 26, 36, 0.9), rgba(10, 10, 15, 0.95));
+            border-radius: 25px;
+            padding: 40px;
+            border: 1px solid rgba(240, 172, 18, 0.2);
+            max-width: 800px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .staking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(240, 172, 18, 0.1);
+        }
+
+        .staking-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .staking-title i {
+            font-size: 32px;
+            color: var(--gold-primary);
+            background: rgba(240, 172, 18, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .staking-title h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .staking-title p {
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .apr-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(34, 197, 94, 0.2));
+            color: var(--success);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 800;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .staking-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .staking-stat {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(240, 172, 18, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .staking-stat:hover {
+            transform: translateY(-3px);
+            border-color: rgba(240, 172, 18, 0.3);
+        }
+
+        .staking-stat h4 {
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .staking-stat .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--gold-primary);
+            margin: 5px 0;
+        }
+
+        .staking-stat .subvalue {
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+
+        .staking-form {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(240, 172, 18, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(240, 172, 18, 0.2);
+            border-radius: 12px;
+            padding: 18px;
+            color: var(--text-white);
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px rgba(240, 172, 18, 0.1);
+        }
+
+        .input-with-max {
+            position: relative;
+        }
+
+        .max-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(240, 172, 18, 0.1);
+            border: 1px solid rgba(240, 172, 18, 0.2);
+            color: var(--gold-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .max-btn:hover {
+            background: rgba(240, 172, 18, 0.2);
+        }
+
+        .form-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: var(--bg-darker);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(240, 172, 18, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(240, 172, 18, 0.1);
+            color: var(--gold-primary);
+            border: 1px solid rgba(240, 172, 18, 0.3);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(240, 172, 18, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ROADMAP */
+        .roadmap {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, var(--gold-primary), transparent);
+        }
+
+        .roadmap-phase {
+            position: relative;
+            margin-bottom: 60px;
+            width: calc(50% - 40px);
+        }
+
+        .roadmap-phase:nth-child(odd) {
+            margin-left: auto;
+            padding-left: 60px;
+        }
+
+        .roadmap-phase:nth-child(even) {
+            margin-right: auto;
+            padding-right: 60px;
+            text-align: right;
+        }
+
+        .phase-dot {
+            position: absolute;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-darker);
+            border: 4px solid;
+            z-index: 2;
+        }
+
+        .roadmap-phase:nth-child(odd) .phase-dot {
+            left: -12px;
+        }
+
+        .roadmap-phase:nth-child(even) .phase-dot {
+            right: -12px;
+        }
+
+        .phase-dot.completed {
+            border-color: var(--success);
+            background: var(--success);
+        }
+
+        .phase-dot.current {
+            border-color: var(--gold-primary);
+            background: var(--gold-primary);
+            animation: pulse 2s infinite;
+        }
+
+        .phase-dot.upcoming {
+            border-color: var(--text-gray);
+        }
+
+        .phase-content {
+            background: linear-gradient(135deg, rgba(26, 26, 36, 0.8), rgba(10, 10, 15, 0.9));
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid;
+            backdrop-filter: blur(10px);
+        }
+
+        .roadmap-phase.completed .phase-content {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .roadmap-phase.current .phase-content {
+            border-color: rgba(240, 172, 18, 0.3);
+            box-shadow: 0 10px 30px rgba(240, 172, 18, 0.1);
+        }
+
+        .roadmap-phase.upcoming .phase-content {
+            border-color: rgba(160, 160, 176, 0.2);
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .phase-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .phase-title i {
+            font-size: 20px;
+        }
+
+        .roadmap-phase.completed .phase-title i {
+            color: var(--success);
+        }
+
+        .roadmap-phase.current .phase-title i {
+            color: var(--gold-primary);
+        }
+
+        .roadmap-phase.upcoming .phase-title i {
+            color: var(--text-gray);
+        }
+
+        .phase-title h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .phase-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .roadmap-phase.completed .phase-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .roadmap-phase.current .phase-badge {
+            background: rgba(240, 172, 18, 0.2);
+            color: var(--gold-primary);
+        }
+
+        .roadmap-phase.upcoming .phase-badge {
+            background: rgba(160, 160, 176, 0.1);
+            color: var(--text-gray);
+        }
+
+        .phase-goal {
+            color: var(--gold-light);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .phase-tasks {
+            list-style: none;
+        }
+
+        .phase-tasks li {
+            padding: 10px 0;
+            color: var(--text-gray);
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .roadmap-phase:nth-child(even) .phase-tasks li {
+            padding-left: 0;
+            padding-right: 25px;
+            text-align: right;
+        }
+
+        .phase-tasks li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--gold-primary);
+            font-weight: bold;
+        }
+
+        .roadmap-phase:nth-child(even) .phase-tasks li::before {
+            left: auto;
+            right: 0;
+        }
+
+        .roadmap-phase.completed .phase-tasks li::before {
+            color: var(--success);
+        }
+
+        /* ФУТЕР */
+        .footer {
+            background: rgba(5, 5, 7, 0.95);
+            border-top: 1px solid rgba(240, 172, 18, 0.2);
+            padding: 60px 0 30px;
+            margin-top: 80px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h4 {
+            color: var(--gold-primary);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-section h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold-primary), transparent);
+        }
+
+        .footer-section a {
+            display: block;
+            color: var(--text-gray);
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--gold-primary);
+            transform: translateX(5px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-gray);
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background: rgba(240, 172, 18, 0.1);
+            color: var(--gold-primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        .security-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.2);
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin: 1rem 0;
-        }
-        
-        /* Domain Verification */
-        .domain-verification {
-            text-align: center;
-            padding: 1rem;
-            margin: 1rem 0;
             background: rgba(16, 185, 129, 0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
         }
-        
-        /* Notification */
+
+        /* МОДАЛЬНЫЕ ОКНА */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(10, 10, 15, 0.95), rgba(26, 26, 36, 0.98));
+            border-radius: 25px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(240, 172, 18, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--gold-primary);
+        }
+
+        .wallet-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .wallet-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(240, 172, 18, 0.2);
+            color: var(--text-white);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .wallet-option:hover {
+            background: rgba(240, 172, 18, 0.1);
+            border-color: rgba(240, 172, 18, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .wallet-option i {
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            background: rgba(240, 172, 18, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* УВЕДОМЛЕНИЯ */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 999999;
-            animation: slideIn 0.3s ease;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            color: var(--bg-darker);
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-weight: 700;
+            z-index: 3000;
+            box-shadow: 0 10px 30px rgba(240, 172, 18, 0.3);
+            animation: slideInRight 0.3s ease, slideOutRight 0.3s ease 2.7s;
             max-width: 400px;
-            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        
-        @keyframes slideIn {
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success), #34d399);
+            color: white;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--error), #f87171);
+            color: white;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        
-        .notification-success {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
-        
-        .notification-error {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
-        }
-        
-        .notification-warning {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9));
-        }
-        
-        .notification-info {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(29, 78, 216, 0.9));
-        }
-        
-        /* Loading Spinner */
-        .spinner {
+
+        /* ЗАГРУЗКИ */
+        .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top-color: white;
+            border-top-color: var(--gold-primary);
             animation: spin 1s ease-in-out infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        /* Buttons */
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 56px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .staking-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-actions {
+                grid-template-columns: 1fr;
+            }
         }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
-        }
-        
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .btn-secondary:hover:not(:disabled) {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Main Content Sections */
-        .section {
-            padding: 4rem 0;
-        }
-        
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: var(--light);
-        }
-        
-        /* Links */
-        .links {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            padding: 2rem 0;
-        }
-        
-        .link-btn {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            text-decoration: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-        }
-        
-        .link-btn:hover {
-            background: rgba(139, 92, 246, 0.3);
-            transform: translateY(-2px);
-            border-color: var(--primary);
-        }
-        
-        /* Contract Address */
-        .contract-address {
-            font-family: 'Monaco', 'Courier New', monospace;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            word-break: break-all;
-            margin: 0.5rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #94A3B8;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .contract-address:hover {
-            background: rgba(0, 0, 0, 0.4);
-            border-color: var(--primary);
-        }
-        
-        /* Staking Section */
-        .staking-section {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1));
-            border-radius: 20px;
-            padding: 3rem;
-            margin: 3rem 0;
-        }
-        
-        /* Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .stat-item {
-            text-align: center;
-            padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            transition: all 0.3s;
-        }
-        
-        .stat-item:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-label {
-            color: #94A3B8;
-            font-size: 0.9rem;
-        }
-        
-        /* Staking Grid */
-        .staking-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .staking-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 2px solid rgba(139, 92, 246, 0.2);
-            transition: all 0.3s;
-        }
-        
-        .staking-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
-        }
-        
-        .staking-info {
-            margin: 1.5rem 0;
-            padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .staking-controls {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        /* Inputs */
-        input {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.3);
-            color: white;
-            font-size: 1rem;
-            flex: 1;
-            min-width: 120px;
-        }
-        
-        input::placeholder {
-            color: #94A3B8;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-        }
-        
-        /* Contract List */
-        .contract-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        
-        .contract-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-        }
-        
-        .contract-item:hover {
-            background: rgba(0, 0, 0, 0.3);
-            border-color: var(--primary);
-        }
-        
-        .contract-label {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        /* Security Badge */
-        .security-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(16, 185, 129, 0.2);
-            color: #10B981;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .security-badge.warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: #F59E0B;
-            border-color: rgba(245, 158, 11, 0.3);
-        }
-        
-        .security-badge.danger {
-            background: rgba(239, 68, 68, 0.2);
-            color: #EF4444;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        
-        /* Tokenomics */
-        .tokenomics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .tokenomics-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 2rem;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-        
-        .tokenomics-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .tokenomics-item:last-child {
-            border-bottom: none;
-        }
-        
-        .tokenomics-percentage {
-            background: var(--primary);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-        
-        /* Progress Bar */
-        .progress-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 20px;
-            margin: 1rem 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-        
-        /* Wallet Info */
-        .wallet-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(139, 92, 246, 0.2);
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-        
-        .wallet-address {
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .disconnect-btn {
-            background: rgba(239, 68, 68, 0.2);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .disconnect-btn:hover {
-            background: rgba(239, 68, 68, 0.3);
-            transform: translateY(-1px);
-        }
-        
-        /* Features Grid */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 2.5rem;
-            border: 2px solid rgba(139, 92, 246, 0.2);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
-        }
-        
-        .feature-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 4rem 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #94A3B8;
-            background: rgba(0, 0, 0, 0.3);
-            margin-top: 4rem;
-        }
-        
-        /* Responsive */
+
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .section-title { font-size: 2rem; }
-            .features-grid, .staking-grid { grid-template-columns: 1fr; }
-            .links { flex-direction: column; align-items: center; }
-            .staking-section { padding: 2rem; }
-            .contract-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            .staking-controls { flex-direction: column; }
-            input { width: 100%; }
+            .navbar .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .hero-title {
+                font-size: 42px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+                padding: 0 20px;
+            }
+            
+            .hero-stats {
+                gap: 20px;
+            }
+            
+            .stat-card {
+                min-width: 150px;
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 36px;
+            }
+            
+            .staking-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .staking-tab {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .staking-card {
+                padding: 25px;
+            }
+            
+            .staking-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .roadmap::before {
+                left: 30px;
+            }
+            
+            .roadmap-phase {
+                width: calc(100% - 60px);
+                margin-left: 60px !important;
+                padding-left: 30px !important;
+                padding-right: 0 !important;
+                text-align: left !important;
+            }
+            
+            .roadmap-phase:nth-child(odd) .phase-dot,
+            .roadmap-phase:nth-child(even) .phase-dot {
+                left: -42px;
+                right: auto;
+            }
+            
+            .roadmap-phase:nth-child(even) .phase-tasks li {
+                padding-left: 25px;
+                padding-right: 0;
+                text-align: left;
+            }
+            
+            .roadmap-phase:nth-child(even) .phase-tasks li::before {
+                left: 0;
+                right: auto;
+            }
+            
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-        
-        /* Utility */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .mt-1 { margin-top: 1rem; }
-        .mt-2 { margin-top: 2rem; }
-        .mb-1 { margin-bottom: 1rem; }
-        .mb-2 { margin-bottom: 2rem; }
-        
-        /* X Icon */
-        .x-icon {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            font-weight: bold;
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 32px;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+            
+            .staking-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 25px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="container">
             <div class="logo">
-                <span>🛡️</span>
-                <span>L3G3NDARY</span>
+                <div class="logo-icon">L</div>
+                <div class="logo-text">
+                    <h1>L3G3NDARY</h1>
+                    <div class="subtitle">NFT STAKING PLATFORM</div>
+                </div>
             </div>
-            <div id="networkInfo"></div>
-        </div>
-    </header>
-
-    <!-- Domain Verification -->
-    <div class="domain-verification">
-        <span style="color: #10B981;">✅</span>
-        <span>Official Website: <strong id="verifiedDomain">l3g3ndary.com</strong></span>
-        <span style="margin-left: 1rem; color: #94A3B8; font-size: 0.9rem;">
-            Security: <span id="securityStatus" class="security-status">
-                <span>✅ Verified</span>
-            </span>
-        </span>
-    </div>
-
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            <h1>L3G3NDARY</h1>
             
-            <div class="links">
-                <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>🖼️</span>
-                    <span>L3G3NDS NFTs</span>
+            <div class="nav-links">
+                <a href="#dashboard" class="nav-link active">Dashboard</a>
+                <a href="#staking" class="nav-link">Staking</a>
+                <a href="#roadmap" class="nav-link">Roadmap</a>
+                <a href="https://discord.gg/FXHpdqeqDr" target="_blank" class="discord-btn">
+                    <i class="fab fa-discord"></i> Discord
                 </a>
-                <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>🎫</span>
-                    <span>L3G3NDARY Pass</span>
-                </a>
-                <button id="connectWalletBtn" class="btn btn-primary">
-                    🔗 Connect Wallet
+                <button class="connect-wallet-btn" id="connectWalletBtn">
+                    <i class="fas fa-wallet"></i> <span id="walletBtnText">Connect Wallet</span>
                 </button>
             </div>
-        </section>
+        </div>
+    </nav>
 
-        <!-- Security & Transparency Section -->
-        <section class="section">
-            <h2 class="section-title">🔒 Security & Transparency</h2>
-            <div class="tokenomics-grid">
-                <div class="tokenomics-card">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 10px;">
-                        <span>✅</span>
-                        <span>Renounced Contracts</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div class="tokenomics-item">
-                            <span>LGND Token Contract</span>
-                            <span class="security-badge">Renounced Forever</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>L3G3NDARY Pass Staking</span>
-                            <span class="security-badge">Renounced</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>L3G3NDS Staking</span>
-                            <span class="security-badge">Renounced</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>Liquidity Pool</span>
-                            <span class="security-badge">LOCKED</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tokenomics-card">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 10px;">
-                        <span>💰</span>
-                        <span>Royalty Distribution</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div class="tokenomics-item">
-                            <span>100% NFT Sales</span>
-                            <span style="color: #10B981; font-weight: bold;">To LGND Liquidity</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>50% Royalties</span>
-                            <span style="color: #10B981; font-weight: bold;">To LGND Liquidity</span>
-                        </div>
-                        <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 1rem;">
-                            100% of NFT sales will be added to liquidity L3G3NDARY Coin (LGND). 50% of royalties will also be added to liquidity.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tokenomics Section -->
-        <section class="section">
-            <h2 class="section-title">📊 LGND Tokenomics</h2>
-            <p style="text-align: center; color: #CBD5E1; margin-bottom: 2rem; font-size: 1.1rem;">
-                Total Supply: 1,000,000,000 LGND (1 Billion)
+    <!-- Hero секция -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Become Part of the Legend</h1>
+            <p class="hero-subtitle">
+                Stake your exclusive L3G3NDARY NFTs and earn daily LGND rewards. 
+                Join the elite community shaping the future of Web3 ownership and passive income.
             </p>
             
-            <div class="tokenomics-grid">
-                <div class="tokenomics-card">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Token Allocation</h3>
-                    <div style="margin-top: 1rem;">
-                        <div class="tokenomics-item">
-                            <span>L3G3NDARY Pass Staking</span>
-                            <span class="tokenomics-percentage">50% (500M)</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>L3G3NDS Staking</span>
-                            <span class="tokenomics-percentage">15% (150M)</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>Liquidity Pool</span>
-                            <span class="tokenomics-percentage">2% (20M)</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>Reserved for Liquidity</span>
-                            <span class="tokenomics-percentage">12% (120M)</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>Locked Tokens</span>
-                            <span class="tokenomics-percentage">15.2% (152M)</span>
-                        </div>
-                        <div class="tokenomics-item">
-                            <span>Community & Development</span>
-                            <span class="tokenomics-percentage">5.8% (58M)</span>
-                        </div>
-                    </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <h3>1B</h3>
+                    <p>Total LGND Supply</p>
                 </div>
-                
-                <div class="tokenomics-card">
-                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Distribution Visualization</h3>
-                    <div style="margin-top: 1.5rem;">
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <div class="progress-container" style="flex: 1;">
-                                <div class="progress-bar" style="width: 50%; background: linear-gradient(90deg, #8B5CF6, #7C3AED);"></div>
-                            </div>
-                            <span style="margin-left: 1rem; font-weight: bold;">50%</span>
-                        </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <div class="progress-container" style="flex: 1;">
-                                <div class="progress-bar" style="width: 15%; background: linear-gradient(90deg, #10B981, #059669);"></div>
-                            </div>
-                            <span style="margin-left: 1rem; font-weight: bold;">15%</span>
-                        </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <div class="progress-container" style="flex: 1;">
-                                <div class="progress-bar" style="width: 17%; background: linear-gradient(90deg, #F59E0B, #D97706);"></div>
-                            </div>
-                            <span style="margin-left: 1rem; font-weight: bold;">17%</span>
-                        </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <div class="progress-container" style="flex: 1;">
-                                <div class="progress-bar" style="width: 15.2%; background: linear-gradient(90deg, #EF4444, #DC2626);"></div>
-                            </div>
-                            <span style="margin-left: 1rem; font-weight: bold;">15.2%</span>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <div class="progress-container" style="flex: 1;">
-                                <div class="progress-bar" style="width: 5.8%; background: linear-gradient(90deg, #3B82F6, #1D4ED8);"></div>
-                            </div>
-                            <span style="margin-left: 1rem; font-weight: bold;">5.8%</span>
-                        </div>
-                    </div>
+                <div class="stat-card">
+                    <h3>1,666</h3>
+                    <p>NFT Collections</p>
+                </div>
+                <div class="stat-card">
+                    <h3>100%</h3>
+                    <p>Liquidity Locked</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Secure</h3>
+                    <p>Immutable Contracts</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Contract Addresses Section -->
-        <section class="section">
-            <h2 class="section-title">📋 Smart Contract Addresses</h2>
-            <div class="contract-list">
-                <div class="contract-item">
-                    <div class="contract-label">
-                        <span>🛡️</span>
-                        <div>
-                            <div><strong>LGND Token Contract</strong></div>
-                            <div class="contract-address" onclick="copyToClipboard('0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30')">
-                                0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30
-                            </div>
-                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
-                                Renounced Forever • Total Supply: 1,000,000,000
-                            </div>
-                        </div>
-                    </div>
-                    <a href="https://etherscan.io/token/0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30" target="_blank" rel="noopener noreferrer" class="link-btn" style="padding: 0.5rem 1rem;">
-                        🔍 View
-                    </a>
-                </div>
-                
-                <div class="contract-item">
-                    <div class="contract-label">
-                        <span>🎫</span>
-                        <div>
-                            <div><strong>L3G3NDARY Pass Staking Contract</strong></div>
-                            <div class="contract-address" onclick="copyToClipboard('0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378')">
-                                0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378
-                            </div>
-                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
-                                Renounced • 500M LGND allocated
-                            </div>
-                        </div>
-                    </div>
-                    <a href="https://etherscan.io/address/0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378" target="_blank" rel="noopener noreferrer" class="link-btn" style="padding: 0.5rem 1rem;">
-                        🔍 View
-                    </a>
-                </div>
-                
-                <div class="contract-item">
-                    <div class="contract-label">
-                        <span>🖼️</span>
-                        <div>
-                            <div><strong>L3G3NDS Staking Contract</strong></div>
-                            <div class="contract-address" onclick="copyToClipboard('0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52')">
-                                0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52
-                            </div>
-                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
-                                Renounced • 150M LGND allocated
-                            </div>
-                        </div>
-                    </div>
-                    <a href="https://etherscan.io/address/0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52" target="_blank" rel="noopener noreferrer" class="link-btn" style="padding: 0.5rem 1rem;">
-                        🔍 View
-                    </a>
-                </div>
-                
-                <div class="contract-item">
-                    <div class="contract-label">
-                        <span>💧</span>
-                        <div>
-                            <div><strong>Liquidity Pool (LOCKED)</strong></div>
-                            <div class="contract-address" onclick="copyToClipboard('0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6')">
-                                0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6
-                            </div>
-                            <div style="font-size: 0.9rem; color: #10B981; margin-top: 0.25rem;">
-                                LOCKED • 20M LGND + ETH
-                            </div>
-                        </div>
-                    </div>
-                    <a href="https://etherscan.io/address/0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6" target="_blank" rel="noopener noreferrer" class="link-btn" style="padding: 0.5rem 1rem;">
-                        🔍 View
-                    </a>
-                </div>
-                
-                <div class="contract-item">
-                    <div class="contract-label">
-                        <span>🏦</span>
-                        <div>
-                            <div><strong>Project Wallet (Liquidity Reserve)</strong></div>
-                            <div class="contract-address" onclick="copyToClipboard('0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc')">
-                                0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc
-                            </div>
-                            <div style="font-size: 0.9rem; color: #F59E0B; margin-top: 0.25rem;">
-                                Adjustable • 120M LGND reserved
-                            </div>
-                        </div>
-                    </div>
-                    <a href="https://etherscan.io/address/0x39F2e6f3381B04eea73Eb02DCAe8B379B5F25cDc" target="_blank" rel="noopener noreferrer" class="link-btn" style="padding: 0.5rem 1rem;">
-                        🔍 View
-                    </a>
-                </div>
-            </div>
+    <!-- Dashboard -->
+    <section id="dashboard" class="section">
+        <div class="container">
+            <h2 class="section-title">Project Dashboard</h2>
             
-            <div style="text-align: center; margin-top: 2rem;">
-                <div style="display: inline-flex; align-items: center; gap: 10px; padding: 1rem 2rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                    <span>✅</span>
-                    <span><strong>152M LGND (15.2%)</strong> are permanently locked in vesting contracts</span>
+            <div class="dashboard-grid">
+                <!-- Token Distribution -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Token Distribution</h3>
+                    </div>
+                    <div class="distribution">
+                        <div class="dist-item">
+                            <div class="dist-info">
+                                <div class="dist-color" style="background: #f0ac12;"></div>
+                                <span class="dist-name">Staking Pool</span>
+                            </div>
+                            <div class="dist-value">500,000,000 LGND</div>
+                            <div class="dist-percentage">50%</div>
+                        </div>
+                        <div class="dist-item">
+                            <div class="dist-info">
+                                <div class="dist-color" style="background: #3b82f6;"></div>
+                                <span class="dist-name">Project Wallet</span>
+                            </div>
+                            <div class="dist-value">196,000,000 LGND</div>
+                            <div class="dist-percentage">19.6%</div>
+                        </div>
+                        <div class="dist-item">
+                            <div class="dist-info">
+                                <div class="dist-color" style="background: #10b981;"></div>
+                                <span class="dist-name">Locked Tokens</span>
+                            </div>
+                            <div class="dist-value">231,962,000 LGND</div>
+                            <div class="dist-percentage">23.2%</div>
+                        </div>
+                        <div class="dist-item">
+                            <div class="dist-info">
+                                <div class="dist-color" style="background: #8b5cf6;"></div>
+                                <span class="dist-name">Liquidity Pool</span>
+                            </div>
+                            <div class="dist-value">20,193,541 LGND</div>
+                            <div class="dist-percentage">2%</div>
+                        </div>
+                        <div class="dist-item">
+                            <div class="dist-info">
+                                <div class="dist-color" style="background: #ef4444;"></div>
+                                <span class="dist-name">User Holdings</span>
+                            </div>
+                            <div class="dist-value">49,927,485 LGND</div>
+                            <div class="dist-percentage">5%</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Ecosystem Section -->
-        <section class="section">
-            <h2 class="section-title">✨ L3G3NDARY Ecosystem</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🖼️</div>
-                    <h3 style="margin-bottom: 1rem;">L3G3NDS NFTs</h3>
-                    <div class="contract-address" onclick="copyToClipboard('0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501')">
-                        0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501
+                <!-- Contract Addresses -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-contract"></i>
+                        <h3>Smart Contracts</h3>
                     </div>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🎫</div>
-                    <h3 style="margin-bottom: 1rem;">L3G3NDARY Pass</h3>
-                    <div class="contract-address" onclick="copyToClipboard('0x1bc5f738b2dad5adbab624f82223b2d5c789efd8')">
-                        0x1bc5f738b2dad5adbab624f82223b2d5c789efd8
-                    </div>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3 style="margin-bottom: 1rem;">LGND Token</h3>
-                    <div class="contract-address" onclick="copyToClipboard('0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30')">
-                        0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30
+                    <div class="address-list">
+                        <div class="address-item">
+                            <div class="address-label">
+                                <i class="fas fa-coins"></i> LGND Token
+                            </div>
+                            <div class="address-value" id="lgndToken">0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30</div>
+                            <button class="copy-btn" onclick="copyToClipboard('lgndToken')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <div class="address-item">
+                            <div class="address-label">
+                                <i class="fas fa-crown"></i> L3G3NDARY Pass NFT
+                            </div>
+                            <div class="address-value" id="passNFT">0x1bC5f738b2dad5aDBaB624F82223B2d5c789EFD8</div>
+                            <button class="copy-btn" onclick="copyToClipboard('passNFT')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <div class="address-item">
+                            <div class="address-label">
+                                <i class="fas fa-knight"></i> L3G3NDS NFT
+                            </div>
+                            <div class="address-value" id="legendsNFT">0xC8b2276d2B6814Ca79AA81cdECCb6D65A684b501</div>
+                            <button class="copy-btn" onclick="copyToClipboard('legendsNFT')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Staking Section -->
-        <section class="staking-section">
-            <h2 class="section-title" style="color: white;">🎯 NFT Staking Platform</h2>
+    <!-- Staking -->
+    <section id="staking" class="section">
+        <div class="container">
+            <h2 class="section-title">NFT Staking</h2>
             
-            <!-- Статистика -->
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalStaked">0</div>
-                    <div class="stat-label">Total NFTs Staked</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="dailyRewards">0</div>
-                    <div class="stat-label">L3G3NDS Daily Pool</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="passRewards">0</div>
-                    <div class="stat-label">Pass Daily Pool</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="totalRewards">0</div>
-                    <div class="stat-label">Total Rewards Distributed</div>
-                </div>
+            <div class="staking-tabs">
+                <button class="staking-tab active" data-tab="pass">
+                    <i class="fas fa-crown"></i> L3G3NDARY Pass
+                </button>
+                <button class="staking-tab" data-tab="legends">
+                    <i class="fas fa-knight"></i> L3G3NDS
+                </button>
             </div>
-            
-            <!-- Интерфейс стейкинга -->
-            <div id="stakingInterface" style="display: none; margin-top: 2rem;">
-                <div style="background: rgba(0, 0, 0, 0.3); padding: 2rem; border-radius: 15px; border: 1px solid rgba(139, 92, 246, 0.3);">
-                    <h3 style="color: white; margin-bottom: 1.5rem; text-align: center;">Stake Your NFTs</h3>
+
+            <!-- Pass Staking Tab -->
+            <div class="tab-content active" id="pass-tab">
+                <div class="staking-card">
+                    <div class="staking-header">
+                        <div class="staking-title">
+                            <i class="fas fa-crown"></i>
+                            <div>
+                                <h3>L3G3NDARY Pass Staking</h3>
+                                <p>Exclusive 555 NFT Collection • Premium Rewards</p>
+                            </div>
+                        </div>
+                        <div class="apr-badge">~25% APR</div>
+                    </div>
                     
-                    <div class="staking-grid">
-                        <!-- L3G3NDS Staking -->
-                        <div class="staking-card">
-                            <h4 style="color: #8B5CF6; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
-                                <span>🖼️</span>
-                                <span>L3G3NDS</span>
-                            </h4>
-                            <div class="staking-info">
-                                <div style="margin-bottom: 0.5rem;">
-                                    <strong>Your Balance:</strong> <span id="legendBalance" style="color: #8B5CF6; font-weight: bold;">0</span>
-                                </div>
-                                <div>
-                                    <strong>Pending Rewards:</strong> <span id="legendPending" style="color: #F59E0B; font-weight: bold;">0 LGND</span>
-                                </div>
-                                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #94A3B8;">
-                                    <strong>APR:</strong> <span id="legendAPR">25%</span> • <strong>Daily:</strong> <span id="legendDaily">0.068%</span>
-                                </div>
-                            </div>
-                            <div class="staking-controls">
-                                <input type="number" id="legendAmount" placeholder="Amount" min="1" style="flex: 1;">
-                                <button onclick="stakeLegend()" class="btn btn-small" style="background: var(--secondary);" id="stakeLegendBtn">Stake</button>
-                                <button onclick="openUnstakeModal('legend')" class="btn btn-small" style="background: var(--danger);">Unstake</button>
-                                <button onclick="claimLegend()" class="btn btn-small" style="background: var(--accent);" id="claimLegendBtn">Claim</button>
-                            </div>
-                            <div style="margin-top: 1rem; font-size: 0.85rem; color: #94A3B8;">
-                                <strong>Your Stakes:</strong> <span id="legendStakes">0</span> NFTs
+                    <div class="staking-stats">
+                        <div class="staking-stat">
+                            <h4>Total Staked</h4>
+                            <div class="value" id="passTotalStaked">0</div>
+                            <div class="subvalue">NFTs</div>
+                        </div>
+                        <div class="staking-stat">
+                            <h4>Your Staked</h4>
+                            <div class="value" id="passUserStaked">0</div>
+                            <div class="subvalue">NFTs</div>
+                        </div>
+                        <div class="staking-stat">
+                            <h4>Pending Rewards</h4>
+                            <div class="value" id="passPendingRewards">0</div>
+                            <div class="subvalue">LGND</div>
+                        </div>
+                    </div>
+
+                    <div class="staking-form">
+                        <div class="form-group">
+                            <label for="passAmount">Amount to Stake (Token ID: 1)</label>
+                            <div class="input-with-max">
+                                <input type="number" id="passAmount" class="form-control" placeholder="1" min="1" value="1">
+                                <button class="max-btn" id="passMaxBtn">MAX</button>
                             </div>
                         </div>
                         
-                        <!-- L3G3NDARY Pass Staking -->
-                        <div class="staking-card">
-                            <h4 style="color: #10B981; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
-                                <span>🎫</span>
-                                <span>L3G3NDARY Pass</span>
-                            </h4>
-                            <div class="staking-info">
-                                <div style="margin-bottom: 0.5rem;">
-                                    <strong>Your Balance:</strong> <span id="passBalance" style="color: #10B981; font-weight: bold;">0</span>
-                                </div>
-                                <div>
-                                    <strong>Pending Rewards:</strong> <span id="passPending" style="color: #F59E0B; font-weight: bold;">0 LGND</span>
-                                </div>
-                                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #94A3B8;">
-                                    <strong>APR:</strong> <span id="passAPR">50%</span> • <strong>Daily:</strong> <span id="passDaily">0.137%</span>
-                                </div>
-                            </div>
-                            <div class="staking-controls">
-                                <input type="number" id="passAmount" placeholder="Amount" min="1" style="flex: 1;">
-                                <button onclick="stakePass()" class="btn btn-small" style="background: var(--secondary);" id="stakePassBtn">Stake</button>
-                                <button onclick="openUnstakeModal('pass')" class="btn btn-small" style="background: var(--danger);">Unstake</button>
-                                <button onclick="claimPass()" class="btn btn-small" style="background: var(--accent);" id="claimPassBtn">Claim</button>
-                            </div>
-                            <div style="margin-top: 1rem; font-size: 0.85rem; color: #94A3B8;">
-                                <strong>Your Stakes:</strong> <span id="passStakes">0</span> NFTs
-                            </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" id="passStakeBtn">
+                                <i class="fas fa-lock"></i> Stake NFTs
+                            </button>
+                            <button class="btn btn-secondary" id="passClaimBtn">
+                                <i class="fas fa-coins"></i> Claim Rewards
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 1.5rem;">
-                        <div style="display: inline-block; background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.2);">
-                            <p style="color: #94A3B8; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                                <strong>📊 Reward Information:</strong>
-                            </p>
-                            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                                <div style="text-align: center;">
-                                    <div style="color: #8B5CF6; font-weight: bold;">L3G3NDS</div>
-                                    <div style="color: #94A3B8; font-size: 0.85rem;">Daily Rewards Pool</div>
-                                    <div style="color: #F59E0B; font-weight: bold;" id="legendPoolInfo">0 LGND</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="color: #10B981; font-weight: bold;">PASS</div>
-                                    <div style="color: #94A3B8; font-size: 0.85rem;">Daily Rewards Pool</div>
-                                    <div style="color: #F59E0B; font-weight: bold;" id="passPoolInfo">0 LGND</div>
-                                </div>
-                            </div>
-                            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
-                                <div style="text-align: center;">
-                                    <div style="color: #94A3B8; font-size: 0.85rem;">L3G3NDS Remaining</div>
-                                    <div style="color: #8B5CF6; font-weight: bold;" id="legendRemaining">150,000,000 LGND</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="color: #94A3B8; font-size: 0.85rem;">PASS Remaining</div>
-                                    <div style="color: #10B981; font-weight: bold;" id="passRemaining">500,000,000 LGND</div>
-                                </div>
-                            </div>
-                            <p style="color: #94A3B8; margin-top: 0.5rem; font-size: 0.8rem;">
-                                Staking contracts are renounced for maximum security
-                            </p>
+
+                        <!-- User's Staked Positions -->
+                        <div id="passStakedPositions" style="margin-top: 30px; display: none;">
+                            <h4 style="color: var(--text-white); margin-bottom: 15px;">Your Staked Positions</h4>
+                            <div id="passPositionsList"></div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Legends Staking Tab -->
+            <div class="tab-content" id="legends-tab">
+                <div class="staking-card">
+                    <div class="staking-header">
+                        <div class="staking-title">
+                            <i class="fas fa-knight"></i>
+                            <div>
+                                <h3>L3G3NDS Staking</h3>
+                                <p>1111 NFT Collection • Community Access</p>
+                            </div>
+                        </div>
+                        <div class="apr-badge">~15% APR</div>
+                    </div>
+                    
+                    <div class="staking-stats">
+                        <div class="staking-stat">
+                            <h4>Total Staked</h4>
+                            <div class="value" id="legendsTotalStaked">0</div>
+                            <div class="subvalue">NFTs</div>
+                        </div>
+                        <div class="staking-stat">
+                            <h4>Your Staked</h4>
+                            <div class="value" id="legendsUserStaked">0</div>
+                            <div class="subvalue">NFTs</div>
+                        </div>
+                        <div class="staking-stat">
+                            <h4>Pending Rewards</h4>
+                            <div class="value" id="legendsPendingRewards">0</div>
+                            <div class="subvalue">LGND</div>
+                        </div>
+                    </div>
+
+                    <div class="staking-form">
+                        <div class="form-group">
+                            <label for="legendsAmount">Amount to Stake (Token ID: 1)</label>
+                            <div class="input-with-max">
+                                <input type="number" id="legendsAmount" class="form-control" placeholder="1" min="1" value="1">
+                                <button class="max-btn" id="legendsMaxBtn">MAX</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-primary" id="legendsStakeBtn">
+                                <i class="fas fa-lock"></i> Stake NFTs
+                            </button>
+                            <button class="btn btn-secondary" id="legendsClaimBtn">
+                                <i class="fas fa-coins"></i> Claim Rewards
+                            </button>
+                        </div>
+
+                        <!-- User's Staked Positions -->
+                        <div id="legendsStakedPositions" style="margin-top: 30px; display: none;">
+                            <h4 style="color: var(--text-white); margin-bottom: 15px;">Your Staked Positions</h4>
+                            <div id="legendsPositionsList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap" class="section">
+        <div class="container">
+            <h2 class="section-title">Project Roadmap</h2>
             
-            <!-- Кнопка для не подключенных пользователей -->
-            <div id="stakingNotConnected" style="text-align: center; margin-top: 2rem;">
-                <button id="goToStakingBtn" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
-                    🚀 Connect Wallet to Stake
-                </button>
-                <p style="margin-top: 1rem; color: #94A3B8; font-size: 0.9rem;">
-                    Connect wallet to stake NFTs and earn LGND rewards
+            <div class="roadmap">
+                <!-- Phase 1 -->
+                <div class="roadmap-phase completed">
+                    <div class="phase-dot completed"></div>
+                    <div class="phase-content">
+                        <div class="phase-header">
+                            <div class="phase-title">
+                                <i class="fas fa-check-circle"></i>
+                                <h3>Phase 1: Foundation & Launch</h3>
+                            </div>
+                            <span class="phase-badge">Completed</span>
+                        </div>
+                        <div class="phase-goal">Activate project economy, increase transparency, prepare growth platform</div>
+                        <ul class="phase-tasks">
+                            <li>Launch native LGND token (1B supply)</li>
+                            <li>Create two unique NFT collections (Pass: 555, Legends: 1111)</li>
+                            <li>Deploy immutable staking contracts</li>
+                            <li>Priority NFT sales (100 Pass + 200 Legends)</li>
+                            <li>100% of NFT sales added to locked liquidity</li>
+                            <li>Launch updated web portal with dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="roadmap-phase current">
+                    <div class="phase-dot current"></div>
+                    <div class="phase-content">
+                        <div class="phase-header">
+                            <div class="phase-title">
+                                <i class="fas fa-sync-alt"></i>
+                                <h3>Phase 2: Community Growth</h3>
+                            </div>
+                            <span class="phase-badge">In Progress</span>
+                        </div>
+                        <div class="phase-goal">Attract attention, increase participants, enhance NFT value</div>
+                        <ul class="phase-tasks">
+                            <li>Marketing campaigns and collaborations</li>
+                            <li>Discord community expansion with role system</li>
+                            <li>Active participant program with contests and rewards</li>
+                            <li>Enhanced NFT utility beyond staking</li>
+                            <li>Community governance setup</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="roadmap-phase upcoming">
+                    <div class="phase-dot upcoming"></div>
+                    <div class="phase-content">
+                        <div class="phase-header">
+                            <div class="phase-title">
+                                <i class="fas fa-rocket"></i>
+                                <h3>Phase 3: Expansion & Integration</h3>
+                            </div>
+                            <span class="phase-badge">Upcoming</span>
+                        </div>
+                        <div class="phase-goal">Reach main crypto radars and deepen integrations</div>
+                        <ul class="phase-tasks">
+                            <li>Listings on CoinGecko & CoinMarketCap</li>
+                            <li>Integration with DexScreener and other trackers</li>
+                            <li>Wallet integration for asset display (MetaMask, Trust Wallet)</li>
+                            <li>Additional NFT sales waves</li>
+                            <li>Partnerships with other Web3 projects</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 4 -->
+                <div class="roadmap-phase upcoming">
+                    <div class="phase-dot upcoming"></div>
+                    <div class="phase-content">
+                        <div class="phase-header">
+                            <div class="phase-title">
+                                <i class="fas fa-chess-queen"></i>
+                                <h3>Phase 4: Decentralization & Future</h3>
+                            </div>
+                            <span class="phase-badge">Future Vision</span>
+                        </div>
+                        <div class="phase-goal">Establish foundations for long-term, community-driven development</div>
+                        <ul class="phase-tasks">
+                            <li>Research & Development based on community feedback</li>
+                            <li>New NFT collection development</li>
+                            <li>Unique product utilizing project assets</li>
+                            <li>DAO governance implementation</li>
+                            <li>Presentation of new, ambitious ecosystem vision</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div class="logo" style="margin-bottom: 20px;">
+                        <div class="logo-icon">L</div>
+                        <h4 style="margin: 0;">L3G3NDARY</h4>
+                    </div>
+                    <p style="color: var(--text-gray); line-height: 1.6; margin-bottom: 20px;">
+                        Building the future of digital ownership and passive income through NFTs. 
+                        Transparent, secure, and community-driven.
+                    </p>
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i> Immutable Contracts
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Platform</h4>
+                    <a href="#dashboard">Dashboard</a>
+                    <a href="#staking">NFT Staking</a>
+                    <a href="#roadmap">Roadmap</a>
+                    <a href="https://discord.gg/FXHpdqeqDr" target="_blank">Discord Community</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank">OpenSea: L3G3NDARY Pass</a>
+                    <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank">OpenSea: L3G3NDS</a>
+                    <a href="https://etherscan.io/address/0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30" target="_blank">LGND Token Contract</a>
+                    <a href="https://app.uniswap.org/swap" target="_blank">Uniswap Liquidity</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <a href="https://x.com/l3g3ndary_dep" target="_blank">
+                        <i class="fab fa-twitter"></i> Twitter / X
+                    </a>
+                    <a href="https://discord.gg/FXHpdqeqDr" target="_blank">
+                        <i class="fab fa-discord"></i> Discord
+                    </a>
+                    <div class="social-links">
+                        <a href="https://x.com/l3g3ndary_dep" target="_blank" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://discord.gg/FXHpdqeqDr" target="_blank" class="social-link">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2024 L3G3NDARY. All rights reserved. Smart contracts are immutable and verified on Ethereum Mainnet.</p>
+                <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                    Project Wallet: 0x39f2e6f3381b04eea73eb02dcae8b379b5f25cdc • 
+                    Liquidity Pool: 0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6
                 </p>
             </div>
-        </section>
-
-        <!-- Community Section -->
-        <section class="section">
-            <h2 class="section-title">🌍 Join Our Community</h2>
-            <div class="links">
-                <a href="https://x.com/l3g3ndary_dep" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span class="x-icon">𝕏</span>
-                </a>
-                <a href="https://discord.gg/FXHpdqeqDr" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>💬</span>
-                    <span>Discord</span>
-                </a>
-                <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>🖼️</span>
-                    <span>L3G3NDS on OpenSea</span>
-                </a>
-                <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>🎫</span>
-                    <span>Pass on OpenSea</span>
-                </a>
-                <a href="https://dextools.io/" target="_blank" rel="noopener noreferrer" class="link-btn">
-                    <span>📈</span>
-                    <span>Trade LGND</span>
-                </a>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p style="margin-bottom: 0.5rem; font-size: 1.1rem;">🛡️ L3G3NDARY | Official Website</p>
-            <div style="display: flex; justify-content: center; gap: 1rem; margin: 1rem 0; flex-wrap: wrap;">
-                <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
-                    ✅ Token Contract Renounced
-                </span>
-                <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
-                    ✅ Staking Contracts Renounced
-                </span>
-                <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(245, 158, 11, 0.1); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">
-                    🔒 Liquidity LOCKED
-                </span>
-            </div>
-            <p style="font-size: 0.9rem; color: #64748B;">
-                © 2024 L3G3NDARY | 
-                <a href="https://l3g3ndary.com" style="color: #8B5CF6; text-decoration: none;">l3g3ndary.com</a> | 
-                Always verify contract addresses
-            </p>
         </div>
     </footer>
 
+    <!-- Wallet Modal -->
+    <div class="modal" id="walletModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Connect Wallet</h3>
+                <button class="close-modal" id="closeWalletModal">&times;</button>
+            </div>
+            <div class="wallet-options">
+                <button class="wallet-option" id="metamaskBtn">
+                    <i class="fab fa-metamask"></i> MetaMask
+                </button>
+                <button class="wallet-option" id="walletConnectBtn">
+                    <i class="fas fa-wallet"></i> WalletConnect
+                </button>
+                <button class="wallet-option" id="coinbaseBtn">
+                    <i class="fab fa-bitcoin"></i> Coinbase Wallet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript код -->
     <script>
-        // ============================
-        // КОНФИГУРАЦИЯ
-        // ============================
+        // Конфигурация контрактов
         const CONFIG = {
-            token: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
-            collections: {
-                "L3G3NDS": "0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501",
-                "L3G3NDARY Pass": "0x1bc5f738b2dad5adbab624f82223b2d5c789efd8"
-            },
-            staking: {
-                "L3G3NDARY Pass": "0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378",
-                "L3G3NDS": "0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52"
-            },
-            rewards: {
-                "L3G3NDS": {
-                    total: 150000000, // 150M
-                    daily: 82191 // 150M / 1825 дней
-                },
-                "PASS": {
-                    total: 500000000, // 500M
-                    daily: 273972 // 500M / 1825 дней
-                }
-            }
+            lgndToken: '0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30',
+            passNFT: '0x1bC5f738b2dad5aDBaB624F82223B2d5c789EFD8',
+            legendsNFT: '0xC8b2276d2B6814Ca79AA81cdECCb6D65A684b501',
+            passStaking: '0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378',
+            legendsStaking: '0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52',
+            liquidityPool: '0x52BEa360319c9e34c197BA9D6132a6f1DB17A6A6',
+            projectWallet: '0x39f2e6f3381b04eea73eb02dcae8b379b5f25cdc'
         };
 
-        // ============================
-        // ABI КОНТРАКТОВ (расширенные)
-        // ============================
-        const ERC1155_ABI = [
-            "function balanceOf(address account, uint256 id) view returns (uint256)",
-            "function isApprovedForAll(address account, address operator) view returns (bool)",
-            "function setApprovalForAll(address operator, bool approved)"
-        ];
-
+        // ABI для контрактов (упрощенная версия)
         const STAKING_ABI = [
-            "function stake(uint256 tokenId, uint256 amount) external",
-            "function unstake(uint256 stakeIndex) external",
-            "function claimRewards() external",
-            "function getUserStakes(address user) view returns ((uint256 tokenId, uint256 amount, uint256 stakedAt)[] memory)",
+            "function stake(uint256 tokenId, uint256 amount)",
+            "function unstake(uint256 index)",
+            "function claimRewards()",
             "function pendingRewards(address user) view returns (uint256)",
-            "function totalStaked() view returns (uint256)",
-            "function totalRewardsDistributed() view returns (uint256)",
-            "function rewardPerDay() view returns (uint256)",
-            "function totalStakedAmount() view returns (uint256)",
-            "function rewardBalance() view returns (uint256)"
+            "function getUserStakes(address user) view returns ((uint256 tokenId, uint256 amount, uint256 stakedAt)[])",
+            "function totalStaked() view returns (uint256)"
         ];
 
-        const ERC20_ABI = [
-            "function balanceOf(address account) view returns (uint256)",
-            "function totalSupply() view returns (uint256)"
-        ];
-
-        // ============================
-        // СОСТОЯНИЕ ПРИЛОЖЕНИЯ
-        // ============================
-        let state = {
-            isConnected: false,
-            walletAddress: null,
-            walletType: null,
-            chainId: null,
-            provider: null,
-            signer: null,
-            currentUnstakeType: null,
-            stakingData: {
-                legend: { balance: 0, pending: 0, stakes: [] },
-                pass: { balance: 0, pending: 0, stakes: [] }
-            },
-            contracts: {
-                legendStaking: null,
-                passStaking: null,
-                legendNFT: null,
-                passNFT: null,
-                token: null
-            },
-            stats: {
-                totalStakedNFTs: 0,
-                totalDistributed: 0,
-                legendRemaining: 150000000,
-                passRemaining: 500000000
-            }
-        };
-
-        // ============================
-        // УТИЛИТНЫЕ ФУНКЦИИ
-        // ============================
-        function showNotification(message, type = 'info') {
-            // Удаляем старые уведомления
-            document.querySelectorAll('.notification').forEach(n => n.remove());
-            
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 5000);
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('✅ Address copied to clipboard!', 'success');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                showNotification('❌ Failed to copy address', 'error');
-            });
-        }
-
-        function formatAddress(address) {
-            if (!address) return '';
-            return address.substring(0, 6) + '...' + address.substring(address.length - 4);
-        }
-
-        function showLoading(buttonId) {
-            const button = document.getElementById(buttonId);
-            if (button) {
-                button.innerHTML = '<span class="spinner"></span> Processing...';
-                button.disabled = true;
-            }
-        }
-
-        function hideLoading(buttonId, text) {
-            const button = document.getElementById(buttonId);
-            if (button) {
-                button.innerHTML = text;
-                button.disabled = false;
-            }
-        }
-
-        function formatNumber(num) {
-            return num.toLocaleString('en-US');
-        }
-
-        // ============================
-        // ОБНОВЛЕНИЕ СТАТИСТИКИ (реалистичная версия)
-        // ============================
-        async function updateStakingStats() {
-            try {
-                console.log('🔄 Updating staking stats...');
-                
-                // Устанавливаем фиксированные значения для демонстрации
-                const fixedStats = {
-                    totalStakedNFTs: 60,
-                    legendDistributed: 1234567,
-                    passDistributed: 4567890,
-                    legendRemaining: 150000000 - 1234567,
-                    passRemaining: 500000000 - 4567890
-                };
-                
-                // Обновляем UI с фиксированными значениями
-                document.getElementById('totalStaked').textContent = formatNumber(fixedStats.totalStakedNFTs);
-                document.getElementById('dailyRewards').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily);
-                document.getElementById('passRewards').textContent = formatNumber(CONFIG.rewards["PASS"].daily);
-                
-                // Общее распределение
-                const totalDistributed = fixedStats.legendDistributed + fixedStats.passDistributed;
-                document.getElementById('totalRewards').textContent = formatNumber(totalDistributed);
-                
-                // Обновляем информацию о пулах
-                document.getElementById('legendPoolInfo').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily) + ' LGND';
-                document.getElementById('passPoolInfo').textContent = formatNumber(CONFIG.rewards["PASS"].daily) + ' LGND';
-                
-                // Обновляем оставшиеся балансы
-                document.getElementById('legendRemaining').textContent = formatNumber(fixedStats.legendRemaining) + ' LGND';
-                document.getElementById('passRemaining').textContent = formatNumber(fixedStats.passRemaining) + ' LGND';
-                
-                // Обновляем состояние
-                state.stats = {
-                    totalStakedNFTs: fixedStats.totalStakedNFTs,
-                    totalDistributed: totalDistributed,
-                    legendRemaining: fixedStats.legendRemaining,
-                    passRemaining: fixedStats.passRemaining
-                };
-                
-                console.log('✅ Stats updated:', state.stats);
-                
-                // Если есть подключение к кошельку, получаем реальные данные
-                if (state.provider) {
-                    try {
-                        await fetchRealStats();
-                    } catch (error) {
-                        console.log('Using fixed stats due to error:', error.message);
-                    }
-                }
-                
-            } catch (error) {
-                console.error('❌ Error updating stats:', error);
-                // Используем минимальные значения при ошибке
-                document.getElementById('totalStaked').textContent = '0';
-                document.getElementById('dailyRewards').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily);
-                document.getElementById('passRewards').textContent = formatNumber(CONFIG.rewards["PASS"].daily);
-                document.getElementById('totalRewards').textContent = '0';
-            }
-        }
-
-        async function fetchRealStats() {
-            try {
-                if (!state.provider) return;
-                
-                // Инициализируем контракты если нужно
-                if (!state.contracts.legendStaking) {
-                    state.contracts.legendStaking = new ethers.Contract(
-                        CONFIG.staking["L3G3NDS"],
-                        STAKING_ABI,
-                        state.provider
-                    );
-                }
-                
-                if (!state.contracts.passStaking) {
-                    state.contracts.passStaking = new ethers.Contract(
-                        CONFIG.staking["L3G3NDARY Pass"],
-                        STAKING_ABI,
-                        state.provider
-                    );
-                }
-                
-                if (!state.contracts.token) {
-                    state.contracts.token = new ethers.Contract(
-                        CONFIG.token,
-                        ERC20_ABI,
-                        state.provider
-                    );
-                }
-                
-                // Получаем реальные данные
-                const [totalStakedLegend, totalStakedPass] = await Promise.all([
-                    state.contracts.legendStaking.totalStaked().catch(() => 0n),
-                    state.contracts.passStaking.totalStaked().catch(() => 0n)
-                ]);
-                
-                const [legendDistributed, passDistributed] = await Promise.all([
-                    state.contracts.legendStaking.totalRewardsDistributed().catch(() => 0n),
-                    state.contracts.passStaking.totalRewardsDistributed().catch(() => 0n)
-                ]);
-                
-                // Получаем балансы контрактов
-                const [legendBalance, passBalance] = await Promise.all([
-                    state.contracts.token.balanceOf(CONFIG.staking["L3G3NDS"]).catch(() => 0n),
-                    state.contracts.token.balanceOf(CONFIG.staking["L3G3NDARY Pass"]).catch(() => 0n)
-                ]);
-                
-                // Обновляем статистику
-                const totalStaked = Number(totalStakedLegend) + Number(totalStakedPass);
-                const totalDistributed = Number(legendDistributed) + Number(passDistributed);
-                const legendRemaining = Math.max(0, CONFIG.rewards["L3G3NDS"].total - Number(ethers.formatUnits(legendDistributed, 18)));
-                const passRemaining = Math.max(0, CONFIG.rewards["PASS"].total - Number(ethers.formatUnits(passDistributed, 18)));
-                
-                // Обновляем UI с реальными данными
-                document.getElementById('totalStaked').textContent = formatNumber(totalStaked);
-                document.getElementById('totalRewards').textContent = formatNumber(Math.floor(Number(ethers.formatUnits(totalDistributed, 18))));
-                document.getElementById('legendRemaining').textContent = formatNumber(Math.floor(legendRemaining)) + ' LGND';
-                document.getElementById('passRemaining').textContent = formatNumber(Math.floor(passRemaining)) + ' LGND';
-                
-                // Обновляем состояние
-                state.stats = {
-                    totalStakedNFTs: totalStaked,
-                    totalDistributed: Math.floor(Number(ethers.formatUnits(totalDistributed, 18))),
-                    legendRemaining: Math.floor(legendRemaining),
-                    passRemaining: Math.floor(passRemaining)
-                };
-                
-                console.log('✅ Real stats fetched:', state.stats);
-                
-            } catch (error) {
-                console.log('⚠️ Could not fetch real stats:', error.message);
-            }
-        }
-
-        // ============================
-        // ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
-        // ============================
-        async function loadUserData() {
-            console.log('👤 Loading user data...', state.isConnected, state.signer);
-            
-            if (!state.isConnected || !state.signer) {
-                document.getElementById('stakingInterface').style.display = 'none';
-                document.getElementById('stakingNotConnected').style.display = 'block';
-                return;
-            }
-
-            try {
-                // Показываем интерфейс стейкинга
-                document.getElementById('stakingInterface').style.display = 'block';
-                document.getElementById('stakingNotConnected').style.display = 'none';
-
-                // Инициализируем контракты с signer для записи
-                state.contracts.legendStaking = new ethers.Contract(
-                    CONFIG.staking["L3G3NDS"],
-                    STAKING_ABI,
-                    state.signer
-                );
-                
-                state.contracts.passStaking = new ethers.Contract(
-                    CONFIG.staking["L3G3NDARY Pass"],
-                    STAKING_ABI,
-                    state.signer
-                );
-                
-                state.contracts.legendNFT = new ethers.Contract(
-                    CONFIG.collections["L3G3NDS"],
-                    ERC1155_ABI,
-                    state.signer
-                );
-                
-                state.contracts.passNFT = new ethers.Contract(
-                    CONFIG.collections["L3G3NDARY Pass"],
-                    ERC1155_ABI,
-                    state.signer
-                );
-
-                console.log('📝 Contracts initialized, fetching user data...');
-
-                // Получаем балансы NFT (tokenId = 1 для обоих коллекций)
-                const [legendBalance, passBalance] = await Promise.all([
-                    state.contracts.legendNFT.balanceOf(state.walletAddress, 1).catch(() => 0n),
-                    state.contracts.passNFT.balanceOf(state.walletAddress, 1).catch(() => 0n)
-                ]);
-
-                // Получаем pending rewards
-                const [legendPending, passPending] = await Promise.all([
-                    state.contracts.legendStaking.pendingRewards(state.walletAddress).catch(() => 0n),
-                    state.contracts.passStaking.pendingRewards(state.walletAddress).catch(() => 0n)
-                ]);
-
-                // Получаем стейки пользователя
-                const [legendStakes, passStakes] = await Promise.all([
-                    state.contracts.legendStaking.getUserStakes(state.walletAddress).catch(() => []),
-                    state.contracts.passStaking.getUserStakes(state.walletAddress).catch(() => [])
-                ]);
-
-                console.log('✅ User data fetched:', {
-                    legendBalance: Number(legendBalance),
-                    passBalance: Number(passBalance),
-                    legendPending: ethers.formatUnits(legendPending, 18),
-                    passPending: ethers.formatUnits(passPending, 18),
-                    legendStakes: legendStakes.length,
-                    passStakes: passStakes.length
-                });
-
-                // Обновляем состояние
-                state.stakingData.legend = {
-                    balance: Number(legendBalance),
-                    pending: parseFloat(ethers.formatUnits(legendPending, 18)),
-                    stakes: legendStakes
-                };
-
-                state.stakingData.pass = {
-                    balance: Number(passBalance),
-                    pending: parseFloat(ethers.formatUnits(passPending, 18)),
-                    stakes: passStakes
-                };
-
-                // Обновляем UI
-                updateUserUI();
-
-            } catch (error) {
-                console.error('❌ Error loading user data:', error);
-                showNotification('Failed to load staking data: ' + error.message, 'error');
-            }
-        }
-
-        function updateUserUI() {
-            console.log('🎨 Updating UI with data:', state.stakingData);
-            
-            // L3G3NDS
-            const legendBalanceEl = document.getElementById('legendBalance');
-            const legendPendingEl = document.getElementById('legendPending');
-            const legendStakesEl = document.getElementById('legendStakes');
-            
-            if (legendBalanceEl) legendBalanceEl.textContent = state.stakingData.legend.balance;
-            if (legendPendingEl) legendPendingEl.textContent = state.stakingData.legend.pending.toFixed(2) + ' LGND';
-            if (legendStakesEl) legendStakesEl.textContent = state.stakingData.legend.stakes.length;
-            
-            // L3G3NDARY Pass
-            const passBalanceEl = document.getElementById('passBalance');
-            const passPendingEl = document.getElementById('passPending');
-            const passStakesEl = document.getElementById('passStakes');
-            
-            if (passBalanceEl) passBalanceEl.textContent = state.stakingData.pass.balance;
-            if (passPendingEl) passPendingEl.textContent = state.stakingData.pass.pending.toFixed(2) + ' LGND';
-            if (passStakesEl) passStakesEl.textContent = state.stakingData.pass.stakes.length;
-        }
-
-        // ============================
-        // ФУНКЦИИ СТЕЙКИНГА
-        // ============================
-        async function stakeLegend() {
-            if (!state.isConnected || !state.signer) {
-                showNotification('Please connect wallet first', 'warning');
-                return;
-            }
-
-            const amount = parseInt(document.getElementById('legendAmount').value);
-            if (!amount || amount < 1) {
-                showNotification('Enter valid amount', 'warning');
-                return;
-            }
-
-            if (amount > state.stakingData.legend.balance) {
-                showNotification('Insufficient balance', 'error');
-                return;
-            }
-
-            showLoading('stakeLegendBtn');
-
-            try {
-                // Проверяем approve
-                const isApproved = await state.contracts.legendNFT.isApprovedForAll(
-                    state.walletAddress,
-                    CONFIG.staking["L3G3NDS"]
-                );
-
-                if (!isApproved) {
-                    showNotification('Approving NFTs for staking...', 'info');
-                    const approveTx = await state.contracts.legendNFT.setApprovalForAll(
-                        CONFIG.staking["L3G3NDS"],
-                        true
-                    );
-                    await approveTx.wait();
-                    showNotification('NFTs approved successfully!', 'success');
-                }
-
-                // Стейкинг
-                showNotification('Staking L3G3NDS...', 'info');
-                const tx = await state.contracts.legendStaking.stake(1, amount);
-                await tx.wait();
-
-                showNotification(`✅ Successfully staked ${amount} L3G3NDS!`, 'success');
-
-                // Обновляем данные
-                await loadUserData();
-                await updateStakingStats();
-
-            } catch (error) {
-                console.error('❌ Stake error:', error);
-                showNotification(`Stake failed: ${error.message}`, 'error');
-            } finally {
-                hideLoading('stakeLegendBtn', 'Stake');
-                document.getElementById('legendAmount').value = '';
-            }
-        }
-
-        async function stakePass() {
-            if (!state.isConnected || !state.signer) {
-                showNotification('Please connect wallet first', 'warning');
-                return;
-            }
-
-            const amount = parseInt(document.getElementById('passAmount').value);
-            if (!amount || amount < 1) {
-                showNotification('Enter valid amount', 'warning');
-                return;
-            }
-
-            if (amount > state.stakingData.pass.balance) {
-                showNotification('Insufficient balance', 'error');
-                return;
-            }
-
-            showLoading('stakePassBtn');
-
-            try {
-                // Проверяем approve
-                const isApproved = await state.contracts.passNFT.isApprovedForAll(
-                    state.walletAddress,
-                    CONFIG.staking["L3G3NDARY Pass"]
-                );
-
-                if (!isApproved) {
-                    showNotification('Approving Pass NFTs for staking...', 'info');
-                    const approveTx = await state.contracts.passNFT.setApprovalForAll(
-                        CONFIG.staking["L3G3NDARY Pass"],
-                        true
-                    );
-                    await approveTx.wait();
-                    showNotification('Pass NFTs approved successfully!', 'success');
-                }
-
-                // Стейкинг
-                showNotification('Staking L3G3NDARY Pass...', 'info');
-                const tx = await state.contracts.passStaking.stake(1, amount);
-                await tx.wait();
-
-                showNotification(`✅ Successfully staked ${amount} L3G3NDARY Pass!`, 'success');
-
-                // Обновляем данные
-                await loadUserData();
-                await updateStakingStats();
-
-            } catch (error) {
-                console.error('❌ Stake error:', error);
-                showNotification(`Stake failed: ${error.message}`, 'error');
-            } finally {
-                hideLoading('stakePassBtn', 'Stake');
-                document.getElementById('passAmount').value = '';
-            }
-        }
-
-        async function claimLegend() {
-            if (!state.isConnected || !state.signer) {
-                showNotification('Please connect wallet first', 'warning');
-                return;
-            }
-
-            if (state.stakingData.legend.pending <= 0) {
-                showNotification('No rewards to claim', 'warning');
-                return;
-            }
-
-            showLoading('claimLegendBtn');
-
-            try {
-                showNotification('Claiming L3G3NDS rewards...', 'info');
-                const tx = await state.contracts.legendStaking.claimRewards();
-                await tx.wait();
-
-                showNotification(`✅ Successfully claimed ${state.stakingData.legend.pending.toFixed(2)} LGND!`, 'success');
-
-                // Обновляем данные
-                await loadUserData();
-                await updateStakingStats();
-
-            } catch (error) {
-                console.error('❌ Claim error:', error);
-                showNotification(`Claim failed: ${error.message}`, 'error');
-            } finally {
-                hideLoading('claimLegendBtn', 'Claim');
-            }
-        }
-
-        async function claimPass() {
-            if (!state.isConnected || !state.signer) {
-                showNotification('Please connect wallet first', 'warning');
-                return;
-            }
-
-            if (state.stakingData.pass.pending <= 0) {
-                showNotification('No rewards to claim', 'warning');
-                return;
-            }
-
-            showLoading('claimPassBtn');
-
-            try {
-                showNotification('Claiming Pass rewards...', 'info');
-                const tx = await state.contracts.passStaking.claimRewards();
-                await tx.wait();
-
-                showNotification(`✅ Successfully claimed ${state.stakingData.pass.pending.toFixed(2)} LGND!`, 'success');
-
-                // Обновляем данные
-                await loadUserData();
-                await updateStakingStats();
-
-            } catch (error) {
-                console.error('❌ Claim error:', error);
-                showNotification(`Claim failed: ${error.message}`, 'error');
-            } finally {
-                hideLoading('claimPassBtn', 'Claim');
-            }
-        }
-
-        // ============================
-        // UNSTAKE ФУНКЦИИ
-        // ============================
-        async function openUnstakeModal(type) {
-            if (!state.isConnected) {
-                showNotification('Connect wallet first', 'warning');
-                return;
-            }
-
-            const stakes = type === 'legend' ? state.stakingData.legend.stakes : state.stakingData.pass.stakes;
-            if (!stakes || stakes.length === 0) {
-                showNotification('No stakes found', 'warning');
-                return;
-            }
-
-            // Создаем простое модальное окно
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-            modal.style.display = 'flex';
-            modal.style.alignItems = 'center';
-            modal.style.justifyContent = 'center';
-            modal.style.zIndex = '99999';
-            
-            const modalContent = document.createElement('div');
-            modalContent.style.background = 'var(--dark)';
-            modalContent.style.padding = '2rem';
-            modalContent.style.borderRadius = '20px';
-            modalContent.style.maxWidth = '500px';
-            modalContent.style.width = '90%';
-            modalContent.style.border = '2px solid var(--primary)';
-            
-            let stakesHTML = `<h3 style="color: white; margin-bottom: 1.5rem;">Select ${type === 'legend' ? 'L3G3NDS' : 'Pass'} Stake to Unstake</h3>`;
-            
-            stakes.forEach((stake, index) => {
-                const date = new Date(Number(stake.stakedAt) * 1000);
-                const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-                
-                stakesHTML += `
-                    <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; cursor: pointer;"
-                         onclick="performUnstake('${type}', ${index}, this)">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong>Amount:</strong> ${Number(stake.amount)}
-                                <br>
-                                <small style="color: #94A3B8;">Staked: ${date.toLocaleDateString()} (${days} days ago)</small>
-                            </div>
-                            <div style="color: var(--danger);">Unstake →</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            stakesHTML += `
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button onclick="this.parentNode.parentNode.parentNode.remove()" 
-                            class="btn btn-small" style="background: var(--dark); border: 1px solid var(--primary);">
-                        Cancel
-                    </button>
-                </div>
-            `;
-            
-            modalContent.innerHTML = stakesHTML;
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-        }
-
-        async function performUnstake(type, index, element) {
-            if (!state.isConnected || !state.signer) {
-                showNotification('Wallet not connected', 'error');
-                return;
-            }
-
-            // Показываем индикатор загрузки
-            element.innerHTML = '<div class="spinner"></div> Unstaking...';
-
-            try {
-                const contract = type === 'legend' ? state.contracts.legendStaking : state.contracts.passStaking;
-                
-                showNotification(`Unstaking ${type === 'legend' ? 'L3G3NDS' : 'Pass'}...`, 'info');
-                const tx = await contract.unstake(index);
-                await tx.wait();
-
-                showNotification('✅ Successfully unstaked!', 'success');
-
-                // Закрываем модальное окно
-                const modal = element.closest('div[style*="position: fixed"]');
-                if (modal) modal.remove();
-
-                // Обновляем данные
-                await loadUserData();
-                await updateStakingStats();
-
-            } catch (error) {
-                console.error('❌ Unstake error:', error);
-                showNotification(`Unstake failed: ${error.message}`, 'error');
-                // Восстанавливаем исходный вид
-                const stake = state.stakingData[type].stakes[index];
-                const date = new Date(Number(stake.stakedAt) * 1000);
-                const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-                
-                element.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>Amount:</strong> ${Number(stake.amount)}
-                            <br>
-                            <small style="color: #94A3B8;">Staked: ${date.toLocaleDateString()} (${days} days ago)</small>
-                        </div>
-                        <div style="color: var(--danger);">Unstake →</div>
-                    </div>
-                `;
-            }
-        }
-
-        // ============================
-        // КОШЕЛЕК И СЕТЬ
-        // ============================
-        async function connectWallet() {
-            console.log('🚀 Connecting wallet...');
-            
-            if (typeof window.ethereum === 'undefined') {
-                showNotification('❌ MetaMask not found! Install from https://metamask.io', 'error');
-                return;
-            }
-            
-            const button = document.getElementById('connectWalletBtn');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<span class="spinner"></span> Connecting...';
-            button.disabled = true;
-            
-            try {
-                // Запрашиваем аккаунты
-                const accounts = await window.ethereum.request({ 
-                    method: 'eth_requestAccounts' 
-                });
-                
-                if (!accounts || accounts.length === 0) {
-                    throw new Error('No accounts returned');
-                }
-                
-                const address = accounts[0];
-                
-                // Создаем провайдер и подписывающего
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const signer = await provider.getSigner();
-                
-                // Получаем сеть
-                const network = await provider.getNetwork();
-                
-                // Определяем тип кошелька
-                let walletType = 'MetaMask';
-                if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
-                else if (window.ethereum.isTrust) walletType = 'Trust Wallet';
-                else if (window.ethereum.isRabby) walletType = 'Rabby Wallet';
-                
-                // Обновляем состояние
-                state.isConnected = true;
-                state.walletAddress = address;
-                state.walletType = walletType;
-                state.provider = provider;
-                state.signer = signer;
-                state.chainId = Number(network.chainId);
-                
-                console.log('✅ Connected:', {
-                    address,
-                    walletType,
-                    chainId: state.chainId
-                });
-                
-                // Обновляем UI
-                updateUI();
-                updateNetworkInfo();
-                
-                // Загружаем данные
-                await Promise.all([
-                    loadUserData(),
-                    updateStakingStats()
-                ]);
-                
-                showNotification(`✅ ${walletType} connected!`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Wallet connection error:', error);
-                
-                if (error.code === 4001) {
-                    showNotification('❌ Connection rejected by user', 'warning');
-                } else {
-                    showNotification('❌ Connection failed: ' + error.message, 'error');
-                }
-                
-                // Сбрасываем состояние при ошибке
-                state.isConnected = false;
-                state.walletAddress = null;
-                updateUI();
-            } finally {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        }
-
-        function disconnectWallet() {
-            console.log('🔌 Disconnecting wallet...');
-            
-            // Сбрасываем состояние
-            state.isConnected = false;
-            state.walletAddress = null;
-            state.walletType = null;
-            state.provider = null;
-            state.signer = null;
-            state.chainId = null;
-            
-            // Сбрасываем данные стейкинга
-            state.stakingData = {
-                legend: { balance: 0, pending: 0, stakes: [] },
-                pass: { balance: 0, pending: 0, stakes: [] }
-            };
-            
-            // Обновляем UI
-            updateUI();
-            updateNetworkInfo();
-            
-            showNotification('Wallet disconnected', 'info');
-        }
-
-        function updateUI() {
-            console.log('🎨 Updating UI, connected:', state.isConnected);
-            
-            const connectWalletBtn = document.getElementById('connectWalletBtn');
-            const goToStakingBtn = document.getElementById('goToStakingBtn');
-            const networkInfoDiv = document.getElementById('networkInfo');
-            const stakingInterface = document.getElementById('stakingInterface');
-            const stakingNotConnected = document.getElementById('stakingNotConnected');
-            
-            if (state.isConnected && state.walletAddress) {
-                // Обновляем кнопку подключения
-                if (connectWalletBtn) {
-                    connectWalletBtn.innerHTML = '✅ Connected';
-                    connectWalletBtn.disabled = false;
-                    connectWalletBtn.onclick = disconnectWallet;
-                }
-                
-                // Обновляем кнопку стейкинга
-                if (goToStakingBtn) {
-                    goToStakingBtn.textContent = '🚀 Stake NFTs';
-                    goToStakingBtn.onclick = function() {
-                        document.querySelector('.staking-section').scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    };
-                }
-                
-                // Показываем информацию о кошельке в хедере
-                if (networkInfoDiv) {
-                    networkInfoDiv.innerHTML = `
-                        <div class="wallet-info">
-                            <span>👛</span>
-                            <span class="wallet-address">${formatAddress(state.walletAddress)}</span>
-                            <button class="disconnect-btn" onclick="disconnectWallet()">Disconnect</button>
-                        </div>
-                    `;
-                }
-                
-                // Показываем интерфейс стейкинга
-                if (stakingInterface) stakingInterface.style.display = 'block';
-                if (stakingNotConnected) stakingNotConnected.style.display = 'none';
-                
-            } else {
-                // Когда не подключен
-                if (connectWalletBtn) {
-                    connectWalletBtn.innerHTML = '🔗 Connect Wallet';
-                    connectWalletBtn.disabled = false;
-                    connectWalletBtn.onclick = connectWallet;
-                }
-                
-                if (goToStakingBtn) {
-                    goToStakingBtn.textContent = '🔒 Connect Wallet First';
-                    goToStakingBtn.onclick = connectWallet;
-                }
-                
-                if (networkInfoDiv) networkInfoDiv.innerHTML = '';
-                if (stakingInterface) stakingInterface.style.display = 'none';
-                if (stakingNotConnected) stakingNotConnected.style.display = 'block';
-            }
-        }
-
-        function updateNetworkInfo() {
-            // Проверяем сеть и показываем предупреждение если не Ethereum Mainnet
-            if (state.chainId && state.chainId !== 1) {
-                let networkWarning = document.querySelector('.network-warning');
-                
-                if (!networkWarning) {
-                    networkWarning = document.createElement('div');
-                    networkWarning.className = 'domain-verification network-warning';
-                    networkWarning.style.background = 'rgba(245, 158, 11, 0.1)';
-                    networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                    networkWarning.style.marginTop = '1rem';
-                    networkWarning.innerHTML = `
-                        <span style="color: #F59E0B;">⚠️</span>
-                        <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
-                        <br>
-                        <span style="font-size: 0.9rem;">
-                            Please switch to Ethereum Mainnet
-                        </span>
-                    `;
-                    
-                    // Добавляем предупреждение после доменной проверки
-                    const domainVerification = document.querySelector('.domain-verification');
-                    if (domainVerification) {
-                        domainVerification.parentNode.insertBefore(networkWarning, domainVerification.nextSibling);
-                    }
-                }
-            } else {
-                // Удаляем предупреждение если оно есть
-                const warning = document.querySelector('.network-warning');
-                if (warning) warning.remove();
-            }
-        }
-
-        // ============================
-        // ИНИЦИАЛИЗАЦИЯ
-        // ============================
-        window.addEventListener('load', async () => {
-            console.log('🎮 L3G3NDARY website initializing...');
-            
-            // Делаем адреса копируемыми
-            document.querySelectorAll('.contract-address').forEach(el => {
-                el.style.cursor = 'pointer';
-                el.title = 'Click to copy address';
-                el.addEventListener('click', function() {
-                    copyToClipboard(this.textContent.trim());
-                });
-            });
-            
-            // Назначаем обработчики кнопок
-            document.getElementById('connectWalletBtn').onclick = connectWallet;
-            document.getElementById('goToStakingBtn').onclick = function() {
-                if (!state.isConnected) {
-                    showNotification('Please connect your wallet first', 'warning');
-                    connectWallet();
-                } else {
-                    document.querySelector('.staking-section').scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            };
-            
-            // Проверяем безопасность домена
-            checkDomainSecurity();
-            
-            // Загружаем начальную статистику
-            await updateStakingStats();
-            
-            // Проверяем автоподключение
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    
-                    if (accounts && accounts.length > 0) {
-                        console.log('✅ Found existing connection:', accounts[0]);
-                        
-                        const provider = new ethers.BrowserProvider(window.ethereum);
-                        const signer = await provider.getSigner();
-                        const address = accounts[0];
-                        const network = await provider.getNetwork();
-                        
-                        state.isConnected = true;
-                        state.walletAddress = address;
-                        state.walletType = 'MetaMask';
-                        state.provider = provider;
-                        state.signer = signer;
-                        state.chainId = Number(network.chainId);
-                        
-                        updateUI();
-                        updateNetworkInfo();
-                        
-                        // Загружаем данные пользователя
-                        await Promise.all([
-                            loadUserData(),
-                            updateStakingStats()
-                        ]);
-                        
-                        console.log('✅ Auto-connected to:', address);
-                    }
-                } catch (error) {
-                    console.error('❌ Auto-connect error:', error);
-                }
-            }
-            
-            // Настраиваем обработчики событий MetaMask
-            setupEventListeners();
-            
-            // Обновляем статистику каждые 30 секунд
-            setInterval(async () => {
-                await updateStakingStats();
-            }, 30000);
-            
-            console.log('✅ Website initialized successfully');
+        // Глобальные переменные
+        let provider = null;
+        let signer = null;
+        let userAddress = null;
+        let isConnected = false;
+        let currentNetwork = null;
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initEventListeners();
+            initTabs();
+            checkWalletConnection();
         });
 
-        function setupEventListeners() {
-            if (window.ethereum) {
-                window.ethereum.on('accountsChanged', async (accounts) => {
-                    console.log('🔀 Accounts changed:', accounts);
-                    if (accounts.length === 0) {
-                        disconnectWallet();
-                    } else {
-                        state.walletAddress = accounts[0];
-                        if (state.isConnected) {
-                            updateUI();
-                            await loadUserData();
-                            showNotification('Account changed', 'info');
+        // Инициализация слушателей событий
+        function initEventListeners() {
+            // Подключение кошелька
+            document.getElementById('connectWalletBtn').addEventListener('click', toggleWalletModal);
+            document.getElementById('closeWalletModal').addEventListener('click', closeWalletModal);
+            
+            // Опции кошельков
+            document.getElementById('metamaskBtn').addEventListener('click', () => connectWallet('metamask'));
+            document.getElementById('walletConnectBtn').addEventListener('click', () => connectWallet('walletconnect'));
+            document.getElementById('coinbaseBtn').addEventListener('click', () => connectWallet('coinbase'));
+            
+            // Стейкинг
+            document.getElementById('passStakeBtn').addEventListener('click', () => stakeNFT('pass'));
+            document.getElementById('passClaimBtn').addEventListener('click', () => claimRewards('pass'));
+            document.getElementById('passMaxBtn').addEventListener('click', () => setMaxAmount('pass'));
+            
+            document.getElementById('legendsStakeBtn').addEventListener('click', () => stakeNFT('legends'));
+            document.getElementById('legendsClaimBtn').addEventListener('click', () => claimRewards('legends'));
+            document.getElementById('legendsMaxBtn').addEventListener('click', () => setMaxAmount('legends'));
+            
+            // Навигация
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (targetId.startsWith('#')) {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
                         }
                     }
                 });
-                
-                window.ethereum.on('chainChanged', (chainId) => {
-                    console.log('🔗 Chain changed:', chainId);
-                    state.chainId = parseInt(chainId, 16);
-                    updateNetworkInfo();
-                    // Перезагружаем данные
-                    if (state.isConnected) {
-                        loadUserData();
-                        updateStakingStats();
-                    }
-                });
-                
-                window.ethereum.on('disconnect', () => {
-                    console.log('🔌 Wallet disconnected');
-                    disconnectWallet();
-                });
-            }
+            });
+            
+            // Клик вне модального окна
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('walletModal');
+                if (event.target === modal) {
+                    closeWalletModal();
+                }
+            });
         }
 
-        function checkDomainSecurity() {
-            const currentDomain = window.location.hostname;
-            const verifiedDomain = 'l3g3ndary.com';
-            const isSecure = window.location.protocol === 'https:';
-            
-            // Проверяем домен
-            const domainValid = currentDomain === verifiedDomain || 
-                              currentDomain.endsWith('.' + verifiedDomain);
-            
-            if (!domainValid) {
-                const warningDiv = document.createElement('div');
-                warningDiv.className = 'domain-verification';
-                warningDiv.style.background = 'rgba(239, 68, 68, 0.1)';
-                warningDiv.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                warningDiv.innerHTML = `
-                    <span style="color: #EF4444;">⚠️</span>
-                    <span style="color: #EF4444; font-weight: bold;">DOMAIN WARNING</span>
-                    <br>
-                    <span style="font-size: 0.9rem;">
-                        You are on: <strong>${currentDomain}</strong>
-                        <br>
-                        Official domain: <strong>${verifiedDomain}</strong>
-                    </span>
-                `;
-                
-                const hero = document.querySelector('.hero');
-                if (hero && hero.parentNode) {
-                    hero.parentNode.insertBefore(warningDiv, hero);
+        // Инициализация вкладок
+        function initTabs() {
+            const tabs = document.querySelectorAll('.staking-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Обновляем активные вкладки
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Показываем соответствующий контент
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // Загружаем данные для выбранной вкладки
+                    if (isConnected) {
+                        loadStakingData(tabId);
+                    }
+                });
+            });
+        }
+
+        // Проверка подключения кошелька
+        async function checkWalletConnection() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet('metamask');
+                    }
+                } catch (error) {
+                    console.log('No wallet connected');
                 }
             }
         }
 
-        // Экспортируем для отладки
-        window.getState = () => state;
-        window.getStakingData = () => state.stakingData;
-        window.getStats = () => state.stats;
+        // Управление модальным окном кошелька
+        function toggleWalletModal() {
+            if (isConnected) {
+                disconnectWallet();
+            } else {
+                const modal = document.getElementById('walletModal');
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeWalletModal() {
+            const modal = document.getElementById('walletModal');
+            modal.style.display = 'none';
+        }
+
+        // Подключение кошелька
+        async function connectWallet(walletType) {
+            try {
+                showNotification('Connecting wallet...', 'info');
+                
+                if (walletType === 'metamask') {
+                    if (!window.ethereum) {
+                        throw new Error('Please install MetaMask extension');
+                    }
+                    
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    
+                    // Слушатель изменений аккаунта
+                    window.ethereum.on('accountsChanged', (accounts) => {
+                        if (accounts.length === 0) {
+                            disconnectWallet();
+                        } else {
+                            userAddress = accounts[0];
+                            updateWalletUI();
+                            loadAllData();
+                        }
+                    });
+                    
+                    // Слушатель изменений сети
+                    window.ethereum.on('chainChanged', () => {
+                        window.location.reload();
+                    });
+                }
+                
+                isConnected = true;
+                updateWalletUI();
+                closeWalletModal();
+                showNotification('Wallet connected successfully!', 'success');
+                
+                // Загружаем данные
+                await loadAllData();
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                showNotification(error.message || 'Failed to connect wallet', 'error');
+            }
+        }
+
+        // Отключение кошелька
+        function disconnectWallet() {
+            provider = null;
+            signer = null;
+            userAddress = null;
+            isConnected = false;
+            updateWalletUI();
+            resetStakingData();
+            showNotification('Wallet disconnected', 'info');
+        }
+
+        // Обновление UI кошелька
+        function updateWalletUI() {
+            const btn = document.getElementById('connectWalletBtn');
+            const btnText = document.getElementById('walletBtnText');
+            
+            if (isConnected && userAddress) {
+                btn.classList.add('connected');
+                const shortAddress = `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
+                btnText.textContent = shortAddress;
+            } else {
+                btn.classList.remove('connected');
+                btnText.textContent = 'Connect Wallet';
+            }
+        }
+
+        // Загрузка всех данных
+        async function loadAllData() {
+            if (!isConnected) return;
+            
+            try {
+                showNotification('Loading staking data...', 'info');
+                
+                // Загружаем данные для активной вкладки
+                const activeTab = document.querySelector('.staking-tab.active');
+                const tabId = activeTab ? activeTab.getAttribute('data-tab') : 'pass';
+                await loadStakingData(tabId);
+                
+                showNotification('Data loaded successfully', 'success');
+            } catch (error) {
+                console.error('Load data error:', error);
+                showNotification('Failed to load data', 'error');
+            }
+        }
+
+        // Загрузка данных стейкинга
+        async function loadStakingData(poolType) {
+            if (!isConnected || !signer) return;
+            
+            const config = poolType === 'pass' ? {
+                address: CONFIG.passStaking,
+                nftAddress: CONFIG.passNFT
+            } : {
+                address: CONFIG.legendsStaking,
+                nftAddress: CONFIG.legendsNFT
+            };
+            
+            try {
+                const stakingContract = new ethers.Contract(config.address, STAKING_ABI, signer);
+                
+                // Получаем общее количество застейканных NFT
+                const totalStaked = await stakingContract.totalStaked();
+                document.getElementById(`${poolType}TotalStaked`).textContent = 
+                    ethers.utils.formatUnits(totalStaked, 0);
+                
+                if (userAddress) {
+                    // Получаем награды пользователя
+                    const pendingRewards = await stakingContract.pendingRewards(userAddress);
+                    document.getElementById(`${poolType}PendingRewards`).textContent = 
+                        parseFloat(ethers.utils.formatUnits(pendingRewards, 18)).toFixed(4);
+                    
+                    // Получаем стейки пользователя
+                    const userStakes = await stakingContract.getUserStakes(userAddress);
+                    const totalUserStaked = userStakes.reduce((sum, stake) => sum + stake.amount, 0);
+                    document.getElementById(`${poolType}UserStaked`).textContent = 
+                        ethers.utils.formatUnits(totalUserStaked, 0);
+                    
+                    // Отображаем позиции если есть
+                    if (userStakes.length > 0) {
+                        displayStakedPositions(poolType, userStakes);
+                    }
+                }
+                
+            } catch (error) {
+                console.error(`Load ${poolType} data error:`, error);
+            }
+        }
+
+        // Отображение стейкнутых позиций
+        function displayStakedPositions(poolType, stakes) {
+            const container = document.getElementById(`${poolType}StakedPositions`);
+            const list = document.getElementById(`${poolType}PositionsList`);
+            
+            if (stakes.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            list.innerHTML = '';
+            
+            stakes.forEach((stake, index) => {
+                const positionDiv = document.createElement('div');
+                positionDiv.className = 'dist-item';
+                positionDiv.innerHTML = `
+                    <div class="dist-info">
+                        <div class="dist-color" style="background: ${poolType === 'pass' ? '#f0ac12' : '#3b82f6'};"></div>
+                        <span class="dist-name">Position #${index + 1}</span>
+                    </div>
+                    <div class="dist-value">${ethers.utils.formatUnits(stake.amount, 0)} NFTs</div>
+                    <button class="copy-btn" onclick="unstakeNFT('${poolType}', ${index})">
+                        <i class="fas fa-unlock"></i> Unstake
+                    </button>
+                `;
+                list.appendChild(positionDiv);
+            });
+        }
+
+        // Стейкинг NFT
+        async function stakeNFT(poolType) {
+            if (!isConnected || !signer) {
+                showNotification('Please connect wallet first', 'error');
+                return;
+            }
+            
+            const amountInput = document.getElementById(`${poolType}Amount`);
+            const amount = amountInput.value;
+            
+            if (!amount || amount <= 0) {
+                showNotification('Please enter valid amount', 'error');
+                return;
+            }
+            
+            const config = poolType === 'pass' ? {
+                address: CONFIG.passStaking,
+                nftAddress: CONFIG.passNFT
+            } : {
+                address: CONFIG.legendsStaking,
+                nftAddress: CONFIG.legendsNFT
+            };
+            
+            try {
+                showNotification('Processing stake transaction...', 'info');
+                
+                const stakingContract = new ethers.Contract(config.address, STAKING_ABI, signer);
+                const tokenId = 1; // ERC1155 token ID
+                
+                const tx = await stakingContract.stake(tokenId, ethers.utils.parseUnits(amount, 0));
+                showNotification('Transaction submitted. Waiting for confirmation...', 'info');
+                
+                await tx.wait();
+                showNotification('NFTs staked successfully!', 'success');
+                
+                // Обновляем данные
+                await loadStakingData(poolType);
+                amountInput.value = '1';
+                
+            } catch (error) {
+                console.error('Stake error:', error);
+                showNotification(error.message || 'Staking failed', 'error');
+            }
+        }
+
+        // Клейм наград
+        async function claimRewards(poolType) {
+            if (!isConnected || !signer) {
+                showNotification('Please connect wallet first', 'error');
+                return;
+            }
+            
+            const config = poolType === 'pass' ? CONFIG.passStaking : CONFIG.legendsStaking;
+            
+            try {
+                showNotification('Processing claim transaction...', 'info');
+                
+                const stakingContract = new ethers.Contract(config, STAKING_ABI, signer);
+                const tx = await stakingContract.claimRewards();
+                showNotification('Transaction submitted. Waiting for confirmation...', 'info');
+                
+                await tx.wait();
+                showNotification('Rewards claimed successfully!', 'success');
+                
+                // Обновляем данные
+                await loadStakingData(poolType);
+                
+            } catch (error) {
+                console.error('Claim error:', error);
+                showNotification(error.message || 'Claim failed', 'error');
+            }
+        }
+
+        // Анстейкинг NFT
+        async function unstakeNFT(poolType, index) {
+            if (!isConnected || !signer) {
+                showNotification('Please connect wallet first', 'error');
+                return;
+            }
+            
+            const config = poolType === 'pass' ? CONFIG.passStaking : CONFIG.legendsStaking;
+            
+            try {
+                showNotification('Processing unstake transaction...', 'info');
+                
+                const stakingContract = new ethers.Contract(config, STAKING_ABI, signer);
+                const tx = await stakingContract.unstake(index);
+                showNotification('Transaction submitted. Waiting for confirmation...', 'info');
+                
+                await tx.wait();
+                showNotification('NFTs unstaked successfully!', 'success');
+                
+                // Обновляем данные
+                await loadStakingData(poolType);
+                
+            } catch (error) {
+                console.error('Unstake error:', error);
+                showNotification(error.message || 'Unstaking failed', 'error');
+            }
+        }
+
+        // Установка максимального количества
+        async function setMaxAmount(poolType) {
+            // В реальном приложении здесь нужно получать баланс NFT пользователя
+            showNotification('Max function requires NFT balance check', 'info');
+        }
+
+        // Сброс данных стейкинга
+        function resetStakingData() {
+            const pools = ['pass', 'legends'];
+            pools.forEach(pool => {
+                document.getElementById(`${pool}TotalStaked`).textContent = '0';
+                document.getElementById(`${pool}UserStaked`).textContent = '0';
+                document.getElementById(`${pool}PendingRewards`).textContent = '0';
+                document.getElementById(`${pool}StakedPositions`).style.display = 'none';
+                document.getElementById(`${pool}PositionsList`).innerHTML = '';
+            });
+        }
+
+        // Копирование в буфер обмена
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Address copied to clipboard!', 'success');
+            }).catch(err => {
+                showNotification('Failed to copy address', 'error');
+            });
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            // Удаляем предыдущие уведомления
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => {
+                notification.remove();
+            });
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Автоматическое удаление
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Вспомогательные функции
+        function formatAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(38)}`;
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-US').format(num);
+        }
     </script>
 </body>
 </html>
