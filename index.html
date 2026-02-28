@@ -1512,14 +1512,37 @@
                         legendStaked = Number(legendTotalStaked);
                         passStaked = Number(passTotalStaked);
                         
-                        // Get total rewards distributed
-                        const [legendTotalRewards, passTotalRewards] = await Promise.all([
-                            state.contracts.legendStaking?.totalRewardsDistributed().catch(() => 0n) || 0n,
-                            state.contracts.passStaking?.totalRewardsDistributed().catch(() => 0n) || 0n
-                        ]);
-                        
-                        legendDistributed = Number(ethers.formatUnits(legendTotalRewards, 18));
-                        passDistributed = Number(ethers.formatUnits(passTotalRewards, 18));
+                        // Get total rewards distributed - MULTIPLE METHODS
+console.log('📊 Attempting to fetch total rewards distributed...');
+
+// Method 1: Try to get from contract if available
+try {
+    if (state.contracts.legendStaking) {
+        const legendTotalRewards = await state.contracts.legendStaking.totalRewardsDistributed().catch(() => null);
+        if (legendTotalRewards !== null) {
+            legendDistributed = Number(ethers.formatUnits(legendTotalRewards, 18));
+            console.log('✅ Legend total rewards from contract (method 1):', legendDistributed);
+        } else {
+            console.log('⚠️ Method 1 failed for legend - totalRewardsDistributed returned null');
+        }
+    }
+} catch (e) {
+    console.log('⚠️ Method 1 failed for legend:', e.message);
+}
+
+try {
+    if (state.contracts.passStaking) {
+        const passTotalRewards = await state.contracts.passStaking.totalRewardsDistributed().catch(() => null);
+        if (passTotalRewards !== null) {
+            passDistributed = Number(ethers.formatUnits(passTotalRewards, 18));
+            console.log('✅ Pass total rewards from contract (method 1):', passDistributed);
+        } else {
+            console.log('⚠️ Method 1 failed for pass - totalRewardsDistributed returned null');
+        }
+    }
+} catch (e) {
+    console.log('⚠️ Method 1 failed for pass:', e.message);
+}
                         
                         // Get remaining rewards in contracts
                         const [legendContractBalance, passContractBalance] = await Promise.all([
