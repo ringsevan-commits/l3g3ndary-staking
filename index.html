@@ -1314,29 +1314,29 @@
 
     <script>
         // ============================
-        // КОНФИГУРАЦИЯ
-        // ============================
-        const CONFIG = {
-            token: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
-            collections: {
-                "L3G3NDS": "0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501",
-                "L3G3NDARY Pass": "0x1bc5f738b2dad5adbab624f82223b2d5c789efd8"
-            },
-            staking: {
-                "L3G3NDARY Pass": "0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378",
-                "L3G3NDS": "0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52"
-            },
-            rewards: {
-                "L3G3NDS": {
-                    total: 150000000, // 150M
-                    daily: 82191 // 150M / 1825 дней
-                },
-                "PASS": {
-                    total: 500000000, // 500M
-                    daily: 273972 // 500M / 1825 дней
-                }
-            }
-        };
+// КОНФИГУРАЦИЯ
+// ============================
+const CONFIG = {
+    token: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
+    collections: {
+        "L3G3NDS": "0xc8b2276d2b6814ca79aa81cdeccb6d65a684b501",
+        "L3G3NDARY Pass": "0x1bc5f738b2dad5adbab624f82223b2d5c789efd8"
+    },
+    staking: {
+        "L3G3NDARY Pass": "0xd6155A5dAb72E332A29574c1f6C56F8ba7EF1378",
+        "L3G3NDS": "0x3E80ab8077dE0B6ccB28365e152440C4ED9Caa52"
+    },
+    rewards: {
+        "L3G3NDS": {
+            total: 150000000, // 150M
+            dailyPerNFT: 1000 // 1000 LGND в сутки за 1 NFT
+        },
+        "PASS": {
+            total: 500000000, // 500M
+            dailyPerNFT: 2500 // 2500 LGND в сутки за 1 NFT
+        }
+    }
+};
 
         // ============================
         // ABI КОНТРАКТОВ (расширенные)
@@ -1451,64 +1451,162 @@
         // ============================
         // ОБНОВЛЕНИЕ СТАТИСТИКИ (реалистичная версия)
         // ============================
-        async function updateStakingStats() {
+       async function updateStakingStats() {
+    try {
+        console.log('🔄 Fetching real-time stats from contracts...');
+        
+        // Initialize contracts if needed
+        if (!state.contracts.legendStaking && state.provider) {
+            state.contracts.legendStaking = new ethers.Contract(
+                CONFIG.staking["L3G3NDS"],
+                STAKING_ABI,
+                state.provider
+            );
+        }
+        
+        if (!state.contracts.passStaking && state.provider) {
+            state.contracts.passStaking = new ethers.Contract(
+                CONFIG.staking["L3G3NDARY Pass"],
+                STAKING_ABI,
+                state.provider
+            );
+        }
+        
+        if (!state.contracts.token && state.provider) {
+            state.contracts.token = new ethers.Contract(
+                CONFIG.token,
+                ERC20_ABI,
+                state.provider
+            );
+        }
+
+        // Default values
+        let legendStaked = 0;
+        let passStaked = 0;
+        let legendDistributed = 0;
+        let passDistributed = 0;
+        let legendBalance = 0;
+        let passBalance = 0;
+        
+        // Fetch real data if provider exists
+        if (state.provider) {
             try {
-                console.log('🔄 Updating staking stats...');
+                // Get total staked amounts
+                const [legendTotalStaked, passTotalStaked] = await Promise.all([
+                    state.contracts.legendStaking?.totalStaked().catch(() => 0n) || 0n,
+                    state.contracts.passStaking?.totalStaked().catch(() => 0n) || 0n
+                ]);
                 
-                // Устанавливаем фиксированные значения для демонстрации
-                const fixedStats = {
-                    totalStakedNFTs: 60,
-                    legendDistributed: 1234567,
-                    passDistributed: 4567890,
-                    legendRemaining: 150000000 - 1234567,
-                    passRemaining: 500000000 - 4567890
-                };
+                legendStaked = Number(legendTotalStaked);
+                passStaked = Number(passTotalStaked);
                 
-                // Обновляем UI с фиксированными значениями
-                document.getElementById('totalStaked').textContent = formatNumber(fixedStats.totalStakedNFTs);
-                document.getElementById('dailyRewards').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily);
-                document.getElementById('passRewards').textContent = formatNumber(CONFIG.rewards["PASS"].daily);
+                // Get total rewards distributed
+                const [legendTotalRewards, passTotalRewards] = await Promise.all([
+                    state.contracts.legendStaking?.totalRewardsDistributed().catch(() => 0n) || 0n,
+                    state.contracts.passStaking?.totalRewardsDistributed().catch(() => 0n) || 0n
+                ]);
                 
-                // Общее распределение
-                const totalDistributed = fixedStats.legendDistributed + fixedStats.passDistributed;
-                document.getElementById('totalRewards').textContent = formatNumber(totalDistributed);
+                legendDistributed = Number(ethers.formatUnits(legendTotalRewards, 18));
+                passDistributed = Number(ethers.formatUnits(passTotalRewards, 18));
                 
-                // Обновляем информацию о пулах
-                document.getElementById('legendPoolInfo').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily) + ' LGND';
-                document.getElementById('passPoolInfo').textContent = formatNumber(CONFIG.rewards["PASS"].daily) + ' LGND';
+                // Get remaining rewards in contracts
+                const [legendContractBalance, passContractBalance] = await Promise.all([
+                    state.contracts.token?.balanceOf(CONFIG.staking["L3G3NDS"]).catch(() => 0n) || 0n,
+                    state.contracts.token?.balanceOf(CONFIG.staking["L3G3NDARY Pass"]).catch(() => 0n) || 0n
+                ]);
                 
-                // Обновляем оставшиеся балансы
-                document.getElementById('legendRemaining').textContent = formatNumber(fixedStats.legendRemaining) + ' LGND';
-                document.getElementById('passRemaining').textContent = formatNumber(fixedStats.passRemaining) + ' LGND';
-                
-                // Обновляем состояние
-                state.stats = {
-                    totalStakedNFTs: fixedStats.totalStakedNFTs,
-                    totalDistributed: totalDistributed,
-                    legendRemaining: fixedStats.legendRemaining,
-                    passRemaining: fixedStats.passRemaining
-                };
-                
-                console.log('✅ Stats updated:', state.stats);
-                
-                // Если есть подключение к кошельку, получаем реальные данные
-                if (state.provider) {
-                    try {
-                        await fetchRealStats();
-                    } catch (error) {
-                        console.log('Using fixed stats due to error:', error.message);
-                    }
-                }
+                legendBalance = Number(ethers.formatUnits(legendContractBalance, 18));
+                passBalance = Number(ethers.formatUnits(passContractBalance, 18));
                 
             } catch (error) {
-                console.error('❌ Error updating stats:', error);
-                // Используем минимальные значения при ошибке
-                document.getElementById('totalStaked').textContent = '0';
-                document.getElementById('dailyRewards').textContent = formatNumber(CONFIG.rewards["L3G3NDS"].daily);
-                document.getElementById('passRewards').textContent = formatNumber(CONFIG.rewards["PASS"].daily);
-                document.getElementById('totalRewards').textContent = '0';
+                console.warn('⚠️ Error fetching some contract data:', error.message);
             }
         }
+        
+        // Calculate daily pools based on staked NFTs
+        const legendDailyPool = legendStaked * CONFIG.rewards["L3G3NDS"].dailyPerNFT;
+        const passDailyPool = passStaked * CONFIG.rewards["PASS"].dailyPerNFT;
+        
+        // Calculate totals
+        const totalStakedNFTs = legendStaked + passStaked;
+        const totalDistributed = legendDistributed + passDistributed;
+        
+        // Calculate remaining rewards
+        const legendRemaining = Math.max(0, CONFIG.rewards["L3G3NDS"].total - legendDistributed);
+        const passRemaining = Math.max(0, CONFIG.rewards["PASS"].total - passDistributed);
+        
+        // Update UI
+        document.getElementById('totalStaked').textContent = formatNumber(totalStakedNFTs);
+        document.getElementById('legendStakedCount').textContent = formatNumber(legendStaked);
+        document.getElementById('passStakedCount').textContent = formatNumber(passStaked);
+        
+        // Daily pools
+        document.getElementById('dailyRewards').innerHTML = 
+            `${formatNumber(legendDailyPool)} <span style="font-size: 0.8rem;">LGND/day</span>`;
+        document.getElementById('passRewards').innerHTML = 
+            `${formatNumber(passDailyPool)} <span style="font-size: 0.8rem;">LGND/day</span>`;
+        
+        // Total rewards distributed
+        document.getElementById('totalRewards').innerHTML = 
+            `${formatNumber(totalDistributed)} <span style="font-size: 0.8rem;">LGND</span>`;
+        
+        // Pool info with per-NFT rates
+        const legendPoolInfo = document.getElementById('legendRemainingPool');
+        if (legendPoolInfo) {
+            legendPoolInfo.innerHTML = 
+                `${formatNumber(Math.floor(legendRemaining))} LGND left · ` +
+                `<span style="color: #8B5CF6;">${formatNumber(legendStaked)} NFTs staked</span><br>` +
+                `<span style="font-size: 0.7rem;">⚡ ${formatNumber(CONFIG.rewards["L3G3NDS"].dailyPerNFT)} LGND/NFT/day</span>`;
+            
+            if (legendBalance > 0) {
+                legendPoolInfo.innerHTML += ` · 📦 ${formatNumber(Math.floor(legendBalance))} in contract`;
+            }
+        }
+        
+        const passPoolInfo = document.getElementById('passRemainingPool');
+        if (passPoolInfo) {
+            passPoolInfo.innerHTML = 
+                `${formatNumber(Math.floor(passRemaining))} LGND left · ` +
+                `<span style="color: #10B981;">${formatNumber(passStaked)} NFTs staked</span><br>` +
+                `<span style="font-size: 0.7rem;">⚡ ${formatNumber(CONFIG.rewards["PASS"].dailyPerNFT)} LGND/NFT/day</span>`;
+            
+            if (passBalance > 0) {
+                passPoolInfo.innerHTML += ` · 📦 ${formatNumber(Math.floor(passBalance))} in contract`;
+            }
+        }
+        
+        // Last update time
+        document.getElementById('lastUpdate').textContent = 
+            `updated ${new Date().toLocaleTimeString()}`;
+        
+        // Update state
+        state.stats = {
+            totalStakedNFTs,
+            totalDistributed: Math.floor(totalDistributed),
+            legendRemaining: Math.floor(legendRemaining),
+            passRemaining: Math.floor(passRemaining),
+            legendBalance: Math.floor(legendBalance),
+            passBalance: Math.floor(passBalance),
+            legendStaked,
+            passStaked,
+            legendDailyPool,
+            passDailyPool
+        };
+        
+        console.log('✅ Real-time stats updated:', {
+            totalNFTs: totalStakedNFTs,
+            legendStaked,
+            passStaked,
+            legendDaily: legendDailyPool,
+            passDaily: passDailyPool,
+            totalDistributed: Math.floor(totalDistributed)
+        });
+        
+    } catch (error) {
+        console.error('❌ Error updating stats:', error);
+        document.getElementById('lastUpdate').textContent = 'update failed';
+    }
+}
 
         async function fetchRealStats() {
             try {
