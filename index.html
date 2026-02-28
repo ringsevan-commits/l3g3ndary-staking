@@ -9,6 +9,10 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     
+    <!-- Для мобильных приложений -->
+    <meta name="apple-itunes-app" content="app-id=1578821947, app-argument=https://metamask.app.link/dapp/l3g3ndary.com">
+    <meta name="google-play-app" content="app-id=io.metamask">
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
     
     <!-- Ethers.js -->
@@ -565,6 +569,22 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-weight: bold;
         }
+        
+        /* Wallet Modal */
+        .wallet-option:hover {
+            background: rgba(139, 92, 246, 0.2) !important;
+            transform: translateY(-2px);
+            border-color: var(--primary) !important;
+        }
+        
+        #walletModal {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -597,22 +617,31 @@
             <h1>L3G3NDARY</h1>
             
             <div class="links">
-    <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank" rel="noopener noreferrer" class="link-btn">
-        <span>🖼️</span>
-        <span>L3G3NDS NFTs</span>
-    </a>
-    <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank" rel="noopener noreferrer" class="link-btn">
-        <span>🎫</span>
-        <span>L3G3NDARY Pass</span>
-    </a>
-    <a href="https://www.dextools.io/app/ether/pair-explorer/0x52bea360319c9e34c197ba9d6132a6f1db17a6a6" target="_blank" rel="noopener noreferrer" class="link-btn">
-        <span>📈</span>
-        <span>Trade LGND</span>
-    </a>
-    <button id="connectWalletBtn" class="btn btn-primary">
-        🔗 Connect Wallet
-    </button>
-</div>
+                <a href="https://opensea.io/collection/l3g3nds-317620434" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span>🖼️</span>
+                    <span>L3G3NDS NFTs</span>
+                </a>
+                <a href="https://opensea.io/collection/l3g3ndary-pass" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span>🎫</span>
+                    <span>L3G3NDARY Pass</span>
+                </a>
+                <a href="https://www.dextools.io/app/ether/pair-explorer/0x52bea360319c9e34c197ba9d6132a6f1db17a6a6" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span>📈</span>
+                    <span>Trade LGND</span>
+                </a>
+                <button id="connectWalletBtn" class="btn btn-primary">
+                    🔗 Connect Wallet
+                </button>
+            </div>
+            
+            <!-- Для мобильных пользователей (скрыто по умолчанию) -->
+            <div style="margin-top: 1rem; display: none;" id="mobileDownload">
+                <a href="https://metamask.app.link/dapp/l3g3ndary.com" 
+                   class="btn btn-secondary" 
+                   style="text-decoration: none;">
+                    📱 Open in MetaMask
+                </a>
+            </div>
         </section>
 
         <!-- Security & Transparency Section -->
@@ -1274,26 +1303,23 @@
         </section>
 
         <!-- Community Section -->
-<section class="section">
-    <h2 class="section-title">🌍 Join Our Community</h2>
-    <div class="links">
-        <a href="https://x.com/l3g3ndary_dep" target="_blank" rel="noopener noreferrer" class="link-btn">
-            <span class="x-icon">𝕏</span>
-        </a>
-        <a href="https://discord.gg/FXHpdqeqDr" target="_blank" rel="noopener noreferrer" class="link-btn">
-            <span>💬</span>
-            <span>Discord</span>
-        </a>
-        <a href="https://www.linkedin.com/in/3g3ndary/" target="_blank" rel="noopener noreferrer" class="link-btn">
-            <span>💼</span>
-            <span>LinkedIn</span>
-        </a>
-        <a href="https://medium.com/@l3g3ndarydep" target="_blank" rel="noopener noreferrer" class="link-btn">
-            <span>📝</span>
-            <span>Medium</span>
-        </a>
-    </div>
-</section>
+        <section class="section">
+            <h2 class="section-title">🌍 Join Our Community</h2>
+            <div class="links">
+                <a href="https://x.com/l3g3ndary_dep" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span class="x-icon">𝕏</span>
+                </a>
+                <a href="https://discord.gg/FXHpdqeqDr" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span>💬</span>
+                </a>
+                <a href="https://www.linkedin.com/in/3g3ndary/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span>💼</span>
+                </a>
+                <a href="https://medium.com/@l3g3ndarydep" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <span>📝</span>
+                </a>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -1318,6 +1344,73 @@
             </p>
         </div>
     </footer>
+
+    <!-- Модальное окно выбора кошелька -->
+    <div id="walletModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+        <div style="background: var(--dark); padding: 2rem; border-radius: 20px; max-width: 400px; width: 90%; border: 2px solid var(--primary); position: relative;">
+            
+            <!-- Кнопка закрытия -->
+            <button onclick="closeWalletModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #94A3B8; font-size: 1.5rem; cursor: pointer;">✕</button>
+            
+            <h3 style="color: white; margin-bottom: 1.5rem; text-align: center;">Connect Wallet</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr; gap: 0.8rem; margin-bottom: 1.5rem;">
+                
+                <!-- MetaMask -->
+                <button onclick="connectMobileWallet('metamask')" class="wallet-option" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s;">
+                    <span style="font-size: 2rem;">🦊</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">MetaMask</span>
+                    <span style="color: #94A3B8;">→</span>
+                </button>
+                
+                <!-- Trust Wallet -->
+                <button onclick="connectMobileWallet('trust')" class="wallet-option" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s;">
+                    <span style="font-size: 2rem;">🛡️</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">Trust Wallet</span>
+                    <span style="color: #94A3B8;">→</span>
+                </button>
+                
+                <!-- Coinbase Wallet -->
+                <button onclick="connectMobileWallet('coinbase')" class="wallet-option" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s;">
+                    <span style="font-size: 2rem;">🔷</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">Coinbase Wallet</span>
+                    <span style="color: #94A3B8;">→</span>
+                </button>
+                
+                <!-- Rainbow -->
+                <button onclick="connectMobileWallet('rainbow')" class="wallet-option" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s;">
+                    <span style="font-size: 2rem;">🌈</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">Rainbow</span>
+                    <span style="color: #94A3B8;">→</span>
+                </button>
+                
+                <!-- OKX Wallet -->
+                <button onclick="connectMobileWallet('okx')" class="wallet-option" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s;">
+                    <span style="font-size: 2rem;">⭕</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">OKX Wallet</span>
+                    <span style="color: #94A3B8;">→</span>
+                </button>
+                
+                <!-- TokenPocket -->
+                <button onclick="connectMobileWallet('tokenpocket')" class="wallet-option" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s;">
+                    <span style="font-size: 2rem;">💰</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">TokenPocket</span>
+                    <span style="color: #94A3B8;">→</span>
+                </button>
+                
+                <!-- WalletConnect (для всех остальных) -->
+                <button onclick="connectMobileWallet('walletconnect')" class="wallet-option" style="background: rgba(139,92,246,0.2); border: 2px solid var(--primary); border-radius: 12px; padding: 1rem; cursor: pointer; color: white; display: flex; align-items: center; gap: 1rem; width: 100%; transition: all 0.3s; margin-top: 0.5rem;">
+                    <span style="font-size: 2rem;">🔗</span>
+                    <span style="flex: 1; text-align: left; font-weight: 600;">WalletConnect</span>
+                    <span style="color: #8B5CF6;">(другие кошельки)</span>
+                </button>
+            </div>
+            
+            <p style="color: #94A3B8; font-size: 0.85rem; text-align: center;">
+                Выберите кошелек. Если приложение не открывается, установите его сначала.
+            </p>
+        </div>
+    </div>
 
     <script>
         // ============================
@@ -1460,6 +1553,90 @@
         }
 
         // ============================
+        // ПРОВЕРКА МОБИЛЬНОГО УСТРОЙСТВА
+        // ============================
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function getWalletName(walletType) {
+            const names = {
+                'metamask': 'MetaMask',
+                'trust': 'Trust Wallet',
+                'coinbase': 'Coinbase Wallet',
+                'rainbow': 'Rainbow',
+                'tokenpocket': 'TokenPocket',
+                'imtoken': 'imToken',
+                'okx': 'OKX Wallet',
+                'bitkeep': 'BitKeep',
+                'walletconnect': 'WalletConnect'
+            };
+            return names[walletType] || 'Wallet';
+        }
+
+        function getWalletDeepLink(walletType) {
+            const dappUrl = encodeURIComponent(`https://${window.location.host}${window.location.pathname}`);
+            
+            const deepLinks = {
+                'metamask': `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`,
+                'trust': `https://link.trustwallet.com/open_url?coin_id=60&url=${dappUrl}`,
+                'coinbase': `https://go.cb-w.com/dapp?cb_url=${dappUrl}`,
+                'rainbow': `https://rainbow.me/app/dapp?url=${dappUrl}`,
+                'tokenpocket': `https://tokenpocket.pro/dapp?url=${dappUrl}`,
+                'imtoken': `https://imtoken.app.co/dapp?url=${dappUrl}`,
+                'okx': `https://www.okx.com/download?deeplink=dapp${dappUrl}`,
+                'bitkeep': `https://bkapp.vip/dapp?url=${dappUrl}`,
+                'walletconnect': `https://walletconnect.com/`
+            };
+            
+            return deepLinks[walletType] || deepLinks.metamask;
+        }
+
+        function showWalletModal() {
+            const modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeWalletModal() {
+            const modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function connectMobileWallet(walletType) {
+            closeWalletModal();
+            
+            // Проверяем, есть ли уже кошелек в браузере
+            if (window.ethereum) {
+                let activeWallet = 'metamask';
+                if (window.ethereum.isTrust) activeWallet = 'trust';
+                else if (window.ethereum.isCoinbaseWallet) activeWallet = 'coinbase';
+                else if (window.ethereum.isTokenPocket) activeWallet = 'tokenpocket';
+                else if (window.ethereum.isImToken) activeWallet = 'imtoken';
+                else if (window.ethereum.isOKExWallet) activeWallet = 'okx';
+                else if (window.ethereum.isBitKeep) activeWallet = 'bitkeep';
+                
+                showNotification(`🔄 Connecting to ${getWalletName(activeWallet)}...`, 'info');
+                await connectWallet();
+                return;
+            }
+            
+            // Если нет кошелька в браузере, открываем deep link
+            const deepLink = getWalletDeepLink(walletType);
+            
+            if (walletType === 'walletconnect') {
+                showNotification('📱 WalletConnect: откройте приложение кошелька и сканируйте QR-код', 'info');
+                window.open('https://walletconnect.com/', '_blank');
+            } else {
+                showNotification(`📱 Открываем ${getWalletName(walletType)}...`, 'info');
+                window.location.href = deepLink;
+            }
+        }
+
+        // ============================
         // ОБНОВЛЕНИЕ СТАТИСТИКИ (реальная версия)
         // ============================
         async function updateStakingStats() {
@@ -1512,36 +1689,36 @@
                         passStaked = Number(passTotalStaked);
                         
                         // Get total rewards distributed - MULTIPLE METHODS
-console.log('📊 Attempting to fetch total rewards distributed...');
+                        console.log('📊 Attempting to fetch total rewards distributed...');
 
-// Method 1: Try to get from contract if available
-try {
-    if (state.contracts.legendStaking) {
-        const legendTotalRewards = await state.contracts.legendStaking.totalRewardsDistributed().catch(() => null);
-        if (legendTotalRewards !== null) {
-            legendDistributed = Number(ethers.formatUnits(legendTotalRewards, 18));
-            console.log('✅ Legend total rewards from contract (method 1):', legendDistributed);
-        } else {
-            console.log('⚠️ Method 1 failed for legend - totalRewardsDistributed returned null');
-        }
-    }
-} catch (e) {
-    console.log('⚠️ Method 1 failed for legend:', e.message);
-}
+                        // Method 1: Try to get from contract if available
+                        try {
+                            if (state.contracts.legendStaking) {
+                                const legendTotalRewards = await state.contracts.legendStaking.totalRewardsDistributed().catch(() => null);
+                                if (legendTotalRewards !== null) {
+                                    legendDistributed = Number(ethers.formatUnits(legendTotalRewards, 18));
+                                    console.log('✅ Legend total rewards from contract (method 1):', legendDistributed);
+                                } else {
+                                    console.log('⚠️ Method 1 failed for legend - totalRewardsDistributed returned null');
+                                }
+                            }
+                        } catch (e) {
+                            console.log('⚠️ Method 1 failed for legend:', e.message);
+                        }
 
-try {
-    if (state.contracts.passStaking) {
-        const passTotalRewards = await state.contracts.passStaking.totalRewardsDistributed().catch(() => null);
-        if (passTotalRewards !== null) {
-            passDistributed = Number(ethers.formatUnits(passTotalRewards, 18));
-            console.log('✅ Pass total rewards from contract (method 1):', passDistributed);
-        } else {
-            console.log('⚠️ Method 1 failed for pass - totalRewardsDistributed returned null');
-        }
-    }
-} catch (e) {
-    console.log('⚠️ Method 1 failed for pass:', e.message);
-}
+                        try {
+                            if (state.contracts.passStaking) {
+                                const passTotalRewards = await state.contracts.passStaking.totalRewardsDistributed().catch(() => null);
+                                if (passTotalRewards !== null) {
+                                    passDistributed = Number(ethers.formatUnits(passTotalRewards, 18));
+                                    console.log('✅ Pass total rewards from contract (method 1):', passDistributed);
+                                } else {
+                                    console.log('⚠️ Method 1 failed for pass - totalRewardsDistributed returned null');
+                                }
+                            }
+                        } catch (e) {
+                            console.log('⚠️ Method 1 failed for pass:', e.message);
+                        }
                         
                         // Get remaining rewards in contracts
                         const [legendContractBalance, passContractBalance] = await Promise.all([
@@ -1585,9 +1762,6 @@ try {
                 const passRewardsEl = document.getElementById('passRewards');
                 if (passRewardsEl) passRewardsEl.textContent = formatNumber(passDailyPool);
                 
-                const totalRewardsEl = document.getElementById('totalRewards');
-                if (totalRewardsEl) totalRewardsEl.textContent = formatNumber(Math.floor(totalDistributed));
-                
                 // Update pool info
                 const legendPoolInfoEl = document.getElementById('legendPoolInfo');
                 if (legendPoolInfoEl) {
@@ -1612,12 +1786,6 @@ try {
                 if (passRemainingEl) {
                     passRemainingEl.innerHTML = `${formatNumber(Math.floor(passRemaining))} LGND · ` +
                         `<span style="font-size: 0.8rem;">📦 ${formatNumber(Math.floor(passBalance))} in contract</span>`;
-                }
-                
-                // Last update time
-                const lastUpdateEl = document.getElementById('lastUpdate');
-                if (lastUpdateEl) {
-                    lastUpdateEl.textContent = `updated ${new Date().toLocaleTimeString()}`;
                 }
                 
                 // Update state
@@ -1645,8 +1813,6 @@ try {
                 
             } catch (error) {
                 console.error('❌ Error updating stats:', error);
-                const lastUpdateEl = document.getElementById('lastUpdate');
-                if (lastUpdateEl) lastUpdateEl.textContent = 'update failed';
             }
         }
 
@@ -2047,9 +2213,36 @@ try {
         async function connectWallet() {
             console.log('🚀 Connecting wallet...');
             
-            if (typeof window.ethereum === 'undefined') {
-                showNotification('❌ MetaMask not found! Install from https://metamask.io', 'error');
-                return;
+            // Проверяем наличие разных кошельков
+            let provider = null;
+            let walletType = 'unknown';
+            
+            if (window.ethereum) {
+                provider = window.ethereum;
+                if (window.ethereum.isTrust) walletType = 'trust';
+                else if (window.ethereum.isCoinbaseWallet) walletType = 'coinbase';
+                else if (window.ethereum.isMetaMask) walletType = 'metamask';
+                else if (window.ethereum.isTokenPocket) walletType = 'tokenpocket';
+                else if (window.ethereum.isImToken) walletType = 'imtoken';
+                else if (window.ethereum.isOKExWallet) walletType = 'okx';
+                else if (window.ethereum.isBitKeep) walletType = 'bitkeep';
+            } else if (window.trustWallet) {
+                provider = window.trustWallet;
+                walletType = 'trust';
+            } else if (window.coinbaseWalletExtension) {
+                provider = window.coinbaseWalletExtension;
+                walletType = 'coinbase';
+            }
+            
+            if (!provider) {
+                if (isMobileDevice()) {
+                    showWalletModal();
+                    return;
+                } else {
+                    showNotification('❌ Кошелек не найден! Установите MetaMask, Trust Wallet или другой кошелек', 'error');
+                    window.open('https://metamask.io/download/', '_blank');
+                    return;
+                }
             }
             
             const button = document.getElementById('connectWalletBtn');
@@ -2058,9 +2251,7 @@ try {
             button.disabled = true;
             
             try {
-                const accounts = await window.ethereum.request({ 
-                    method: 'eth_requestAccounts' 
-                });
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
                 
                 if (!accounts || accounts.length === 0) {
                     throw new Error('No accounts returned');
@@ -2068,26 +2259,20 @@ try {
                 
                 const address = accounts[0];
                 
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const signer = await provider.getSigner();
-                
-                const network = await provider.getNetwork();
-                
-                let walletType = 'MetaMask';
-                if (window.ethereum.isCoinbaseWallet) walletType = 'Coinbase Wallet';
-                else if (window.ethereum.isTrust) walletType = 'Trust Wallet';
-                else if (window.ethereum.isRabby) walletType = 'Rabby Wallet';
+                const ethersProvider = new ethers.BrowserProvider(provider);
+                const signer = await ethersProvider.getSigner();
+                const network = await ethersProvider.getNetwork();
                 
                 state.isConnected = true;
                 state.walletAddress = address;
-                state.walletType = walletType;
-                state.provider = provider;
+                state.walletType = getWalletName(walletType);
+                state.provider = ethersProvider;
                 state.signer = signer;
                 state.chainId = Number(network.chainId);
                 
                 console.log('✅ Connected:', {
                     address,
-                    walletType,
+                    walletType: state.walletType,
                     chainId: state.chainId
                 });
                 
@@ -2099,13 +2284,13 @@ try {
                     updateStakingStats()
                 ]);
                 
-                showNotification(`✅ ${walletType} connected!`, 'success');
+                showNotification(`✅ ${state.walletType} connected!`, 'success');
                 
             } catch (error) {
                 console.error('❌ Wallet connection error:', error);
                 
                 if (error.code === 4001) {
-                    showNotification('❌ Connection rejected by user', 'warning');
+                    showNotification('❌ Connection rejected', 'warning');
                 } else {
                     showNotification('❌ Connection failed: ' + error.message, 'error');
                 }
@@ -2298,6 +2483,13 @@ try {
                 await updateStakingStats();
             }, 15000);
             
+            // Показываем модальное окно если нужно
+            if (isMobileDevice() && !window.ethereum) {
+                setTimeout(() => {
+                    showWalletModal();
+                }, 2000);
+            }
+            
             console.log('✅ Website initialized successfully');
         });
 
@@ -2332,6 +2524,17 @@ try {
                     disconnectWallet();
                 });
             }
+            
+            // Для мобильных - обработка возврата из приложения
+            window.addEventListener('focus', () => {
+                if (isMobileDevice() && !state.isConnected) {
+                    setTimeout(() => {
+                        if (window.ethereum) {
+                            connectWallet();
+                        }
+                    }, 500);
+                }
+            });
         }
 
         function checkDomainSecurity() {
