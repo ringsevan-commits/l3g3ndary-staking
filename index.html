@@ -13,7 +13,7 @@
     <meta name="apple-itunes-app" content="app-id=1578821947, app-argument=https://metamask.app.link/dapp/l3g3ndary.com">
     <meta name="google-play-app" content="app-id=io.metamask">
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23FFD700%22 stroke=%22%23B8860B%22 stroke-width=%223%22/><text x=%2250%22 y=%2265%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22%23B8860B%22 font-weight=%22bold%22>L</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><defs><linearGradient id=%22goldGrad%22 x1=%220%25%22 y1=%220%25%22 x2=%22100%25%22 y2=%22100%25%22><stop offset=%220%25%22 style=%22stop-color:%23FFD700;stop-opacity:1%22 /><stop offset=%2250%25%22 style=%22stop-color:%23FDB931;stop-opacity:1%22 /><stop offset=%22100%25%22 style=%22stop-color:%23B8860B;stop-opacity:1%22 /></linearGradient><radialGradient id=%22shine%22 cx=%2230%25%22 cy=%2230%25%22 r=%2250%25%22 fx=%2230%25%22 fy=%2230%25%22><stop offset=%220%25%22 stop-color=%22%23FFFFFF%22 stop-opacity=%220.8%22/><stop offset=%22100%25%22 stop-color=%22%23FFFFFF%22 stop-opacity=%220%22/></radialGradient></defs><circle cx=%2250%22 cy=%2250%22 r=%2242%22 fill=%22url(%23goldGrad)%22 stroke=%22%23B8860B%22 stroke-width=%223%22/><circle cx=%2250%22 cy=%2250%22 r=%2238%22 fill=%22none%22 stroke=%22%23FFE55C%22 stroke-width=%222%22 stroke-dasharray=%224 6%22/><circle cx=%2250%22 cy=%2250%22 r=%2232%22 fill=%22none%22 stroke=%22%23B8860B%22 stroke-width=%221.5%22/><text x=%2250%22 y=%2265%22 font-size=%2250%22 text-anchor=%22middle%22 fill=%22%238B4513%22 font-weight=%22bold%22 font-family=%22Arial, sans-serif%22>L</text><circle cx=%2235%22 cy=%2235%22 r=%225%22 fill=%22url(%23shine)%22/></svg>">
     
     <!-- Ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
@@ -592,7 +592,11 @@
     <header>
         <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
             <div class="logo">
-    <span style="display: inline-block; width: 40px; height: 40px; background: linear-gradient(135deg, #FFD700, #B8860B); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #B8860B; text-shadow: 0 0 5px rgba(255,215,0,0.5); box-shadow: 0 2px 10px rgba(255,215,0,0.3);">L</span>
+    <span style="display: inline-block; width: 44px; height: 44px; background: radial-gradient(circle at 30% 30%, #FFD700, #B8860B); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 4px 15px rgba(184, 134, 11, 0.5), inset 0 -2px 5px rgba(0,0,0,0.2), inset 0 2px 5px rgba(255,255,255,0.5); border: 2px solid #FDB931;">
+        <span style="position: absolute; width: 36px; height: 36px; border-radius: 50%; border: 1px dashed #FFE55C; opacity: 0.5;"></span>
+        <span style="font-size: 28px; font-weight: bold; color: #8B4513; text-shadow: 0 0 10px #FFD700, 0 2px 4px rgba(0,0,0,0.3); transform: rotate(5deg);">L</span>
+        <span style="position: absolute; top: 8px; left: 12px; width: 8px; height: 8px; background: white; border-radius: 50%; opacity: 0.8; filter: blur(1px);"></span>
+    </span>
     <span>L3G3NDARY</span>
 </div>
             <div id="networkInfo"></div>
