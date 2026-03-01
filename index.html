@@ -1648,6 +1648,217 @@
         }
 
         // ============================
+        // WALLET CONNECTION (ИСПРАВЛЕНО - ТОЛЬКО ПО НАЖАТИЮ)
+        // ============================
+        async function connectWallet() {
+            // Check if already connected
+            if (state.isConnected) {
+                disconnectWallet();
+                return;
+            }
+            
+            console.log('🚀 Connecting wallet...');
+            
+            // Check for different wallets
+            let provider = null;
+            let walletType = 'unknown';
+            
+            if (window.ethereum) {
+                provider = window.ethereum;
+                if (window.ethereum.isTrust) walletType = 'trust';
+                else if (window.ethereum.isCoinbaseWallet) walletType = 'coinbase';
+                else if (window.ethereum.isMetaMask) walletType = 'metamask';
+                else if (window.ethereum.isTokenPocket) walletType = 'tokenpocket';
+                else if (window.ethereum.isImToken) walletType = 'imtoken';
+                else if (window.ethereum.isOKExWallet) walletType = 'okx';
+                else if (window.ethereum.isBitKeep) walletType = 'bitkeep';
+            } else if (window.trustWallet) {
+                provider = window.trustWallet;
+                walletType = 'trust';
+            } else if (window.coinbaseWalletExtension) {
+                provider = window.coinbaseWalletExtension;
+                walletType = 'coinbase';
+            }
+            
+            if (!provider) {
+                if (isMobileDevice()) {
+                    showWalletModal();
+                    return;
+                } else {
+                    showNotification('❌ Wallet not found! Install MetaMask, Trust Wallet or other wallet', 'error');
+                    window.open('https://metamask.io/download/', '_blank');
+                    return;
+                }
+            }
+            
+            const button = document.getElementById('connectWalletBtn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner"></span> Connecting...';
+            button.disabled = true;
+            
+            try {
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No accounts returned');
+                }
+                
+                const address = accounts[0];
+                
+                const ethersProvider = new ethers.BrowserProvider(provider);
+                const signer = await ethersProvider.getSigner();
+                const network = await ethersProvider.getNetwork();
+                
+                state.isConnected = true;
+                state.walletAddress = address;
+                state.walletType = getWalletName(walletType);
+                state.provider = ethersProvider;
+                state.signer = signer;
+                state.chainId = Number(network.chainId);
+                
+                console.log('✅ Connected:', {
+                    address,
+                    walletType: state.walletType,
+                    chainId: state.chainId
+                });
+                
+                updateUI();
+                updateNetworkInfo();
+                
+                await Promise.all([
+                    loadUserData(),
+                    updateStakingStats()
+                ]);
+                
+                showNotification(`✅ ${state.walletType} connected!`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Wallet connection error:', error);
+                
+                if (error.code === 4001) {
+                    showNotification('❌ Connection rejected', 'warning');
+                } else {
+                    showNotification('❌ Connection failed: ' + error.message, 'error');
+                }
+                
+                state.isConnected = false;
+                state.walletAddress = null;
+                updateUI();
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        function disconnectWallet() {
+            console.log('🔌 Disconnecting wallet...');
+            
+            state.isConnected = false;
+            state.walletAddress = null;
+            state.walletType = null;
+            state.provider = null;
+            state.signer = null;
+            state.chainId = null;
+            
+            state.stakingData = {
+                legend: { balance: 0, pending: 0, stakes: [] },
+                pass: { balance: 0, pending: 0, stakes: [] }
+            };
+            
+            updateUI();
+            updateNetworkInfo();
+            
+            showNotification('Wallet disconnected', 'info');
+        }
+
+        function updateUI() {
+            console.log('🎨 Updating UI, connected:', state.isConnected);
+            
+            const connectWalletBtn = document.getElementById('connectWalletBtn');
+            const goToStakingBtn = document.getElementById('goToStakingBtn');
+            const networkInfoDiv = document.getElementById('networkInfo');
+            const stakingInterface = document.getElementById('stakingInterface');
+            const stakingNotConnected = document.getElementById('stakingNotConnected');
+            
+            if (state.isConnected && state.walletAddress) {
+                if (connectWalletBtn) {
+                    connectWalletBtn.innerHTML = '✅ Connected';
+                    connectWalletBtn.disabled = false;
+                    connectWalletBtn.onclick = disconnectWallet;
+                }
+                
+                if (goToStakingBtn) {
+                    goToStakingBtn.textContent = '🚀 Stake NFTs';
+                    goToStakingBtn.onclick = function() {
+                        document.querySelector('.staking-section').scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    };
+                }
+                
+                if (networkInfoDiv) {
+                    networkInfoDiv.innerHTML = `
+                        <div class="wallet-info">
+                            <span>👛</span>
+                            <span class="wallet-address">${formatAddress(state.walletAddress)}</span>
+                            <button class="disconnect-btn" onclick="disconnectWallet()">Disconnect</button>
+                        </div>
+                    `;
+                }
+                
+                if (stakingInterface) stakingInterface.style.display = 'block';
+                if (stakingNotConnected) stakingNotConnected.style.display = 'none';
+                
+            } else {
+                if (connectWalletBtn) {
+                    connectWalletBtn.innerHTML = '🔗 Connect Wallet';
+                    connectWalletBtn.disabled = false;
+                    connectWalletBtn.onclick = connectWallet;
+                }
+                
+                if (goToStakingBtn) {
+                    goToStakingBtn.textContent = '🔒 Connect Wallet First';
+                    goToStakingBtn.onclick = connectWallet;
+                }
+                
+                if (networkInfoDiv) networkInfoDiv.innerHTML = '';
+                if (stakingInterface) stakingInterface.style.display = 'none';
+                if (stakingNotConnected) stakingNotConnected.style.display = 'block';
+            }
+        }
+
+        function updateNetworkInfo() {
+            if (state.chainId && state.chainId !== 1) {
+                let networkWarning = document.querySelector('.network-warning');
+                
+                if (!networkWarning) {
+                    networkWarning = document.createElement('div');
+                    networkWarning.className = 'domain-verification network-warning';
+                    networkWarning.style.background = 'rgba(245, 158, 11, 0.1)';
+                    networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                    networkWarning.style.marginTop = '1rem';
+                    networkWarning.innerHTML = `
+                        <span style="color: #F59E0B;">⚠️</span>
+                        <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
+                        <br>
+                        <span style="font-size: 0.9rem;">
+                            Please switch to Ethereum Mainnet
+                        </span>
+                    `;
+                    
+                    const domainVerification = document.querySelector('.domain-verification');
+                    if (domainVerification) {
+                        domainVerification.parentNode.insertBefore(networkWarning, domainVerification.nextSibling);
+                    }
+                }
+            } else {
+                const warning = document.querySelector('.network-warning');
+                if (warning) warning.remove();
+            }
+        }
+
+        // ============================
         // UPDATE STAKING STATS
         // ============================
         async function updateStakingStats() {
@@ -1699,18 +1910,12 @@
                         legendStaked = Number(legendTotalStaked);
                         passStaked = Number(passTotalStaked);
                         
-                        // Get total rewards distributed - MULTIPLE METHODS
-                        console.log('📊 Attempting to fetch total rewards distributed...');
-
-                        // Method 1: Try to get from contract if available
+                        // Get total rewards distributed
                         try {
                             if (state.contracts.legendStaking) {
                                 const legendTotalRewards = await state.contracts.legendStaking.totalRewardsDistributed().catch(() => null);
                                 if (legendTotalRewards !== null) {
                                     legendDistributed = Number(ethers.formatUnits(legendTotalRewards, 18));
-                                    console.log('✅ Legend total rewards from contract (method 1):', legendDistributed);
-                                } else {
-                                    console.log('⚠️ Method 1 failed for legend - totalRewardsDistributed returned null');
                                 }
                             }
                         } catch (e) {
@@ -1722,9 +1927,6 @@
                                 const passTotalRewards = await state.contracts.passStaking.totalRewardsDistributed().catch(() => null);
                                 if (passTotalRewards !== null) {
                                     passDistributed = Number(ethers.formatUnits(passTotalRewards, 18));
-                                    console.log('✅ Pass total rewards from contract (method 1):', passDistributed);
-                                } else {
-                                    console.log('⚠️ Method 1 failed for pass - totalRewardsDistributed returned null');
                                 }
                             }
                         } catch (e) {
@@ -2219,212 +2421,51 @@
         }
 
         // ============================
-        // WALLET CONNECTION
+        // EVENT LISTENERS (ИСПРАВЛЕНО - БЕЗ АВТО-ПОДКЛЮЧЕНИЯ)
         // ============================
-        async function connectWallet() {
-            console.log('🚀 Connecting wallet...');
-            
-            // Check for different wallets
-            let provider = null;
-            let walletType = 'unknown';
-            
+        function setupEventListeners() {
             if (window.ethereum) {
-                provider = window.ethereum;
-                if (window.ethereum.isTrust) walletType = 'trust';
-                else if (window.ethereum.isCoinbaseWallet) walletType = 'coinbase';
-                else if (window.ethereum.isMetaMask) walletType = 'metamask';
-                else if (window.ethereum.isTokenPocket) walletType = 'tokenpocket';
-                else if (window.ethereum.isImToken) walletType = 'imtoken';
-                else if (window.ethereum.isOKExWallet) walletType = 'okx';
-                else if (window.ethereum.isBitKeep) walletType = 'bitkeep';
-            } else if (window.trustWallet) {
-                provider = window.trustWallet;
-                walletType = 'trust';
-            } else if (window.coinbaseWalletExtension) {
-                provider = window.coinbaseWalletExtension;
-                walletType = 'coinbase';
-            }
-            
-            if (!provider) {
-                if (isMobileDevice()) {
-                    showWalletModal();
-                    return;
-                } else {
-                    showNotification('❌ Wallet not found! Install MetaMask, Trust Wallet or other wallet', 'error');
-                    window.open('https://metamask.io/download/', '_blank');
-                    return;
-                }
-            }
-            
-            const button = document.getElementById('connectWalletBtn');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<span class="spinner"></span> Connecting...';
-            button.disabled = true;
-            
-            try {
-                const accounts = await provider.request({ method: 'eth_requestAccounts' });
-                
-                if (!accounts || accounts.length === 0) {
-                    throw new Error('No accounts returned');
-                }
-                
-                const address = accounts[0];
-                
-                const ethersProvider = new ethers.BrowserProvider(provider);
-                const signer = await ethersProvider.getSigner();
-                const network = await ethersProvider.getNetwork();
-                
-                state.isConnected = true;
-                state.walletAddress = address;
-                state.walletType = getWalletName(walletType);
-                state.provider = ethersProvider;
-                state.signer = signer;
-                state.chainId = Number(network.chainId);
-                
-                console.log('✅ Connected:', {
-                    address,
-                    walletType: state.walletType,
-                    chainId: state.chainId
+                window.ethereum.on('accountsChanged', async (accounts) => {
+                    console.log('🔀 Accounts changed:', accounts);
+                    if (accounts.length === 0) {
+                        disconnectWallet();
+                    } else {
+                        // Only update if already connected, don't auto-connect
+                        if (state.isConnected) {
+                            state.walletAddress = accounts[0];
+                            updateUI();
+                            await loadUserData();
+                            showNotification('Account changed', 'info');
+                        }
+                    }
                 });
                 
-                updateUI();
-                updateNetworkInfo();
-                
-                await Promise.all([
-                    loadUserData(),
-                    updateStakingStats()
-                ]);
-                
-                showNotification(`✅ ${state.walletType} connected!`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Wallet connection error:', error);
-                
-                if (error.code === 4001) {
-                    showNotification('❌ Connection rejected', 'warning');
-                } else {
-                    showNotification('❌ Connection failed: ' + error.message, 'error');
-                }
-                
-                state.isConnected = false;
-                state.walletAddress = null;
-                updateUI();
-            } finally {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        }
-
-        function disconnectWallet() {
-            console.log('🔌 Disconnecting wallet...');
-            
-            state.isConnected = false;
-            state.walletAddress = null;
-            state.walletType = null;
-            state.provider = null;
-            state.signer = null;
-            state.chainId = null;
-            
-            state.stakingData = {
-                legend: { balance: 0, pending: 0, stakes: [] },
-                pass: { balance: 0, pending: 0, stakes: [] }
-            };
-            
-            updateUI();
-            updateNetworkInfo();
-            
-            showNotification('Wallet disconnected', 'info');
-        }
-
-        function updateUI() {
-            console.log('🎨 Updating UI, connected:', state.isConnected);
-            
-            const connectWalletBtn = document.getElementById('connectWalletBtn');
-            const goToStakingBtn = document.getElementById('goToStakingBtn');
-            const networkInfoDiv = document.getElementById('networkInfo');
-            const stakingInterface = document.getElementById('stakingInterface');
-            const stakingNotConnected = document.getElementById('stakingNotConnected');
-            
-            if (state.isConnected && state.walletAddress) {
-                if (connectWalletBtn) {
-                    connectWalletBtn.innerHTML = '✅ Connected';
-                    connectWalletBtn.disabled = false;
-                    connectWalletBtn.onclick = disconnectWallet;
-                }
-                
-                if (goToStakingBtn) {
-                    goToStakingBtn.textContent = '🚀 Stake NFTs';
-                    goToStakingBtn.onclick = function() {
-                        document.querySelector('.staking-section').scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    };
-                }
-                
-                if (networkInfoDiv) {
-                    networkInfoDiv.innerHTML = `
-                        <div class="wallet-info">
-                            <span>👛</span>
-                            <span class="wallet-address">${formatAddress(state.walletAddress)}</span>
-                            <button class="disconnect-btn" onclick="disconnectWallet()">Disconnect</button>
-                        </div>
-                    `;
-                }
-                
-                if (stakingInterface) stakingInterface.style.display = 'block';
-                if (stakingNotConnected) stakingNotConnected.style.display = 'none';
-                
-            } else {
-                if (connectWalletBtn) {
-                    connectWalletBtn.innerHTML = '🔗 Connect Wallet';
-                    connectWalletBtn.disabled = false;
-                    connectWalletBtn.onclick = connectWallet;
-                }
-                
-                if (goToStakingBtn) {
-                    goToStakingBtn.textContent = '🔒 Connect Wallet First';
-                    goToStakingBtn.onclick = connectWallet;
-                }
-                
-                if (networkInfoDiv) networkInfoDiv.innerHTML = '';
-                if (stakingInterface) stakingInterface.style.display = 'none';
-                if (stakingNotConnected) stakingNotConnected.style.display = 'block';
-            }
-        }
-
-        function updateNetworkInfo() {
-            if (state.chainId && state.chainId !== 1) {
-                let networkWarning = document.querySelector('.network-warning');
-                
-                if (!networkWarning) {
-                    networkWarning = document.createElement('div');
-                    networkWarning.className = 'domain-verification network-warning';
-                    networkWarning.style.background = 'rgba(245, 158, 11, 0.1)';
-                    networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                    networkWarning.style.marginTop = '1rem';
-                    networkWarning.innerHTML = `
-                        <span style="color: #F59E0B;">⚠️</span>
-                        <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
-                        <br>
-                        <span style="font-size: 0.9rem;">
-                            Please switch to Ethereum Mainnet
-                        </span>
-                    `;
-                    
-                    const domainVerification = document.querySelector('.domain-verification');
-                    if (domainVerification) {
-                        domainVerification.parentNode.insertBefore(networkWarning, domainVerification.nextSibling);
+                window.ethereum.on('chainChanged', (chainId) => {
+                    console.log('🔗 Chain changed:', chainId);
+                    state.chainId = parseInt(chainId, 16);
+                    updateNetworkInfo();
+                    // Only update data if connected
+                    if (state.isConnected) {
+                        loadUserData();
+                        updateStakingStats();
                     }
-                }
-            } else {
-                const warning = document.querySelector('.network-warning');
-                if (warning) warning.remove();
+                });
+                
+                window.ethereum.on('disconnect', () => {
+                    console.log('🔌 Wallet disconnected');
+                    disconnectWallet();
+                });
             }
+            
+            // For mobile - handle return from app (but don't auto-connect)
+            window.addEventListener('focus', () => {
+                // Removed auto-connect on focus
+                console.log('Window focused');
+            });
         }
 
         // ============================
-        // INITIALIZATION
+        // INITIALIZATION (ИСПРАВЛЕНО - БЕЗ АВТО-ПОДКЛЮЧЕНИЯ)
         // ============================
         window.addEventListener('load', async () => {
             console.log('🎮 L3G3NDARY website initializing...');
@@ -2452,101 +2493,27 @@
             
             checkDomainSecurity();
             
+            // Initialize stats without wallet connection
             await updateStakingStats();
             
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    
-                    if (accounts && accounts.length > 0) {
-                        console.log('✅ Found existing connection:', accounts[0]);
-                        
-                        const provider = new ethers.BrowserProvider(window.ethereum);
-                        const signer = await provider.getSigner();
-                        const address = accounts[0];
-                        const network = await provider.getNetwork();
-                        
-                        state.isConnected = true;
-                        state.walletAddress = address;
-                        state.walletType = 'MetaMask';
-                        state.provider = provider;
-                        state.signer = signer;
-                        state.chainId = Number(network.chainId);
-                        
-                        updateUI();
-                        updateNetworkInfo();
-                        
-                        await Promise.all([
-                            loadUserData(),
-                            updateStakingStats()
-                        ]);
-                        
-                        console.log('✅ Auto-connected to:', address);
-                    }
-                } catch (error) {
-                    console.error('❌ Auto-connect error:', error);
-                }
-            }
-            
+            // Setup event listeners for wallet changes (but don't auto-connect)
             setupEventListeners();
             
+            // Auto-refresh stats every 15 seconds
             setInterval(async () => {
                 await updateStakingStats();
             }, 15000);
             
-            // Show modal on mobile if no wallet
+            // Show modal on mobile if no wallet (but don't auto-connect)
             if (isMobileDevice() && !window.ethereum) {
                 setTimeout(() => {
-                    showWalletModal();
+                    // Don't auto-show modal, just add a small reminder
+                    console.log('📱 Mobile device detected, wallet connection available via button');
                 }, 2000);
             }
             
             console.log('✅ Website initialized successfully');
         });
-
-        function setupEventListeners() {
-            if (window.ethereum) {
-                window.ethereum.on('accountsChanged', async (accounts) => {
-                    console.log('🔀 Accounts changed:', accounts);
-                    if (accounts.length === 0) {
-                        disconnectWallet();
-                    } else {
-                        state.walletAddress = accounts[0];
-                        if (state.isConnected) {
-                            updateUI();
-                            await loadUserData();
-                            showNotification('Account changed', 'info');
-                        }
-                    }
-                });
-                
-                window.ethereum.on('chainChanged', (chainId) => {
-                    console.log('🔗 Chain changed:', chainId);
-                    state.chainId = parseInt(chainId, 16);
-                    updateNetworkInfo();
-                    if (state.isConnected) {
-                        loadUserData();
-                        updateStakingStats();
-                    }
-                });
-                
-                window.ethereum.on('disconnect', () => {
-                    console.log('🔌 Wallet disconnected');
-                    disconnectWallet();
-                });
-            }
-            
-            // For mobile - handle return from app
-            window.addEventListener('focus', () => {
-                if (isMobileDevice() && !state.isConnected) {
-                    setTimeout(() => {
-                        if (window.ethereum) {
-                            connectWallet();
-                        }
-                    }, 500);
-                }
-            });
-        }
 
         function checkDomainSecurity() {
             const currentDomain = window.location.hostname;
