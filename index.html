@@ -599,16 +599,27 @@
         </div>
     </header>
 
-    <!-- Domain Verification -->
-    <div class="domain-verification">
+    <!-- Domain Verification with Security Warning -->
+<div class="domain-verification" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
         <span style="color: #10B981;">✅</span>
         <span>Official Website: <strong id="verifiedDomain">l3g3ndary.com</strong></span>
-        <span style="margin-left: 1rem; color: #94A3B8; font-size: 0.9rem;">
+        <span style="margin-left: auto; color: #94A3B8; font-size: 0.9rem;">
             Security: <span id="securityStatus" class="security-status">
                 <span>✅ Verified</span>
             </span>
         </span>
     </div>
+    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #EF4444; padding: 12px 16px; border-radius: 8px; margin-top: 8px; width: 100%;">
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="color: #EF4444; font-size: 1.2rem;">⚠️</span>
+            <div>
+                <strong style="color: #EF4444; display: block; margin-bottom: 4px;">WARNING</strong>
+                <span style="color: #FCA5A5; font-size: 0.95rem;">Before signing any transaction in your wallet, always check the contract you are interacting with.</span>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Main Content -->
     <main class="container">
