@@ -5,33 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>L3G3NDARY | Official Website</title>
     
-    <!-- ========== УЛУЧШЕННАЯ БЕЗОПАСНОСТЬ ========== -->
-    <!-- Strict Transport Security - принудительное HTTPS -->
-    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload">
-    
-    <!-- Content Security Policy - защита от XSS и инъекций -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://*.infura.io https://*.etherscan.io 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://mainnet.infura.io https://etherscan.io wss://*.infura.io; img-src 'self' data: https:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
-    
-    <!-- X-Content-Type-Options - защита от MIME-sniffing -->
+    <!-- Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    
-    <!-- X-Frame-Options - защита от clickjacking -->
     <meta http-equiv="X-Frame-Options" content="DENY">
     
-    <!-- Referrer Policy - защита от утечки данных -->
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    
-    <!-- Permissions Policy - ограничение возможностей браузера -->
-    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
-    
     <!-- For mobile apps -->
-<meta name="apple-itunes-app" content="app-id=1578821947, app-argument=https://metamask.app.link/dapp/l3g3ndary.com">
-<meta name="google-play-app" content="app-id=io.metamask">
-
-<!-- Ethers.js - исправленная версия -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
-<style>
+    <meta name="apple-itunes-app" content="app-id=1578821947, app-argument=https://metamask.app.link/dapp/l3g3ndary.com">
+    <meta name="google-play-app" content="app-id=io.metamask">
+    
+    <!-- Ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
+    
+    <style>
         :root {
             --primary: #8B5CF6;
             --primary-dark: #7C3AED;
@@ -117,25 +102,6 @@
             background: rgba(16, 185, 129, 0.1);
             border-radius: 10px;
             border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        /* Network Switch Button */
-        .network-switch-btn {
-            background: rgba(245, 158, 11, 0.2);
-            color: #F59E0B;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            margin-left: 10px;
-        }
-        
-        .network-switch-btn:hover {
-            background: rgba(245, 158, 11, 0.3);
-            transform: translateY(-1px);
         }
         
         /* Notification */
@@ -622,35 +588,35 @@
 <body>
     <!-- Header -->
     <header>
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="logo">
-                <span>L3G3NDARY</span>
-            </div>
-            <div id="networkInfo"></div>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="logo">
+            <span>L3G3NDARY</span>
         </div>
-    </header>
+        <div id="networkInfo"></div>
+    </div>
+</header>
 
     <!-- Domain Verification with Security Warning -->
-    <div class="domain-verification" style="flex-direction: column; align-items: center; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; flex-wrap: wrap;">
-            <span style="color: #10B981;">✅</span>
-            <span>Official Website: <strong id="verifiedDomain">l3g3ndary.com</strong></span>
-            <span style="color: #94A3B8; font-size: 0.9rem;">
-                Security: <span id="securityStatus" class="security-status">
-                    <span>✅ Verified</span>
-                </span>
+<div class="domain-verification" style="flex-direction: column; align-items: center; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; flex-wrap: wrap;">
+        <span style="color: #10B981;">✅</span>
+        <span>Official Website: <strong id="verifiedDomain">l3g3ndary.com</strong></span>
+        <span style="color: #94A3B8; font-size: 0.9rem;">
+            Security: <span id="securityStatus" class="security-status">
+                <span>✅ Verified</span>
             </span>
-        </div>
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px 16px; border-radius: 8px; width: 100%; max-width: 600px; margin: 0 auto;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center;">
-                <span style="color: #EF4444; font-size: 1.2rem;">⚠️</span>
-                <div>
-                    <strong style="color: #EF4444; display: block; margin-bottom: 4px;">WARNING</strong>
-                    <span style="color: #FCA5A5; font-size: 0.95rem;">Before signing any transaction in your wallet, always check the contract you are interacting with.</span>
-                </div>
+        </span>
+    </div>
+    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px 16px; border-radius: 8px; width: 100%; max-width: 600px; margin: 0 auto;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center;">
+            <span style="color: #EF4444; font-size: 1.2rem;">⚠️</span>
+            <div>
+                <strong style="color: #EF4444; display: block; margin-bottom: 4px;">WARNING</strong>
+                <span style="color: #FCA5A5; font-size: 0.95rem;">Before signing any transaction in your wallet, always check the contract you are interacting with.</span>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Main Content -->
     <main class="container">
@@ -1456,21 +1422,6 @@
 
     <script>
         // ============================
-        // SECURITY ENHANCEMENTS
-        // ============================
-        
-        // Блокировка функций на неофициальном домене
-        if (window.location.hostname !== 'l3g3ndary.com' && !window.location.hostname.endsWith('.l3g3ndary.com')) {
-            console.error('⚠️ SECURITY WARNING: Unofficial domain detected!');
-            // Блокируем все кнопки
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.btn').forEach(btn => {
-                    btn.disabled = true;
-                });
-            });
-        }
-
-        // ============================
         // CONFIGURATION
         // ============================
         const CONFIG = {
@@ -1485,12 +1436,12 @@
             },
             rewards: {
                 "L3G3NDS": {
-                    total: 150000000,
-                    dailyPerNFT: 1000
+                    total: 150000000, // 150M
+                    dailyPerNFT: 1000 // 1000 LGND per day per NFT
                 },
                 "PASS": {
-                    total: 500000000,
-                    dailyPerNFT: 2500
+                    total: 500000000, // 500M
+                    dailyPerNFT: 2500 // 2500 LGND per day per NFT
                 }
             }
         };
@@ -1610,32 +1561,6 @@
         }
 
         // ============================
-        // NETWORK SWITCH FUNCTION (НОВОЕ)
-        // ============================
-        async function switchToMainnet() {
-            if (!window.ethereum) {
-                showNotification('Please install MetaMask first', 'warning');
-                return;
-            }
-            
-            try {
-                showNotification('Switching to Ethereum Mainnet...', 'info');
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x1' }], // Ethereum Mainnet chainId
-                });
-                showNotification('✅ Switched to Ethereum Mainnet', 'success');
-            } catch (error) {
-                console.error('❌ Network switch error:', error.message);
-                if (error.code === 4902) {
-                    showNotification('Ethereum Mainnet not added to wallet', 'error');
-                } else {
-                    showNotification('Failed to switch network', 'error');
-                }
-            }
-        }
-
-        // ============================
         // MOBILE DEVICE CHECK
         // ============================
         function isMobileDevice() {
@@ -1720,7 +1645,7 @@
         }
 
         // ============================
-        // WALLET CONNECTION
+        // WALLET CONNECTION (ИСПРАВЛЕНО - ТОЛЬКО ПО НАЖАТИЮ)
         // ============================
         async function connectWallet() {
             // Check if already connected
@@ -1900,9 +1825,6 @@
             }
         }
 
-        // ============================
-        // NETWORK INFO WITH SWITCH BUTTON (УЛУЧШЕНО)
-        // ============================
         function updateNetworkInfo() {
             if (state.chainId && state.chainId !== 1) {
                 let networkWarning = document.querySelector('.network-warning');
@@ -1914,16 +1836,12 @@
                     networkWarning.style.borderColor = 'rgba(245, 158, 11, 0.3)';
                     networkWarning.style.marginTop = '1rem';
                     networkWarning.innerHTML = `
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <div>
-                                <span style="color: #F59E0B;">⚠️</span>
-                                <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
-                            </div>
-                            <span style="font-size: 0.9rem;">Please switch to Ethereum Mainnet</span>
-                            <button onclick="switchToMainnet()" class="network-switch-btn">
-                                🔄 Switch to Ethereum Mainnet
-                            </button>
-                        </div>
+                        <span style="color: #F59E0B;">⚠️</span>
+                        <span style="color: #F59E0B; font-weight: bold;">WRONG NETWORK</span>
+                        <br>
+                        <span style="font-size: 0.9rem;">
+                            Please switch to Ethereum Mainnet
+                        </span>
                     `;
                     
                     const domainVerification = document.querySelector('.domain-verification');
@@ -1938,7 +1856,7 @@
         }
 
         // ============================
-        // UPDATE STAKING STATS (УЛУЧШЕНО - БЕЗОПАСНАЯ ОБРАБОТКА ОШИБОК)
+        // UPDATE STAKING STATS
         // ============================
         async function updateStakingStats() {
             try {
@@ -1998,7 +1916,7 @@
                                 }
                             }
                         } catch (e) {
-                            console.log('⚠️ Legend rewards fetch failed:', e.message);
+                            console.log('⚠️ Method 1 failed for legend:', e.message);
                         }
 
                         try {
@@ -2009,7 +1927,7 @@
                                 }
                             }
                         } catch (e) {
-                            console.log('⚠️ Pass rewards fetch failed:', e.message);
+                            console.log('⚠️ Method 1 failed for pass:', e.message);
                         }
                         
                         // Get remaining rewards in contracts
@@ -2022,8 +1940,7 @@
                         passBalance = Number(ethers.formatUnits(passContractBalance, 18));
                         
                     } catch (error) {
-                        console.warn('⚠️ Error fetching contract data:', error.message);
-                        showNotification('Stats update failed, but your funds are safe', 'warning');
+                        console.warn('⚠️ Error fetching some contract data:', error.message);
                     }
                 }
                 
@@ -2105,8 +2022,7 @@
                 });
                 
             } catch (error) {
-                console.error('❌ Critical error updating stats:', error.message);
-                showNotification('Unable to load stats, please refresh', 'error');
+                console.error('❌ Error updating stats:', error);
             }
         }
 
@@ -2191,8 +2107,8 @@
                 updateUserUI();
 
             } catch (error) {
-                console.error('❌ Error loading user data:', error.message);
-                showNotification('Failed to load staking data, but your funds are safe', 'warning');
+                console.error('❌ Error loading user data:', error);
+                showNotification('Failed to load staking data: ' + error.message, 'error');
             }
         }
 
@@ -2264,7 +2180,7 @@
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('❌ Stake error:', error.message);
+                console.error('❌ Stake error:', error);
                 showNotification(`Stake failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('stakeLegendBtn', 'Stake');
@@ -2317,7 +2233,7 @@
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('❌ Stake error:', error.message);
+                console.error('❌ Stake error:', error);
                 showNotification(`Stake failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('stakePassBtn', 'Stake');
@@ -2349,7 +2265,7 @@
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('❌ Claim error:', error.message);
+                console.error('❌ Claim error:', error);
                 showNotification(`Claim failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('claimLegendBtn', 'Claim');
@@ -2380,7 +2296,7 @@
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('❌ Claim error:', error.message);
+                console.error('❌ Claim error:', error);
                 showNotification(`Claim failed: ${error.message}`, 'error');
             } finally {
                 hideLoading('claimPassBtn', 'Claim');
@@ -2481,7 +2397,7 @@
                 await updateStakingStats();
 
             } catch (error) {
-                console.error('❌ Unstake error:', error.message);
+                console.error('❌ Unstake error:', error);
                 showNotification(`Unstake failed: ${error.message}`, 'error');
                 
                 const stake = state.stakingData[type].stakes[index];
@@ -2502,7 +2418,7 @@
         }
 
         // ============================
-        // EVENT LISTENERS
+        // EVENT LISTENERS (ИСПРАВЛЕНО - БЕЗ АВТО-ПОДКЛЮЧЕНИЯ)
         // ============================
         function setupEventListeners() {
             if (window.ethereum) {
@@ -2540,12 +2456,13 @@
             
             // For mobile - handle return from app (but don't auto-connect)
             window.addEventListener('focus', () => {
+                // Removed auto-connect on focus
                 console.log('Window focused');
             });
         }
 
         // ============================
-        // INITIALIZATION
+        // INITIALIZATION (ИСПРАВЛЕНО - БЕЗ АВТО-ПОДКЛЮЧЕНИЯ)
         // ============================
         window.addEventListener('load', async () => {
             console.log('🎮 L3G3NDARY website initializing...');
@@ -2587,6 +2504,7 @@
             // Show modal on mobile if no wallet (but don't auto-connect)
             if (isMobileDevice() && !window.ethereum) {
                 setTimeout(() => {
+                    // Don't auto-show modal, just add a small reminder
                     console.log('📱 Mobile device detected, wallet connection available via button');
                 }, 2000);
             }
@@ -2607,28 +2525,20 @@
                 warningDiv.style.background = 'rgba(239, 68, 68, 0.1)';
                 warningDiv.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                 warningDiv.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                        <span style="color: #EF4444; font-size: 1.2rem;">⚠️</span>
-                        <span style="color: #EF4444; font-weight: bold;">DOMAIN WARNING</span>
-                        <span style="font-size: 0.9rem;">
-                            You are on: <strong>${currentDomain}</strong>
-                            <br>
-                            Official domain: <strong>${verifiedDomain}</strong>
-                        </span>
-                        <span style="color: #EF4444; font-size: 0.8rem;">All functions have been disabled for your safety</span>
-                    </div>
+                    <span style="color: #EF4444;">⚠️</span>
+                    <span style="color: #EF4444; font-weight: bold;">DOMAIN WARNING</span>
+                    <br>
+                    <span style="font-size: 0.9rem;">
+                        You are on: <strong>${currentDomain}</strong>
+                        <br>
+                        Official domain: <strong>${verifiedDomain}</strong>
+                    </span>
                 `;
                 
                 const hero = document.querySelector('.hero');
                 if (hero && hero.parentNode) {
                     hero.parentNode.insertBefore(warningDiv, hero);
                 }
-                
-                // Disable all interactive elements
-                document.querySelectorAll('.btn, .link-btn, .contract-address').forEach(el => {
-                    el.style.pointerEvents = 'none';
-                    el.style.opacity = '0.5';
-                });
             }
         }
 
