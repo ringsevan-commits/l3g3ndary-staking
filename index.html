@@ -3036,43 +3036,43 @@
 </style>
 
 <div class="floating-nav" id="floatingNav">
-    <div class="floating-nav-item" data-section="security-transparency" title="Security & Transparency">
+    <div class="floating-nav-item" data-section="security-transparency">
         <span>🔒</span>
         <span class="tooltip">Security</span>
     </div>
-    <div class="floating-nav-item" data-section="mev-protection" title="MEV Protection">
+    <div class="floating-nav-item" data-section="mev-protection">
         <span>🛡️</span>
         <span class="tooltip">MEV Protection</span>
     </div>
-    <div class="floating-nav-item" data-section="tokenomics" title="Tokenomics">
+    <div class="floating-nav-item" data-section="tokenomics">
         <span>📊</span>
         <span class="tooltip">Tokenomics</span>
     </div>
-    <div class="floating-nav-item" data-section="contracts" title="Contract Addresses">
+    <div class="floating-nav-item" data-section="contract-addresses">
         <span>📋</span>
         <span class="tooltip">Contracts</span>
     </div>
-    <div class="floating-nav-item" data-section="proof-section" title="Proof of Renouncement">
+    <div class="floating-nav-item" data-section="proof-section">
         <span>🔍</span>
         <span class="tooltip">Proof</span>
     </div>
-    <div class="floating-nav-item" data-section="roadmap" title="Roadmap">
+    <div class="floating-nav-item" data-section="roadmap">
         <span>🗺️</span>
         <span class="tooltip">Roadmap</span>
     </div>
-    <div class="floating-nav-item" data-section="staking" title="NFT Staking">
+    <div class="floating-nav-item" data-section="staking">
         <span>🎯</span>
         <span class="tooltip">Staking</span>
     </div>
-    <div class="floating-nav-item" data-section="lockdown-campaign" title="Lockdown Campaign">
+    <div class="floating-nav-item" data-section="lockdown-campaign">
         <span>🔒</span>
         <span class="tooltip">Lockdown</span>
     </div>
-    <div class="floating-nav-item" data-section="community" title="Community">
+    <div class="floating-nav-item" data-section="community">
         <span>🌍</span>
         <span class="tooltip">Community</span>
     </div>
-    <div class="floating-nav-item floating-nav-toggle" id="navToggle" title="Toggle menu">
+    <div class="floating-nav-item floating-nav-toggle" id="navToggle">
         <span>☰</span>
     </div>
 </div>
@@ -3086,16 +3086,31 @@
         
         // Toggle menu on mobile
         if (navToggle) {
-            navToggle.addEventListener('click', () => {
+            navToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 nav.classList.toggle('collapsed');
             });
         }
         
         // Scroll to section on click
         navItems.forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
                 const sectionId = this.getAttribute('data-section');
-                const section = document.getElementById(sectionId);
+                let section = document.getElementById(sectionId);
+                
+                // Если секция не найдена, пробуем найти по классу или альтернативному ID
+                if (!section) {
+                    if (sectionId === 'contract-addresses') {
+                        section = document.querySelector('.contract-list')?.closest('.section');
+                    } else if (sectionId === 'tokenomics') {
+                        section = document.querySelector('.tokenomics-grid')?.closest('.section');
+                    } else if (sectionId === 'staking') {
+                        section = document.querySelector('.staking-section');
+                    } else if (sectionId === 'community') {
+                        section = document.querySelector('.links')?.closest('.section');
+                    }
+                }
                 
                 if (section) {
                     const offset = 80;
@@ -3114,51 +3129,55 @@
                     if (window.innerWidth <= 768) {
                         nav.classList.add('collapsed');
                     }
+                } else {
+                    console.log('Section not found:', sectionId);
                 }
             });
         });
         
         // Update active section on scroll
         function updateActiveSection() {
-            const sections = [];
-            navItems.forEach(item => {
-                const sectionId = item.getAttribute('data-section');
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    sections.push({
-                        id: sectionId,
-                        element: section,
-                        navItem: item
-                    });
-                }
-            });
+            const sections = [
+                { id: 'security-transparency', element: document.querySelector('.tokenomics-grid')?.closest('.section') },
+                { id: 'mev-protection', element: document.getElementById('mev-protection') },
+                { id: 'tokenomics', element: document.querySelector('.tokenomics-grid')?.closest('.section') },
+                { id: 'contract-addresses', element: document.querySelector('.contract-list')?.closest('.section') },
+                { id: 'proof-section', element: document.getElementById('proof-section') },
+                { id: 'roadmap', element: document.querySelector('.tokenomics-card')?.closest('.section') },
+                { id: 'staking', element: document.querySelector('.staking-section') },
+                { id: 'lockdown-campaign', element: document.getElementById('lockdown-campaign') },
+                { id: 'community', element: document.querySelector('.links')?.closest('.section') }
+            ];
             
-            const scrollPosition = window.scrollY + 100;
+            const scrollPosition = window.scrollY + 150;
             
             let currentSection = null;
             for (let i = sections.length - 1; i >= 0; i--) {
                 const section = sections[i];
-                const sectionTop = section.element.offsetTop;
-                const sectionBottom = sectionTop + section.element.offsetHeight;
-                
-                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-                    currentSection = section;
-                    break;
+                if (section.element) {
+                    const sectionTop = section.element.offsetTop;
+                    const sectionBottom = sectionTop + section.element.offsetHeight;
+                    
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                        currentSection = section.id;
+                        break;
+                    }
                 }
             }
             
-            sections.forEach(section => {
-                if (currentSection && section.id === currentSection.id) {
-                    section.navItem.classList.add('active');
+            navItems.forEach(item => {
+                const sectionId = item.getAttribute('data-section');
+                if (currentSection === sectionId) {
+                    item.classList.add('active');
                 } else {
-                    section.navItem.classList.remove('active');
+                    item.classList.remove('active');
                 }
             });
         }
         
         window.addEventListener('scroll', updateActiveSection);
         window.addEventListener('resize', updateActiveSection);
-        updateActiveSection();
+        setTimeout(updateActiveSection, 100);
         
         // Close mobile menu on scroll
         let scrollTimeout;
@@ -3170,6 +3189,9 @@
                 }, 1500);
             }
         });
+        
+        // Initial active check
+        setTimeout(updateActiveSection, 500);
     })();
 </script>
 
