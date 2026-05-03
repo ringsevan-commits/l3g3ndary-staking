@@ -1506,7 +1506,7 @@
         </section>
 
      <!-- ============================================ -->
-<!-- L3G3NDARY ELITE STAKING SECTION - FIXED ABI -->
+<!-- L3G3NDARY ELITE STAKING SECTION -->
 <!-- ============================================ -->
 <section class="staking-section" id="eliteStakingSection" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1)); margin-top: 2rem;">
     <h2 class="section-title" style="color: white;">👑 L3G3NDARY Elite Staking</h2>
@@ -1534,7 +1534,7 @@
     <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
         <div style="background: rgba(139, 92, 246, 0.15); padding: 1rem 2rem; border-radius: 15px; border: 1px solid rgba(139, 92, 246, 0.3); text-align: center;">
             <div style="color: #94A3B8; font-size: 0.85rem;">Contract Balance</div>
-            <div id="eliteContractBalance" style="font-size: 1.5rem; font-weight: bold; color: #10B981;">-- LGND</div>
+            <div id="eliteContractBalance" style="font-size: 1.5rem; font-weight: bold; color: #10B981;">Loading...</div>
         </div>
     </div>
     
@@ -1582,7 +1582,7 @@
                         <select id="eliteUnstakeSelect" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(139,92,246,0.3);">
                             <option value="">Loading stakes...</option>
                         </select>
-                        <button onclick="unstakeEliteNFT()" class="btn btn-small" style="background: var(--danger); margin-top: 0.5rem; width: 100%;">
+                        <button onclick="unstakeEliteNFT()" class="btn btn-small" style="background: #EF4444; margin-top: 0.5rem; width: 100%;">
                             📤 Unstake Selected
                         </button>
                     </div>
@@ -1599,7 +1599,7 @@
                     ⚡ <strong>777 LGND per NFT per day</strong> — Rewards calculated in real-time, claim anytime
                 </p>
                 <p style="color: #64748B; font-size: 0.75rem; margin-top: 0.5rem;" id="eliteContractAddress">
-                    Contract: 
+                    ⏳ Loading contract info...
                 </p>
             </div>
         </div>
@@ -1607,7 +1607,7 @@
     
     <!-- Connect Button -->
     <div id="eliteStakingNotConnected" style="text-align: center; margin-top: 2rem;">
-        <button onclick="connectWallet()" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem; background: #8B5CF6;">
+        <button id="eliteConnectBtn" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem; background: #8B5CF6;">
             🚀 Connect Wallet to Stake Elite NFTs
         </button>
         <p style="margin-top: 1rem; color: #94A3B8; font-size: 0.9rem;">
@@ -1618,11 +1618,21 @@
 
 <script>
 // ============================================
-// CORRECT ABI FOR YOUR STAKING CONTRACT
+// L3G3NDARY ELITE STAKING 
 // ============================================
 
-const ELITE_STAKING_ABI_CORRECT = [
-    // Views
+// CONFIGURATION 
+const ELITE_STAKING_CONFIG = {
+    // 👇👇👇 PUT YOUR DEPLOYED STAKING CONTRACT ADDRESS HERE 👇👇👇
+    stakingContractAddress: "0x18Bf70e35861AD9E59207828E38ee751DdC0b458", // ⚠️ REPLACE WITH ACTUAL STAKING CONTRACT ADDRESS!
+    nftContract: "0x18Bf70e35861AD9E59207828E38ee751DdC0b458",
+    rewardToken: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
+    rewardPerDay: 777,
+    decimals: 18
+};
+
+// ABI from your contract
+const ELITE_STAKING_ABI = [
     "function nftContract() view returns (address)",
     "function rewardToken() view returns (address)",
     "function REWARD_PER_NFT_PER_DAY() view returns (uint256)",
@@ -1633,21 +1643,16 @@ const ELITE_STAKING_ABI_CORRECT = [
     "function getPendingRewards(address user) view returns (uint256)",
     "function getUserStakedTokens(address user) view returns (uint256[])",
     "function getStakingInfo(uint256 tokenId) view returns (uint256 tokenId, uint256 stakedAt, address owner)",
-    
-    // Write
     "function stake(uint256 tokenId) external",
     "function unstake(uint256 tokenId) external",
     "function claimRewards() external",
     "function depositRewards(uint256 amount) external",
     "function withdrawRewards(uint256 amount) external",
-    
-    // Events
     "event Staked(address indexed user, uint256 tokenId, uint256 timestamp)",
     "event Unstaked(address indexed user, uint256 tokenId, uint256 timestamp, uint256 rewardClaimed)",
     "event RewardClaimed(address indexed user, uint256 amount)"
 ];
 
-// ERC721 ABI for Elite NFT
 const ELITE_NFT_ABI = [
     "function balanceOf(address owner) view returns (uint256)",
     "function ownerOf(uint256 tokenId) view returns (address)",
@@ -1655,134 +1660,158 @@ const ELITE_NFT_ABI = [
     "function transferFrom(address from, address to, uint256 tokenId)",
     "function isApprovedForAll(address owner, address operator) view returns (bool)",
     "function setApprovalForAll(address operator, bool approved)",
-    "function approve(address to, uint256 tokenId)",
-    "function tokenURI(uint256 tokenId) view returns (string)"
+    "function tokenURI(uint256 tokenId) view returns (string)",
+    "function totalSupply() view returns (uint256)"
 ];
 
-// ERC20 ABI
 const ELITE_TOKEN_ABI = [
     "function balanceOf(address account) view returns (uint256)",
     "function decimals() view returns (uint8)",
     "function symbol() view returns (string)"
 ];
 
-let eliteStaking = {
-    contractAddress: null,  // Set after deployment
+let eliteState = {
     contract: null,
-    nftContract: "0x18Bf70e35861AD9E59207828E38ee751DdC0b458",
-    rewardToken: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
-    rewardPerDay: 777,
-    decimals: 18
-};
-
-let eliteUserData = {
-    stakedTokens: [],
+    userStakedTokens: [],
     pendingRewards: 0,
     nftBalance: 0,
     totalStaked: 0,
-    contractBalance: 0
+    contractBalance: 0,
+    isInitialized: false
 };
 
 // Initialize Elite Staking
-async function initEliteStaking(contractAddr) {
-    eliteStaking.contractAddress = contractAddr;
-    document.getElementById('eliteContractAddress').innerHTML = `Contract: ${formatAddress(contractAddr)}`;
+async function initEliteStaking() {
+    console.log('Initializing Elite Staking...');
     
-    if (state.isConnected && state.signer) {
-        await loadEliteData();
-    }
-}
-
-// Load all Elite staking data
-async function loadEliteData() {
-    if (!state.isConnected || !state.signer || !eliteStaking.contractAddress) {
-        document.getElementById('eliteStakingInterface').style.display = 'none';
-        document.getElementById('eliteStakingNotConnected').style.display = 'block';
+    if (!ELITE_STAKING_CONFIG.stakingContractAddress || ELITE_STAKING_CONFIG.stakingContractAddress === "0x18Bf70e35861AD9E59207828E38ee751DdC0b458") {
+        console.warn('⚠️ Please update ELITE_STAKING_CONFIG.stakingContractAddress with your deployed contract address!');
+        document.getElementById('eliteContractAddress').innerHTML = '⚠️ Contract address not configured';
         return;
     }
     
-    document.getElementById('eliteStakingInterface').style.display = 'block';
-    document.getElementById('eliteStakingNotConnected').style.display = 'none';
+    document.getElementById('eliteContractAddress').innerHTML = `📜 Contract: ${formatAddress(ELITE_STAKING_CONFIG.stakingContractAddress)}`;
+    
+    // Check if wallet is connected via global state
+    if (typeof state !== 'undefined' && state.isConnected && state.signer) {
+        await loadEliteStakingData();
+    } else {
+        document.getElementById('eliteStakingInterface').style.display = 'none';
+        document.getElementById('eliteStakingNotConnected').style.display = 'block';
+    }
+}
+
+// Load all staking data
+async function loadEliteStakingData() {
+    if (!window.state || !window.state.isConnected || !window.state.signer) {
+        console.log('Wallet not connected, showing connect button');
+        document.getElementById('eliteStakingInterface').style.display = 'none';
+        document.getElementById('eliteStakingNotConnected').style.display = 'block';
+        return false;
+    }
+    
+    console.log('Loading Elite staking data for:', window.state.walletAddress);
     
     try {
         // Create contract instance
-        eliteStaking.contract = new ethers.Contract(
-            eliteStaking.contractAddress,
-            ELITE_STAKING_ABI_CORRECT,
-            state.signer
+        eliteState.contract = new ethers.Contract(
+            ELITE_STAKING_CONFIG.stakingContractAddress,
+            ELITE_STAKING_ABI,
+            window.state.signer
         );
         
-        const nftContractInterface = new ethers.Contract(
-            eliteStaking.nftContract,
+        const nftContract = new ethers.Contract(
+            ELITE_STAKING_CONFIG.nftContract,
             ELITE_NFT_ABI,
-            state.signer
+            window.state.signer
         );
         
         const tokenContract = new ethers.Contract(
-            eliteStaking.rewardToken,
+            ELITE_STAKING_CONFIG.rewardToken,
             ELITE_TOKEN_ABI,
-            state.provider
+            window.state.provider
         );
         
-        // Get NFT balance
-        const balance = await nftContractInterface.balanceOf(state.walletAddress);
-        eliteUserData.nftBalance = Number(balance);
+        // Get user's NFT balance
+        const balance = await nftContract.balanceOf(window.state.walletAddress);
+        eliteState.nftBalance = Number(balance);
         
-        // Get staked tokens for user
-        const stakedTokens = await eliteStaking.contract.getUserStakedTokens(state.walletAddress);
-        eliteUserData.stakedTokens = stakedTokens.map(t => Number(t));
+        // Get user's staked tokens
+        const stakedTokens = await eliteState.contract.getUserStakedTokens(window.state.walletAddress);
+        eliteState.userStakedTokens = stakedTokens.map(t => Number(t));
         
         // Get pending rewards
-        const pending = await eliteStaking.contract.getPendingRewards(state.walletAddress);
-        eliteUserData.pendingRewards = parseFloat(ethers.formatUnits(pending, 18));
+        const pending = await eliteState.contract.getPendingRewards(window.state.walletAddress);
+        eliteState.pendingRewards = parseFloat(ethers.formatUnits(pending, 18));
         
-        // Get total staked NFTs
-        let totalStaked = 0;
-        for (const tokenId of eliteUserData.stakedTokens) {
-            const info = await eliteStaking.contract.getStakingInfo(tokenId);
-            if (info.owner !== ethers.ZeroAddress) {
-                totalStaked++;
+        // Get total staked NFTs (by checking each staked token)
+        let stakedCount = 0;
+        for (const tokenId of eliteState.userStakedTokens) {
+            const info = await eliteState.contract.getStakingInfo(tokenId);
+            if (info.owner !== ethers.ZeroAddress && info.owner.toLowerCase() === window.state.walletAddress.toLowerCase()) {
+                stakedCount++;
             }
         }
-        eliteUserData.totalStaked = totalStaked;
+        eliteState.totalStaked = stakedCount;
         
         // Get contract balance
-        const contractBalanceRaw = await tokenContract.balanceOf(eliteStaking.contractAddress);
-        eliteUserData.contractBalance = parseFloat(ethers.formatUnits(contractBalanceRaw, 18));
+        const contractBalanceRaw = await tokenContract.balanceOf(ELITE_STAKING_CONFIG.stakingContractAddress);
+        eliteState.contractBalance = parseFloat(ethers.formatUnits(contractBalanceRaw, 18));
         
         // Update UI
         updateEliteUI();
         
-        console.log('Elite data loaded:', eliteUserData);
+        // Show staking interface
+        document.getElementById('eliteStakingInterface').style.display = 'block';
+        document.getElementById('eliteStakingNotConnected').style.display = 'none';
+        
+        console.log('Elite data loaded:', {
+            nftBalance: eliteState.nftBalance,
+            stakedCount: eliteState.userStakedTokens.length,
+            pending: eliteState.pendingRewards
+        });
+        
+        return true;
         
     } catch (error) {
         console.error('Error loading elite data:', error);
-        showNotification('Error loading staking data: ' + error.message, 'error');
+        document.getElementById('eliteStakingInterface').style.display = 'none';
+        document.getElementById('eliteStakingNotConnected').style.display = 'block';
+        return false;
     }
 }
 
 function updateEliteUI() {
-    document.getElementById('eliteBalance').textContent = eliteUserData.nftBalance;
-    document.getElementById('eliteStakedCount').textContent = eliteUserData.stakedTokens.length;
-    document.getElementById('elitePendingRewards').innerHTML = eliteUserData.pendingRewards.toFixed(4) + ' LGND';
-    document.getElementById('eliteTotalStaked').textContent = eliteUserData.totalStaked;
-    document.getElementById('eliteDailyPool').innerHTML = (eliteUserData.totalStaked * 777).toLocaleString() + ' LGND';
-    document.getElementById('eliteContractBalance').innerHTML = eliteUserData.contractBalance.toFixed(2).toLocaleString() + ' LGND';
+    const balanceEl = document.getElementById('eliteBalance');
+    const stakedCountEl = document.getElementById('eliteStakedCount');
+    const pendingEl = document.getElementById('elitePendingRewards');
+    const totalStakedEl = document.getElementById('eliteTotalStaked');
+    const dailyPoolEl = document.getElementById('eliteDailyPool');
+    const contractBalanceEl = document.getElementById('eliteContractBalance');
+    
+    if (balanceEl) balanceEl.textContent = eliteState.nftBalance;
+    if (stakedCountEl) stakedCountEl.textContent = eliteState.userStakedTokens.length;
+    if (pendingEl) pendingEl.innerHTML = eliteState.pendingRewards.toFixed(4) + ' LGND';
+    if (totalStakedEl) totalStakedEl.textContent = eliteState.totalStaked;
+    if (dailyPoolEl) dailyPoolEl.innerHTML = (eliteState.totalStaked * 777).toLocaleString() + ' LGND';
+    if (contractBalanceEl) contractBalanceEl.innerHTML = eliteState.contractBalance.toFixed(2).toLocaleString() + ' LGND';
     
     // Update unstake dropdown
     const select = document.getElementById('eliteUnstakeSelect');
-    select.innerHTML = '';
-    if (eliteUserData.stakedTokens.length === 0) {
-        select.innerHTML = '<option value="">No NFTs staked</option>';
-    } else {
-        for (const tokenId of eliteUserData.stakedTokens) {
-            select.innerHTML += `<option value="${tokenId}">Token #${tokenId}</option>`;
+    if (select) {
+        select.innerHTML = '';
+        if (eliteState.userStakedTokens.length === 0) {
+            select.innerHTML = '<option value="">No NFTs staked</option>';
+        } else {
+            for (const tokenId of eliteState.userStakedTokens) {
+                select.innerHTML += `<option value="${tokenId}">Token #${tokenId}</option>`;
+            }
         }
     }
 }
 
 async function stakeEliteNFT() {
-    if (!state.isConnected || !state.signer) {
+    if (!window.state || !window.state.isConnected) {
         showNotification('Please connect wallet first', 'warning');
         return;
     }
@@ -1793,50 +1822,57 @@ async function stakeEliteNFT() {
         return;
     }
     
-    showLoading('stakeEliteBtn', 'Checking approval...');
+    const btn = document.getElementById('stakeEliteBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Checking approval...';
+    btn.disabled = true;
     
     try {
-        const nftContract = new ethers.Contract(eliteStaking.nftContract, ELITE_NFT_ABI, state.signer);
+        const nftContract = new ethers.Contract(ELITE_STAKING_CONFIG.nftContract, ELITE_NFT_ABI, window.state.signer);
         
-        // Check if user owns the NFT
+        // Check ownership
         const owner = await nftContract.ownerOf(tokenId);
-        if (owner.toLowerCase() !== state.walletAddress.toLowerCase()) {
+        if (owner.toLowerCase() !== window.state.walletAddress.toLowerCase()) {
             showNotification('You do not own this NFT', 'error');
             return;
         }
         
         // Check approval
-        const isApproved = await nftContract.isApprovedForAll(state.walletAddress, eliteStaking.contractAddress);
+        const isApproved = await nftContract.isApprovedForAll(window.state.walletAddress, ELITE_STAKING_CONFIG.stakingContractAddress);
         
         if (!isApproved) {
-            showNotification('Approving NFT contract for staking...', 'info');
-            const approveTx = await nftContract.setApprovalForAll(eliteStaking.contractAddress, true);
+            btn.innerHTML = '<span class="spinner"></span> Approving...';
+            const approveTx = await nftContract.setApprovalForAll(ELITE_STAKING_CONFIG.stakingContractAddress, true);
             await approveTx.wait();
             showNotification('Approval confirmed!', 'success');
         }
         
-        showLoading('stakeEliteBtn', 'Staking...');
+        btn.innerHTML = '<span class="spinner"></span> Staking...';
         
-        // Stake the NFT
-        const tx = await eliteStaking.contract.stake(tokenId);
+        const tx = await eliteState.contract.stake(tokenId);
         await tx.wait();
         
         showNotification(`✅ Successfully staked NFT #${tokenId}!`, 'success');
         
         document.getElementById('eliteTokenId').value = '';
-        await loadEliteData();
-        await updateStakingStats(); // Update global stats
+        await loadEliteStakingData();
+        
+        // Also refresh global stats if available
+        if (typeof updateStakingStats === 'function') {
+            updateStakingStats();
+        }
         
     } catch (error) {
         console.error('Stake error:', error);
         showNotification('Stake failed: ' + (error.reason || error.message), 'error');
     } finally {
-        hideLoading('stakeEliteBtn', 'Stake');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
 
 async function unstakeEliteNFT() {
-    if (!state.isConnected || !state.signer) {
+    if (!window.state || !window.state.isConnected) {
         showNotification('Please connect wallet first', 'warning');
         return;
     }
@@ -1844,75 +1880,73 @@ async function unstakeEliteNFT() {
     const select = document.getElementById('eliteUnstakeSelect');
     const tokenId = select.value;
     
-    if (!tokenId || tokenId === '') {
+    if (!tokenId || tokenId === '' || tokenId === 'No NFTs staked') {
         showNotification('Select an NFT to unstake', 'warning');
         return;
     }
     
-    showLoading('unstakeEliteBtn', 'Unstaking...');
+    const btn = document.getElementById('unstakeEliteBtn');
+    if (btn) {
+        btn.innerHTML = '<span class="spinner"></span> Unstaking...';
+        btn.disabled = true;
+    }
     
     try {
-        const tx = await eliteStaking.contract.unstake(tokenId);
+        const tx = await eliteState.contract.unstake(tokenId);
         await tx.wait();
         
         showNotification(`✅ Unstaked NFT #${tokenId}! Rewards automatically claimed.`, 'success');
         
-        await loadEliteData();
-        await updateStakingStats();
+        await loadEliteStakingData();
+        
+        if (typeof updateStakingStats === 'function') {
+            updateStakingStats();
+        }
         
     } catch (error) {
         console.error('Unstake error:', error);
         showNotification('Unstake failed: ' + (error.reason || error.message), 'error');
     } finally {
-        hideLoading('unstakeEliteBtn', 'Unstake');
-        const btn = document.getElementById('unstakeEliteBtn');
-        if (btn) btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = '📤 Unstake Selected';
+            btn.disabled = false;
+        }
     }
 }
 
 async function claimEliteRewards() {
-    if (!state.isConnected || !state.signer) {
+    if (!window.state || !window.state.isConnected) {
         showNotification('Please connect wallet first', 'warning');
         return;
     }
     
-    if (eliteUserData.pendingRewards <= 0.001) {
+    if (eliteState.pendingRewards <= 0.001) {
         showNotification('No rewards to claim', 'warning');
         return;
     }
     
-    showLoading('claimEliteBtn', 'Claiming...');
+    const btn = document.getElementById('claimEliteBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Claiming...';
+    btn.disabled = true;
     
     try {
-        const tx = await eliteStaking.contract.claimRewards();
+        const tx = await eliteState.contract.claimRewards();
         await tx.wait();
         
-        showNotification(`✅ Claimed ${eliteUserData.pendingRewards.toFixed(4)} LGND!`, 'success');
+        showNotification(`✅ Claimed ${eliteState.pendingRewards.toFixed(4)} LGND!`, 'success');
         
-        await loadEliteData();
-        await updateStakingStats();
+        await loadEliteStakingData();
+        
+        if (typeof updateStakingStats === 'function') {
+            updateStakingStats();
+        }
         
     } catch (error) {
         console.error('Claim error:', error);
         showNotification('Claim failed: ' + (error.reason || error.message), 'error');
     } finally {
-        hideLoading('claimEliteBtn', 'Claim Rewards');
-    }
-}
-
-// Helper functions
-function showLoading(btnId, text) {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-        btn.innerHTML = '<span class="spinner"></span> ' + text;
-        btn.disabled = true;
-    }
-}
-
-function hideLoading(btnId, text) {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-        btn.innerHTML = text;
+        btn.innerHTML = originalText;
         btn.disabled = false;
     }
 }
@@ -1922,42 +1956,86 @@ function formatAddress(address) {
     return address.substring(0, 6) + '...' + address.substring(address.length - 4);
 }
 
-// Override connectWallet to initialize elite staking after connection
-const originalConnectWallet = window.connectWallet;
-window.connectWallet = async function() {
-    if (originalConnectWallet) await originalConnectWallet();
+function showNotification(message, type) {
+    // Remove existing notifications
+    document.querySelectorAll('.notification').forEach(n => n.remove());
     
-    // After connection, check if elite staking contract is set
-    if (state.isConnected && eliteStaking.contractAddress) {
-        await loadEliteData();
-    }
-};
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 100000;
+        animation: slideIn 0.3s ease;
+        background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#F59E0B'};
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) notification.remove();
+    }, 5000);
+}
 
-// Set elite staking contract address (call this after deployment)
-window.setEliteStakingContract = function(address) {
-    eliteStaking.contractAddress = address;
-    console.log('Elite staking contract set:', address);
+// Hook into the global wallet connection
+function setupEliteWalletListener() {
+    // Check for global state changes
+    const checkInterval = setInterval(async () => {
+        if (window.state && window.state.isConnected && window.state.signer) {
+            if (!eliteState.isInitialized) {
+                eliteState.isInitialized = true;
+                await loadEliteStakingData();
+            }
+            clearInterval(checkInterval);
+        }
+    }, 500);
     
-    if (state.isConnected) {
-        loadEliteData();
+    // Also listen for connect button click
+    const connectBtn = document.getElementById('eliteConnectBtn');
+    if (connectBtn) {
+        connectBtn.onclick = async () => {
+            if (typeof connectWallet === 'function') {
+                await connectWallet();
+                setTimeout(async () => {
+                    await loadEliteStakingData();
+                }, 2000);
+            } else if (window.connectWallet) {
+                await window.connectWallet();
+                setTimeout(async () => {
+                    await loadEliteStakingData();
+                }, 2000);
+            }
+        };
     }
-};
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Elite staking section loaded');
+    initEliteStaking();
+    setupEliteWalletListener();
+    
+    // Auto refresh every 30 seconds
+    setInterval(async () => {
+        if (window.state && window.state.isConnected) {
+            await loadEliteStakingData();
+        }
+    }, 30000);
+});
 
 // Expose functions globally
 window.stakeEliteNFT = stakeEliteNFT;
 window.unstakeEliteNFT = unstakeEliteNFT;
 window.claimEliteRewards = claimEliteRewards;
-window.loadEliteData = loadEliteData;
+window.loadEliteStakingData = loadEliteStakingData;
 window.initEliteStaking = initEliteStaking;
 
-// Auto-refresh every 15 seconds
-setInterval(() => {
-    if (state.isConnected && eliteStaking.contractAddress) {
-        loadEliteData();
-    }
-}, 15000);
-
-console.log('Elite staking module loaded. Use setEliteStakingContract("0x...") after deployment.');
+console.log('Elite staking module ready. Make sure to update ELITE_STAKING_CONFIG.stakingContractAddress!');
 </script>
     
 <section class="section lockdown-section" id="lockdown-campaign">
