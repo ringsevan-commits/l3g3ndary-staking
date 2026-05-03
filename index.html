@@ -1505,6 +1505,503 @@
             </div>
         </section>
 
+    <!-- ============================================ -->
+<!-- L3G3NDARY ELITE STAKING SECTION -->
+<!-- ============================================ -->
+
+<section class="staking-section" id="eliteStakingSection" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1));">
+    <h2 class="section-title">👑 L3G3NDARY Elite Staking</h2>
+
+    <p style="text-align: center; color: #CBD5E1; margin-bottom: 2rem; font-size: 1.1rem;">
+        Stake your L3G3NDARY Elite NFTs and earn
+        <strong style="color: #FFD700;">777 LGND</strong>
+        per NFT per day
+    </p>
+
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-value" id="eliteWalletBalance">0</div>
+            <div class="stat-label">Elite NFTs in Wallet</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-value" id="eliteStakedBalance">0</div>
+            <div class="stat-label">Your Staked Elite NFTs</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-value" id="elitePendingRewards">0</div>
+            <div class="stat-label">Pending LGND Rewards</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-value" id="eliteContractBalance">0</div>
+            <div class="stat-label">Staking Contract Balance</div>
+        </div>
+    </div>
+
+    <div id="eliteStakingNotConnected" style="text-align: center; margin-top: 2rem;">
+        <button id="eliteConnectBtn" class="btn btn-primary">
+            🚀 Connect Wallet for Elite Staking
+        </button>
+    </div>
+
+    <div id="eliteStakingInterface" style="display: none;">
+        <div class="staking-grid">
+            <div class="staking-card">
+                <h3 style="color: #FFD700; margin-bottom: 1rem;">🔒 Stake Elite NFT</h3>
+
+                <div class="staking-info">
+                    <p style="color: #94A3B8; margin-bottom: 1rem;">
+                        Enter the Token ID of your L3G3NDARY Elite NFT.
+                    </p>
+
+                    <div class="staking-controls">
+                        <input type="number" id="eliteTokenIdInput" placeholder="Token ID" min="1">
+                        <button id="eliteStakeBtn" class="btn btn-primary">
+                            Stake
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="staking-card">
+                <h3 style="color: #FFD700; margin-bottom: 1rem;">📤 Unstake Elite NFT</h3>
+
+                <div class="staking-info">
+                    <p style="color: #94A3B8; margin-bottom: 1rem;">
+                        Select one of your staked Elite NFTs.
+                    </p>
+
+                    <select id="eliteUnstakeSelect" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1rem;">
+                        <option value="">No staked NFTs</option>
+                    </select>
+
+                    <button id="eliteUnstakeBtn" class="btn btn-secondary" style="background: var(--danger); width: 100%;">
+                        Unstake Selected
+                    </button>
+                </div>
+            </div>
+
+            <div class="staking-card">
+                <h3 style="color: #FFD700; margin-bottom: 1rem;">💰 Claim Rewards</h3>
+
+                <div class="staking-info">
+                    <p style="color: #94A3B8; margin-bottom: 1rem;">
+                        Claim your accumulated LGND rewards.
+                    </p>
+
+                    <button id="eliteClaimBtn" class="btn btn-secondary" style="background: var(--accent); width: 100%;">
+                        Claim Rewards
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem; color: #94A3B8; font-size: 0.9rem;">
+            <div>
+                Elite NFT:
+                <span class="contract-address" onclick="copyToClipboard('0x18Bf70e35861AD9E59207828E38ee751DdC0b458')">
+                    0x18Bf70e35861AD9E59207828E38ee751DdC0b458
+                </span>
+            </div>
+
+            <div>
+                Elite Staking:
+                <span class="contract-address" onclick="copyToClipboard('0xC95FC3701b912c178EC907e876b6217bDF545a3E')">
+                    0xC95FC3701b912c178EC907e876b6217bDF545a3E
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+/* ============================================ */
+/* L3G3NDARY ELITE STAKING MODULE */
+/* ============================================ */
+
+const ELITE_CONFIG = {
+    staking: "0xC95FC3701b912c178EC907e876b6217bDF545a3E",
+    nft: "0x18Bf70e35861AD9E59207828E38ee751DdC0b458",
+    token: "0x8BFB4cEdd7776AF70E61740aB8d44F8643E55b30",
+    rewardPerDay: 777
+};
+
+const ELITE_STAKING_ABI = [
+    "function stake(uint256 tokenId) external",
+    "function unstake(uint256 tokenId) external",
+    "function claimRewards() external",
+    "function getUserStakedTokens(address user) view returns (uint256[])",
+    "function getPendingRewards(address user) view returns (uint256)"
+];
+
+const ELITE_NFT_ABI = [
+    "function balanceOf(address owner) view returns (uint256)",
+    "function ownerOf(uint256 tokenId) view returns (address)",
+    "function isApprovedForAll(address owner, address operator) view returns (bool)",
+    "function setApprovalForAll(address operator, bool approved)"
+];
+
+const ELITE_TOKEN_ABI = [
+    "function balanceOf(address account) view returns (uint256)",
+    "function decimals() view returns (uint8)",
+    "function symbol() view returns (string)"
+];
+
+let eliteData = {
+    stakingContract: null,
+    nftContract: null,
+    tokenContract: null,
+    stakedTokens: [],
+    tokenDecimals: 18,
+    tokenSymbol: "LGND"
+};
+
+function eliteIsConnected() {
+    return typeof state !== "undefined" &&
+           state.isConnected &&
+           state.signer &&
+           state.provider &&
+           state.walletAddress;
+}
+
+function eliteSetText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+function eliteShortError(error) {
+    if (!error) return "Unknown error";
+    if (error.reason) return error.reason;
+    if (error.shortMessage) return error.shortMessage;
+    if (error.message) return error.message;
+    return "Transaction failed";
+}
+
+function eliteNotify(message, type = "info") {
+    if (typeof showNotification === "function") {
+        showNotification(message, type);
+    } else {
+        alert(message);
+    }
+}
+
+function eliteInitContracts() {
+    if (!eliteIsConnected()) return false;
+
+    eliteData.stakingContract = new ethers.Contract(
+        ELITE_CONFIG.staking,
+        ELITE_STAKING_ABI,
+        state.signer
+    );
+
+    eliteData.nftContract = new ethers.Contract(
+        ELITE_CONFIG.nft,
+        ELITE_NFT_ABI,
+        state.signer
+    );
+
+    eliteData.tokenContract = new ethers.Contract(
+        ELITE_CONFIG.token,
+        ELITE_TOKEN_ABI,
+        state.provider
+    );
+
+    return true;
+}
+
+async function eliteLoadData() {
+    try {
+        const interfaceEl = document.getElementById("eliteStakingInterface");
+        const notConnectedEl = document.getElementById("eliteStakingNotConnected");
+
+        if (!eliteIsConnected()) {
+            if (interfaceEl) interfaceEl.style.display = "none";
+            if (notConnectedEl) notConnectedEl.style.display = "block";
+            return;
+        }
+
+        eliteInitContracts();
+
+        if (interfaceEl) interfaceEl.style.display = "block";
+        if (notConnectedEl) notConnectedEl.style.display = "none";
+
+        const user = state.walletAddress;
+
+        let decimals = 18;
+        let symbol = "LGND";
+
+        try {
+            decimals = Number(await eliteData.tokenContract.decimals());
+            symbol = await eliteData.tokenContract.symbol();
+        } catch {}
+
+        eliteData.tokenDecimals = decimals;
+        eliteData.tokenSymbol = symbol;
+
+        const walletBalanceRaw = await eliteData.nftContract.balanceOf(user);
+        const walletBalance = Number(walletBalanceRaw);
+
+        let stakedTokens = [];
+
+        try {
+            const rawStaked = await eliteData.stakingContract.getUserStakedTokens(user);
+            stakedTokens = rawStaked.map(id => Number(id));
+        } catch (e) {
+            console.warn("Elite getUserStakedTokens failed:", e);
+        }
+
+        eliteData.stakedTokens = stakedTokens;
+
+        let pending = 0;
+
+        try {
+            const pendingRaw = await eliteData.stakingContract.getPendingRewards(user);
+            pending = Number(ethers.formatUnits(pendingRaw, decimals));
+        } catch (e) {
+            console.warn("Elite pending rewards failed:", e);
+        }
+
+        let contractBalance = 0;
+
+        try {
+            const contractBalanceRaw = await eliteData.tokenContract.balanceOf(ELITE_CONFIG.staking);
+            contractBalance = Number(ethers.formatUnits(contractBalanceRaw, decimals));
+        } catch (e) {
+            console.warn("Elite contract balance failed:", e);
+        }
+
+        eliteSetText("eliteWalletBalance", walletBalance);
+        eliteSetText("eliteStakedBalance", stakedTokens.length);
+        eliteSetText("elitePendingRewards", `${pending.toFixed(4)} ${symbol}`);
+        eliteSetText("eliteContractBalance", `${contractBalance.toFixed(2)} ${symbol}`);
+
+        const select = document.getElementById("eliteUnstakeSelect");
+
+        if (select) {
+            select.innerHTML = "";
+
+            if (stakedTokens.length === 0) {
+                select.innerHTML = `<option value="">No staked NFTs</option>`;
+            } else {
+                stakedTokens.forEach(tokenId => {
+                    const option = document.createElement("option");
+                    option.value = tokenId;
+                    option.textContent = `Elite Token #${tokenId}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+    } catch (error) {
+        console.error("Elite load error:", error);
+        eliteNotify("Elite staking load error: " + eliteShortError(error), "error");
+    }
+}
+
+async function eliteConnect() {
+    if (eliteIsConnected()) {
+        await eliteLoadData();
+        return;
+    }
+
+    if (typeof connectWallet === "function") {
+        await connectWallet();
+        setTimeout(eliteLoadData, 1200);
+    } else {
+        eliteNotify("connectWallet function not found", "error");
+    }
+}
+
+async function eliteStake() {
+    const btn = document.getElementById("eliteStakeBtn");
+    const input = document.getElementById("eliteTokenIdInput");
+    const oldText = btn ? btn.innerHTML : "";
+
+    try {
+        if (!eliteIsConnected()) {
+            eliteNotify("Please connect wallet first", "warning");
+            return;
+        }
+
+        const tokenId = input.value;
+
+        if (!tokenId || Number(tokenId) <= 0) {
+            eliteNotify("Enter valid Elite Token ID", "warning");
+            return;
+        }
+
+        eliteInitContracts();
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Checking owner...`;
+        }
+
+        const owner = await eliteData.nftContract.ownerOf(tokenId);
+
+        if (owner.toLowerCase() !== state.walletAddress.toLowerCase()) {
+            eliteNotify("You do not own this Elite NFT", "error");
+            return;
+        }
+
+        const approved = await eliteData.nftContract.isApprovedForAll(
+            state.walletAddress,
+            ELITE_CONFIG.staking
+        );
+
+        if (!approved) {
+            if (btn) btn.innerHTML = `<span class="spinner"></span> Approving...`;
+
+            const approveTx = await eliteData.nftContract.setApprovalForAll(
+                ELITE_CONFIG.staking,
+                true
+            );
+
+            await approveTx.wait();
+            eliteNotify("Approval confirmed", "success");
+        }
+
+        if (btn) btn.innerHTML = `<span class="spinner"></span> Staking...`;
+
+        const tx = await eliteData.stakingContract.stake(tokenId);
+        await tx.wait();
+
+        eliteNotify(`✅ Elite NFT #${tokenId} staked`, "success");
+
+        input.value = "";
+
+        await eliteLoadData();
+
+        if (typeof updateStakingStats === "function") {
+            await updateStakingStats();
+        }
+
+    } catch (error) {
+        console.error("Elite stake error:", error);
+        eliteNotify("Elite stake failed: " + eliteShortError(error), "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        }
+    }
+}
+
+async function eliteUnstake() {
+    const btn = document.getElementById("eliteUnstakeBtn");
+    const select = document.getElementById("eliteUnstakeSelect");
+    const oldText = btn ? btn.innerHTML : "";
+
+    try {
+        if (!eliteIsConnected()) {
+            eliteNotify("Please connect wallet first", "warning");
+            return;
+        }
+
+        const tokenId = select.value;
+
+        if (!tokenId) {
+            eliteNotify("Select Elite NFT to unstake", "warning");
+            return;
+        }
+
+        eliteInitContracts();
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Unstaking...`;
+        }
+
+        const tx = await eliteData.stakingContract.unstake(tokenId);
+        await tx.wait();
+
+        eliteNotify(`✅ Elite NFT #${tokenId} unstaked`, "success");
+
+        await eliteLoadData();
+
+        if (typeof updateStakingStats === "function") {
+            await updateStakingStats();
+        }
+
+    } catch (error) {
+        console.error("Elite unstake error:", error);
+        eliteNotify("Elite unstake failed: " + eliteShortError(error), "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        }
+    }
+}
+
+async function eliteClaimRewards() {
+    const btn = document.getElementById("eliteClaimBtn");
+    const oldText = btn ? btn.innerHTML : "";
+
+    try {
+        if (!eliteIsConnected()) {
+            eliteNotify("Please connect wallet first", "warning");
+            return;
+        }
+
+        eliteInitContracts();
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Claiming...`;
+        }
+
+        const tx = await eliteData.stakingContract.claimRewards();
+        await tx.wait();
+
+        eliteNotify("✅ Elite rewards claimed", "success");
+
+        await eliteLoadData();
+
+        if (typeof updateStakingStats === "function") {
+            await updateStakingStats();
+        }
+
+    } catch (error) {
+        console.error("Elite claim error:", error);
+        eliteNotify("Elite claim failed: " + eliteShortError(error), "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        }
+    }
+}
+
+function setupEliteStakingSection() {
+    const connectBtn = document.getElementById("eliteConnectBtn");
+    const stakeBtn = document.getElementById("eliteStakeBtn");
+    const unstakeBtn = document.getElementById("eliteUnstakeBtn");
+    const claimBtn = document.getElementById("eliteClaimBtn");
+
+    if (connectBtn) connectBtn.onclick = eliteConnect;
+    if (stakeBtn) stakeBtn.onclick = eliteStake;
+    if (unstakeBtn) unstakeBtn.onclick = eliteUnstake;
+    if (claimBtn) claimBtn.onclick = eliteClaimRewards;
+
+    eliteLoadData();
+
+    setInterval(() => {
+        if (eliteIsConnected()) {
+            eliteLoadData();
+        }
+    }, 30000);
+}
+
+window.addEventListener("load", setupEliteStakingSection);
+
+window.eliteLoadData = eliteLoadData;
+window.eliteStake = eliteStake;
+window.eliteUnstake = eliteUnstake;
+window.eliteClaimRewards = eliteClaimRewards;
+</script>
     
 <section class="section lockdown-section" id="lockdown-campaign">
     <h2 class="section-title">🔒 The L3G3NDARY Lockdown</h2>
