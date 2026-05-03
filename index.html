@@ -1530,12 +1530,12 @@
         </div>
 
         <div class="stat-item">
-            <div class="stat-value" id="elitePendingRewards">0</div>
-            <div class="stat-label">Pending LGND Rewards</div>
+            <div class="stat-value" id="elitePendingRewards">0 LGND</div>
+            <div class="stat-label">Pending Rewards</div>
         </div>
 
         <div class="stat-item">
-            <div class="stat-value" id="eliteContractBalance">0</div>
+            <div class="stat-value" id="eliteContractBalance">0 LGND</div>
             <div class="stat-label">Staking Contract Balance</div>
         </div>
     </div>
@@ -1548,6 +1548,7 @@
 
     <div id="eliteStakingInterface" style="display: none;">
         <div class="staking-grid">
+
             <div class="staking-card">
                 <h3 style="color: #FFD700; margin-bottom: 1rem;">🔒 Stake Elite NFT</h3>
 
@@ -1562,6 +1563,10 @@
                             Stake
                         </button>
                     </div>
+
+                    <p style="color: #94A3B8; font-size: 0.85rem; margin-top: 1rem;">
+                        Approval is requested only for the selected NFT.
+                    </p>
                 </div>
             </div>
 
@@ -1619,6 +1624,7 @@
 <script>
 /* ============================================ */
 /* L3G3NDARY ELITE STAKING MODULE */
+/* Safe ERC-721 approve per Token ID */
 /* ============================================ */
 
 const ELITE_CONFIG = {
@@ -1639,8 +1645,8 @@ const ELITE_STAKING_ABI = [
 const ELITE_NFT_ABI = [
     "function balanceOf(address owner) view returns (uint256)",
     "function ownerOf(uint256 tokenId) view returns (address)",
-    "function isApprovedForAll(address owner, address operator) view returns (bool)",
-    "function setApprovalForAll(address operator, bool approved)"
+    "function getApproved(uint256 tokenId) view returns (address)",
+    "function approve(address to, uint256 tokenId)"
 ];
 
 const ELITE_TOKEN_ABI = [
@@ -1821,8 +1827,12 @@ async function eliteStake() {
 
     try {
         if (!eliteIsConnected()) {
-            eliteNotify("Please connect wallet first", "warning");
-            return;
+            await eliteConnect();
+
+            if (!eliteIsConnected()) {
+                eliteNotify("Please connect wallet first", "warning");
+                return;
+            }
         }
 
         const tokenId = input.value;
@@ -1846,24 +1856,30 @@ async function eliteStake() {
             return;
         }
 
-        const approved = await eliteData.nftContract.isApprovedForAll(
-            state.walletAddress,
-            ELITE_CONFIG.staking
-        );
+        if (btn) {
+            btn.innerHTML = `<span class="spinner"></span> Checking approval...`;
+        }
 
-        if (!approved) {
-            if (btn) btn.innerHTML = `<span class="spinner"></span> Approving...`;
+        const approvedAddress = await eliteData.nftContract.getApproved(tokenId);
 
-            const approveTx = await eliteData.nftContract.setApprovalForAll(
+        if (approvedAddress.toLowerCase() !== ELITE_CONFIG.staking.toLowerCase()) {
+            if (btn) {
+                btn.innerHTML = `<span class="spinner"></span> Approving this NFT...`;
+            }
+
+            const approveTx = await eliteData.nftContract.approve(
                 ELITE_CONFIG.staking,
-                true
+                tokenId
             );
 
             await approveTx.wait();
-            eliteNotify("Approval confirmed", "success");
+
+            eliteNotify("Approval confirmed for this NFT only", "success");
         }
 
-        if (btn) btn.innerHTML = `<span class="spinner"></span> Staking...`;
+        if (btn) {
+            btn.innerHTML = `<span class="spinner"></span> Staking...`;
+        }
 
         const tx = await eliteData.stakingContract.stake(tokenId);
         await tx.wait();
@@ -1896,8 +1912,12 @@ async function eliteUnstake() {
 
     try {
         if (!eliteIsConnected()) {
-            eliteNotify("Please connect wallet first", "warning");
-            return;
+            await eliteConnect();
+
+            if (!eliteIsConnected()) {
+                eliteNotify("Please connect wallet first", "warning");
+                return;
+            }
         }
 
         const tokenId = select.value;
@@ -1942,8 +1962,12 @@ async function eliteClaimRewards() {
 
     try {
         if (!eliteIsConnected()) {
-            eliteNotify("Please connect wallet first", "warning");
-            return;
+            await eliteConnect();
+
+            if (!eliteIsConnected()) {
+                eliteNotify("Please connect wallet first", "warning");
+                return;
+            }
         }
 
         eliteInitContracts();
